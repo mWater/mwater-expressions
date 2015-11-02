@@ -1,8 +1,8 @@
 _ = require 'lodash'
 React = require 'react'
 H = React.DOM
-EditableLinkComponent = require './EditableLinkComponent'
-ui = require './UIComponents'
+EditableLinkComponent = require './ui/EditableLinkComponent'
+ui = require './ui/UIComponents'
 
 # Schema for a database. Stores tables with columns (possibly in nested sections).
 # Also creates a control for selecting a table

@@ -9,6 +9,7 @@ reworkNpm = require 'rework-npm'
 browserSync = require 'browser-sync'
 reload = browserSync.reload
 coffee = require 'gulp-coffee' 
+watchify = require 'watchify'
 
 # Compile coffeescript to js in lib/
 gulp.task 'coffee', ->
@@ -21,14 +22,20 @@ gulp.task 'copy', ->
   gulp.src(['./src/**/*.js', './src/**/*.css', './src/**/*.txt'])
     .pipe(gulp.dest('./lib/'))
 
-gulp.task "browserify", ->
+makeBrowserifyBundle = ->
   shim(browserify("./demo.coffee",
     extensions: [".coffee"]
     basedir: "./src/"
-  )).bundle()
-  .on("error", gutil.log)
-  .pipe(source("demo.js"))
-  .pipe(gulp.dest("./dist/js/"))
+  ))
+
+bundleDemoJs = (bundle) ->
+  bundle.bundle()
+    .on("error", gutil.log)
+    .pipe(source("demo.js"))
+    .pipe(gulp.dest("./dist/js/"))
+
+gulp.task "browserify", ->
+  bundleDemoJs(makeBrowserifyBundle())
 
 gulp.task "libs_css", ->
   return gulp.src([
@@ -41,7 +48,7 @@ gulp.task "libs_js", ->
   return gulp.src([
     "./bower_components/jquery/dist/jquery.js"
     "./bower_components/bootstrap/dist/js/bootstrap.js"
-    "./bower_components/lodash/dist/lodash.js"
+    "./bower_components/lodash/lodash.js"
   ]).pipe(concat("libs.js"))
     .pipe(gulp.dest("./dist/js/"))
 
@@ -66,13 +73,35 @@ gulp.task "demo", gulp.parallel([
   "index_css"
 ])
 
+# gulp.task 'watch', gulp.series([
+#   'demo'
+#   gulp.parallel([
+#     -> browserSync({ server: "./dist", startPath: "demo.html", ghostMode: false, notify: false })
+#     -> gulp.watch("./src/**", gulp.series(['browserify', 'index_css', -> reload()]))
+#   ])
+# ])
+
 gulp.task 'watch', gulp.series([
-  'demo'
-  gulp.parallel([
-    -> browserSync({ server: "./dist", startPath: "demo.html", ghostMode: false, notify: false })
-    -> gulp.watch("./src/**", gulp.series(['browserify', 'index_css', -> reload()]))
+  'demo', 
+  ->
+    b = makeBrowserifyBundle()
+    w = watchify(b)
+
+    first = true
+    w.on 'bytes', ->
+      if first
+        browserSync({ server: "./dist", startPath: "/demo.html", ghostMode: false,  notify: false })
+        first = false
+      else
+        browserSync.reload()
+
+    # Needs to be run at least once
+    bundleDemoJs(w)
+
+    # Redo on update
+    w.on 'update', ->
+      bundleDemoJs(w)
   ])
-])
 
 gulp.task "default", gulp.series("copy", "coffee")
 
@@ -81,7 +110,6 @@ shim = (instance) ->
   shims = {
     jquery: '../shims/jquery-shim'
     lodash: '../shims/lodash-shim'
-    backbone: '../shims/backbone-shim' 
   }
 
   # Add shims
