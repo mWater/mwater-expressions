@@ -2,7 +2,7 @@ React = require 'react'
 H = React.DOM
 ScalarExprTreeBuilder = require './ScalarExprTreeBuilder'
 ScalarExprTreeComponent = require './ScalarExprTreeComponent'
-ExpressionBuilder = require './ExpressionBuilder'
+ExpressionBuilder = require '../ExpressionBuilder'
 EditableLinkComponent = require './EditableLinkComponent'
 
 # Component which appears in popup to allow editing scalar expression

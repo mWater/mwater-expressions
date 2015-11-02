@@ -1,5 +1,5 @@
 _ = require 'lodash'
-ExpressionBuilder = require './ExpressionBuilder'
+ExpressionBuilder = require '../ExpressionBuilder'
 
 # Builds a tree for selecting table + joins + expr of a scalar expression
 # Organizes columns, and follows joins

@@ -17,6 +17,7 @@
   "author": "mWater",
   "license": "",
   "dependencies": {
+    "async": "^1.5.0",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
     "react": "^0.14.1",
@@ -30,7 +31,7 @@
     "browser-sync": "^2.9.11",
     "chai": "^3.4.0",
     "coffeeify": "^1.1.0",
-    "gulp": "^3.9.0",
+    "gulp": "git://github.com/gulpjs/gulp.git#4.0",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.6.0",
     "gulp-rework": "^1.0.3",

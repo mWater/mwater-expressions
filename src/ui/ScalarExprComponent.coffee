@@ -2,7 +2,7 @@ React = require 'react'
 H = React.DOM
 ActionCancelModalComponent = require './ActionCancelModalComponent'
 ScalarExprEditorComponent = require './ScalarExprEditorComponent'
-ExpressionBuilder = require './ExpressionBuilder'
+ExpressionBuilder = require '../ExpressionBuilder'
 EditableLinkComponent = require './EditableLinkComponent'
 
 # Component which displays a scalar expression and allows editing/selecting it

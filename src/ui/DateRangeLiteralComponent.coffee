@@ -1,8 +1,8 @@
 React = require 'react'
 H = React.DOM
 
-ExpressionCompiler = require './ExpressionCompiler'
-ExpressionBuilder = require './ExpressionBuilder'
+ExpressionCompiler = require '../ExpressionCompiler'
+ExpressionBuilder = require '../ExpressionBuilder'
 DateRangeComponent = require './DateRangeComponent'
 
 # Displays a date range

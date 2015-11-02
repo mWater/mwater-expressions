@@ -1,8 +1,8 @@
 React = require 'react'
 H = React.DOM
 ReactSelect = require 'react-select'
-ExpressionCompiler = require './ExpressionCompiler'
-ExpressionBuilder = require './ExpressionBuilder'
+ExpressionCompiler = require '../ExpressionCompiler'
+ExpressionBuilder = require '../ExpressionBuilder'
 
 # Displays a combo box that allows selecting multiple text values from an expression
 module.exports = class TextArrayComponent extends React.Component

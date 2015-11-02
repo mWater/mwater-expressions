@@ -57,7 +57,7 @@ gulp.task 'copy_assets', ->
   return gulp.src("assets/**/*")
     .pipe(gulp.dest('dist/'))
 
-gulp.task "build", gulp.parallel([
+gulp.task "demo", gulp.parallel([
   "browserify"
   "libs_js"
   "libs_css"
@@ -67,14 +67,14 @@ gulp.task "build", gulp.parallel([
 ])
 
 gulp.task 'watch', gulp.series([
-  'build'
+  'demo'
   gulp.parallel([
     -> browserSync({ server: "./dist", startPath: "demo.html", ghostMode: false, notify: false })
     -> gulp.watch("./src/**", gulp.series(['browserify', 'index_css', -> reload()]))
   ])
 ])
 
-gulp.task "default", gulp.series("copy", "coffee", "build")
+gulp.task "default", gulp.series("copy", "coffee")
 
 # Shim non-browserify friendly libraries to allow them to be 'require'd
 shim = (instance) ->
