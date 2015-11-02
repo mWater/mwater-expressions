@@ -29,6 +29,7 @@
   "devDependencies": {
     "brfs": "^1.4.1",
     "browser-sync": "^2.9.11",
+    "canonical-json": "0.0.4",
     "chai": "^3.4.0",
     "coffeeify": "^1.1.0",
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",

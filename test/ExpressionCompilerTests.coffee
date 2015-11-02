@@ -386,7 +386,7 @@ describe "ExpressionCompiler", ->
           ]
         }
 
-        schema.addColumn("t1", { id: "custom", name: "Custom", type: "text", jsonql: columnJsonql })
+        schema.addTable({ id: "t1", contents:[{ id: "custom", name: "Custom", type: "text", jsonql: columnJsonql }]})
         
         ec = new ExpressionCompiler(schema)
 

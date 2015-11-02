@@ -41,38 +41,30 @@ module.exports = class ScalarExprTreeBuilder
 
     table = @schema.getTable(options.table)
 
-    if not table.structure
-      # Create node for each column
-      for column in @schema.getColumns(options.table)
-        node = @createColumnNode(_.extend(options, column: column))
-        if node
-          nodes.push(node)
-    else
-      nodes = nodes.concat(@createStructureNodes(table.structure, options))
-
+    nodes = nodes.concat(@createNodes(table.contents, options))
     return nodes
 
-  createStructureNodes: (structure, options) ->
+  createNodes: (contents, options) ->
     nodes = []
 
-    for item in structure
+    for item in contents
       do (item) =>
-        if item.type == "column"
-          column = @schema.getColumn(options.table, item.column)
+        if item.type == "section"
+          node = {
+            name: item.name
+            children: =>
+              @createNodes(item.contents, options)
+          }
+          # Add if non-empty
+          if node.children().length > 0
+            nodes.push(node)
+        else
+          column = @schema.getColumn(options.table, item.id)
           # Gracefully handle missing columns
           if column
             node = @createColumnNode(_.extend(options, column: column))
             if node
               nodes.push(node)
-        else if item.type == "section"
-          node = {
-            name: item.name
-            children: =>
-              @createStructureNodes(item.contents, options)
-          }
-          # Add if non-empty
-          if node.children().length > 0
-            nodes.push(node)
 
     return nodes
 
