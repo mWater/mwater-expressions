@@ -58,7 +58,7 @@ module.exports = class Schema
     # Remove existing
     @tables = _.filter(@tables, (t) -> t.id != table.id)
     
-    @tables.push(_.cloneDeep(table))
+    @tables.push(@stripIdColumns(_.cloneDeep(table)))
     @reindex()
     return this
 

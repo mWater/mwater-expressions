@@ -12,7 +12,7 @@ module.exports = class ScalarExprTreeComponent extends React.Component
     height: React.PropTypes.number.isRequired # Render height of the component
 
   render: ->
-    H.div style: { overflowY: "scroll", height: @props.height, border: "solid 1px #CCC" },
+    H.div style: { overflowY: "auto", height: @props.height },
       React.createElement(ScalarExprTreeTreeComponent,
         tree: @props.tree,
         value: @props.value,
