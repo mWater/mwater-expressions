@@ -19,9 +19,19 @@ module.exports = class ScalarExprTreeBuilder
   #  table: starting table
   #  types: types to limit to 
   #  includeCount: to include an count (null) option that has null expr and name that is "Number of ..." at first table level
-  #  initialValue: initial value to flesh out
+  #  initialValue: initial value to flesh out TODO REMOVE
+  #  filter: filter regex
   getTree: (options = {}) ->
-    return @createTableChildNodes(startTable: options.table, table: options.table, joins: [], types: options.types, includeCount: options.includeCount, initialValue: options.initialValue)
+    return @createTableChildNodes({
+      startTable: options.table
+      table: options.table
+      joins: []
+      types: options.types
+      includeCount: options.includeCount
+      initialValue: options.initialValue
+      filter: options.filter
+      depth: 0
+      })
 
   # Options:
   # startTable: table id that started from
@@ -29,18 +39,21 @@ module.exports = class ScalarExprTreeBuilder
   # joins: joins for child nodes
   # types: types to limit to 
   # includeCount: to include an count (null) option that has null expr and name that is "Number of ..."
-  # initialValue: initial value to flesh out
+  # initialValue: initial value to flesh out TODO REMOVE
+  # filter: filter regex
+  # depth: current depth. First level is 0
   createTableChildNodes: (options) ->
     nodes = []
     # Create count node if any joins
     if options.includeCount
-      nodes.push({
+      node = {
         name: "Number of #{@schema.getTable(options.table).name}"
         value: { table: options.startTable, joins: options.joins, expr: { type: "count", table: options.table } }
-      })
+      }
+      if not options.filter or node.name.match(options.filter)
+        nodes.push(node)
 
     table = @schema.getTable(options.table)
-
     nodes = nodes.concat(@createNodes(table.contents, options))
     return nodes
 
@@ -50,16 +63,34 @@ module.exports = class ScalarExprTreeBuilder
     for item in contents
       do (item) =>
         if item.type == "section"
+          # Determine if matches
+          matches = not options.filter or item.name.match(options.filter)
+
+          childOptions = _.extend({}, options)
+
+          # Strip filter if matches to allow all sub-items
+          if matches
+            childOptions.filter = null
+
+          # Increment depth
+          childOptions.depth += 1
+
           node = {
             name: item.name
             children: =>
-              @createNodes(item.contents, options)
+              @createNodes(item.contents, childOptions)
           }
+
+          # If depth is 0 and searching, leave open
+          if options.depth == 0 and options.filter
+            node.initiallyOpen = true
+
           # Add if non-empty
           if node.children().length > 0
             nodes.push(node)
         else
           column = @schema.getColumn(options.table, item.id)
+
           # Gracefully handle missing columns
           if column
             node = @createColumnNode(_.extend(options, column: column))
@@ -79,6 +110,9 @@ module.exports = class ScalarExprTreeBuilder
       desc: column.desc
     }
 
+    # Determine if matches
+    matches = not options.filter or node.name.match(options.filter)
+
     # If join, add children
     if column.type == "join"
       # Add column to joins
@@ -89,12 +123,33 @@ module.exports = class ScalarExprTreeBuilder
       node.children = =>
         # Determine if to include count. True if aggregated
         includeCount = exprBuilder.isMultipleJoins(options.startTable, joins)
-        return @createTableChildNodes(startTable: options.startTable, table: column.join.toTable, joins: joins, types: options.types, includeCount: includeCount, initialValue: initVal)
+
+        # Determine whether to include filter. If matches, do not include filter so that subtree will show
+        if not matches
+          filter = options.filter
+
+        return @createTableChildNodes({
+          startTable: options.startTable
+          table: column.join.toTable
+          joins: joins
+          types: options.types
+          includeCount: includeCount
+          initialValue: initVal
+          filter: filter
+          depth: options.depth + 1
+        })
         
       # Load children (recursively) if selected node is in this tree
       if initVal and initVal.joins and _.isEqual(initVal.joins.slice(0, joins.length), joins)
         node.initiallyOpen = true
+
+      # If depth is 0 and searching, leave open
+      if options.depth == 0 and options.filter
+        node.initiallyOpen = true
     else
+      if not matches
+        return
+
       fieldExpr = { type: "field", table: options.table, column: column.id }
       if options.types 
         # If aggregated

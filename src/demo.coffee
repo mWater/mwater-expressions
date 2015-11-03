@@ -35,18 +35,19 @@ ScalarExprTreeBuilder = require './ui/ScalarExprTreeBuilder'
 class SelectExprComponent extends React.Component
   @propTypes:
     schema: React.PropTypes.object.isRequired
-    # dataSource: React.PropTypes.object.isRequired
-    table: React.PropTypes.string # Table to restrict selections to (can still follow joins to other tables)
+    table: React.PropTypes.string.isRequired # Table to restrict selections to (can still follow joins to other tables)
     types: React.PropTypes.array # Optional types to limit to
     includeCount: React.PropTypes.bool # Optionally include count at root level of a table
 
   constructor: ->
     super
-    @state = { active: true }
+    @state = { active: true, filter: "" }
   
   handleActivate: => @setState(active: true)
   handleDeactivate: => @setState(active: false)
-
+  handleFilterChange: (ev) =>
+    console.log ev.target.value
+    @setState(filter: ev.target.value)
   handleTreeChange: (val) => console.log(val)
 
   inputRef: (comp) =>
@@ -55,9 +56,13 @@ class SelectExprComponent extends React.Component
 
   render: ->
     if @state.active
+      escapeRegex = (s) -> return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+      if @state.filter 
+        filter = escapeRegex(@state.filter, "i")
+
       # Create tree 
       treeBuilder = new ScalarExprTreeBuilder(@props.schema)
-      tree = treeBuilder.getTree(table: @props.table, types: @props.types, includeCount: @props.includeCount, initialValue: @props.value)
+      tree = treeBuilder.getTree(table: @props.table, types: @props.types, includeCount: @props.includeCount, filter: filter)
 
       # Create tree component with value of table and path
       dropdown = R ScalarExprTreeComponent, 
@@ -67,11 +72,10 @@ class SelectExprComponent extends React.Component
 
       R ClickOutHandler, onClickOut: @handleDeactivate,
         R DropdownComponent, dropdown: dropdown,
-          H.input type: "text", className: "form-control", style: { maxWidth: "16em" }, ref: @inputRef, initialValue: "", placeholder: "Select..."
+          H.input type: "text", className: "form-control", style: { maxWidth: "16em" }, ref: @inputRef, value: @state.filter, onChange: @handleFilterChange, placeholder: "Select..."
 
     else
       H.a onClick: @handleActivate, "Select..."
-
 
 class DropdownComponent extends React.Component
   @propTypes: 
