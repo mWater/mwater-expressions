@@ -4,7 +4,7 @@ R = React.createElement
 H = React.DOM
 Schema = require './Schema'
 
-SelectExprComponent = require './ui/SelectExprComponent'
+ExprComponent = require './ui/ExprComponent'
 
 $ ->
   schema = new Schema()
@@ -27,8 +27,19 @@ $ ->
     { id: "2-1", name: "T2->T1", type: "join", join: { fromTable: "t2", fromColumn: "t1", toTable: "t1", toColumn: "primary", op: "=", multiple: false }}
     ]})
 
+  class TestComponent extends React.Component
+    constructor: ->
+      super
+      @state = { value: {} }
 
-  ReactDOM.render(R(SelectExprComponent, table: "t1", schema: schema), document.getElementById("main"))
+    handleValueChange: (value) => 
+      #TODO CLEAN
+      @setState(value: value)
+
+    render: ->
+      R(ExprComponent, schema: schema, table: "t1", value: @state.value, onChange: @handleValueChange)
+
+  ReactDOM.render(R(TestComponent), document.getElementById("main"))
 
 
 

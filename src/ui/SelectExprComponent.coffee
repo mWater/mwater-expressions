@@ -8,7 +8,7 @@ ScalarExprTreeBuilder = require './ScalarExprTreeBuilder'
 DropdownComponent = require './DropdownComponent'
 LinkComponent = require './LinkComponent'
 
-# Selects an expression using a searchable dropdown control that activates when clicked.
+# Selects an expression using a searchable dropdown control that opens when clicked.
 module.exports = class SelectExprComponent extends React.Component
   @propTypes:
     schema: React.PropTypes.object.isRequired
@@ -17,16 +17,17 @@ module.exports = class SelectExprComponent extends React.Component
     includeCount: React.PropTypes.bool # Optionally include count at root level of a table
     placeholder: React.PropTypes.node # Placeholder. "Select..." if not specified
     onSelect: React.PropTypes.func  # Called with new expression
+    initiallyOpen: React.PropTypes.bool # True to open immediately
 
-  constructor: ->
+  constructor: (props) ->
     super
     @state = { 
-      active: false  # True if active
+      open: props.initiallyOpen or false
       filter: ""
     }
   
-  handleActivate: => @setState(active: true)
-  handleDeactivate: => @setState(active: false)
+  handleOpen: => @setState(open: true)
+  handleClose: => @setState(open: false)
   handleFilterChange: (ev) => @setState(filter: ev.target.value)
   
   handleTreeChange: (val) => 
@@ -43,7 +44,8 @@ module.exports = class SelectExprComponent extends React.Component
       comp.focus()
 
   render: ->
-    if @state.active
+    if @state.open
+      # Escape regex for filter string
       escapeRegex = (s) -> return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
       if @state.filter 
         filter = escapeRegex(@state.filter, "i")
@@ -58,10 +60,11 @@ module.exports = class SelectExprComponent extends React.Component
         onChange: @handleTreeChange
         height: 350
 
-      R ClickOutHandler, onClickOut: @handleDeactivate,
+      # Close when clicked outside
+      R ClickOutHandler, onClickOut: @handleClose,
         R DropdownComponent, dropdown: dropdown,
           H.input type: "text", className: "form-control input-sm", style: { maxWidth: "16em" }, ref: @inputRef, value: @state.filter, onChange: @handleFilterChange, placeholder: "Select..."
 
     else
-      R LinkComponent, onClick: @handleActivate, (@props.placeholder or "Select...")
+      R LinkComponent, onClick: @handleOpen, (@props.placeholder or "Select...")
 

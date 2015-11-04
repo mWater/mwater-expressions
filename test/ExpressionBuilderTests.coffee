@@ -220,6 +220,12 @@ describe "ExpressionBuilder", ->
     it "gets literal types", ->
       assert.equal @exprBuilder.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean"
 
+  describe "cleanExpr", ->
+    describe "boolean required", ->
+      it "wraps enum with '= any' with empty list", ->
+        expr = { type: "field", }
+
+
   describe "cleanScalarExpr", ->
     it "leaves valid one alone", ->
       fieldExpr = { type: "field", table: "t2", column: "c1" }

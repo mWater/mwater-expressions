@@ -152,18 +152,27 @@ module.exports = class ExpressionBuilder
       return @summarizeExpr(expr)
 
   # Clean an expression, returning null if completely invalid, otherwise removing
-  # invalid parts
-  cleanExpr: (expr, table) ->
+  # invalid parts. Attempts to correct invalid types by wrapping in other expressions.
+  # e.g. if an enum is chosen when a boolean is required, it will be wrapped in "= any" op
+  # options are:
+  #   table: optional current table. expression must be related to this table or will be stripped
+  #   types: optional array of types to limit to
+  cleanExpr: (expr, options) ->
     if not expr
       return null
 
     # Strip if wrong table
-    if table and expr.type != "literal" and expr.table != table
+    if options.table and expr.type != "literal" and expr.table != options.table
       return null
 
     # Strip if non-existent table
     if expr.table and not @schema.getTable(expr.table)
       return null
+
+    # Get type
+    type = @getExprType(expr)
+
+    # If a boolean is
 
     switch expr.type
       when "field"
