@@ -1,3 +1,4 @@
+_ = require 'lodash'
 
 module.exports = class ExpressionUtils
   constructor: (schema) ->

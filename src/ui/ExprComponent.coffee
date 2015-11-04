@@ -2,6 +2,8 @@ _ = require 'lodash'
 React = require 'react'
 R = React.createElement
 H = React.DOM
+
+ExpressionUtils = require '../ExpressionUtils'
 SelectExprComponent = require './SelectExprComponent'
 
 # Displays an expression of any type with controls to allow it to be altered
@@ -17,6 +19,8 @@ module.exports = class ExprComponent extends React.Component
     parentOp: React.PropTypes.string
 
   render: ->
+    exprUtils = new ExpressionUtils(@props.schema)
+
     # If null, use SelectExprComponent, initially closed
     if not @props.value
       return R SelectExprComponent, schema: @props.schema, table: @props.table, placeholder: "None", initiallyOpen: false, onSelect: @props.onChange
@@ -25,29 +29,47 @@ module.exports = class ExprComponent extends React.Component
     if _.isEmpty(@props.value)
       return R SelectExprComponent, schema: @props.schema, table: @props.table, placeholder: "Select...", initiallyOpen: true, onSelect: @props.onChange      
 
-    return H.code null, JSON.stringify(@props.value)
-    # # If op, 
-    # if @state.open
-    #   # Escape regex for filter string
-    #   escapeRegex = (s) -> return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-    #   if @state.filter 
-    #     filter = escapeRegex(@state.filter, "i")
+    # Get type of expression
+    type = exprUtils.getExprType(@props.value)
 
-    #   # Create tree 
-    #   treeBuilder = new ScalarExprTreeBuilder(@props.schema)
-    #   tree = treeBuilder.getTree(table: @props.table, types: @props.types, includeCount: @props.includeCount, filter: filter)
+    content = H.code null, JSON.stringify(@props.value)
 
-    #   # Create tree component with value of table and path
-    #   dropdown = R ScalarExprTreeComponent, 
-    #     tree: tree,
-    #     onChange: @handleTreeChange
-    #     height: 350
+    # If boolean, add +And link
+    # if type == "boolean"
+    content = R WrappedLinkComponent, links: [{ label: "+ And"}, { label: "+ Or"}], content
 
-    #   # Close when clicked outside
-    #   R ClickOutHandler, onClickOut: @handleClose,
-    #     R DropdownComponent, dropdown: dropdown,
-    #       H.input type: "text", className: "form-control input-sm", style: { maxWidth: "16em" }, ref: @inputRef, value: @state.filter, onChange: @handleFilterChange, placeholder: "Select..."
+    return content
 
-    # else
-    #   R LinkComponent, onClick: @handleOpen, (@props.placeholder or "Select...")
+class WrappedLinkComponent extends React.Component
+  @propTypes:
+    links: React.PropTypes.array.isRequired # Shape is label, onClick
 
+  renderLinks: ->
+    H.div style: { 
+      position: "absolute"
+      left: 10
+      bottom: 0 
+    }, className: "hover-display-child",
+      _.map @props.links, (link) =>
+        H.a style: { 
+          paddingLeft: 3
+          paddingRight: 3
+          backgroundColor: "white"
+          cursor: "pointer"
+        }, onClick: link.onClick,
+          link.label
+
+  render: ->
+    H.div style: { display: "inline-block", paddingBottom: 20, position: "relative" }, className: "hover-display-parent",
+      H.div style: { 
+        position: "absolute"
+        height: 10
+        bottom: 10
+        left: 0
+        right: 0
+        borderLeft: "solid 1px #DDD" 
+        borderBottom: "solid 1px #DDD" 
+        borderRight: "solid 1px #DDD" 
+      }, className: "hover-display-child"
+      @renderLinks(),
+        @props.children

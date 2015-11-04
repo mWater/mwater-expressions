@@ -22,7 +22,6 @@ module.exports = class TextArrayComponent extends React.Component
 
   getOptions: (input, cb) =>
     # Create query to get matches ordered by most frequent to least
-    exprBuilder = new ExpressionBuilder(@props.schema)
     exprCompiler = new ExpressionCompiler(@props.schema)
 
     # select <compiled expr> as value, count(*) as number from <table> where <compiled expr> like 'input%' group by value order by number desc limit 50
@@ -32,7 +31,7 @@ module.exports = class TextArrayComponent extends React.Component
         { type: "select", expr: exprCompiler.compileExpr(expr: @props.expr, tableAlias: "main"), alias: "value" }
         { type: "select", expr: { type: "op", op: "count", exprs: [] }, alias: "number" }
       ]
-      from: exprCompiler.compileTable(exprBuilder.getExprTable(@props.expr), "main") 
+      from: exprCompiler.compileTable(@props.expr.table), "main") 
       where: {
         type: "op"
         op: "~*"

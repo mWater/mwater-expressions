@@ -10,3 +10,12 @@
 .editable-link:hover {
   background-color: #e7f0f3;
 }
+
+/* Use these to make a child that displays only when parent is hovered */
+.hover-display-parent > .hover-display-child {
+  visibility: hidden;
+}
+
+.hover-display-parent:hover > .hover-display-child {
+  visibility: visible;
+}

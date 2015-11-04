@@ -1,5 +1,5 @@
 _ = require 'lodash'
-ExpressionBuilder = require '../ExpressionBuilder'
+ExpressionUtils = require '../ExpressionUtils'
 
 # Builds a tree for selecting table + joins + expr of a scalar expression
 # Organizes columns, and follows joins
@@ -101,7 +101,7 @@ module.exports = class ScalarExprTreeBuilder
 
   # Include column, startTable, joins, initialValue, table, types
   createColumnNode: (options) ->
-    exprBuilder = new ExpressionBuilder(@schema)
+    exprUtils = new ExpressionUtils(@schema)
 
     column = options.column
 
@@ -122,7 +122,7 @@ module.exports = class ScalarExprTreeBuilder
       
       node.children = =>
         # Determine if to include count. True if aggregated
-        includeCount = exprBuilder.isMultipleJoins(options.startTable, joins)
+        includeCount = exprUtils.isMultipleJoins(options.startTable, joins)
 
         # Determine whether to include filter. If matches, do not include filter so that subtree will show
         if not matches
@@ -153,9 +153,9 @@ module.exports = class ScalarExprTreeBuilder
       fieldExpr = { type: "field", table: options.table, column: column.id }
       if options.types 
         # If aggregated
-        if exprBuilder.isMultipleJoins(options.startTable, options.joins)
+        if exprUtils.isMultipleJoins(options.startTable, options.joins)
           # Get types that this can become through aggregation
-          types = exprBuilder.getAggrTypes(fieldExpr)
+          types = exprUtils.getAggrTypes(fieldExpr)
           # Skip if wrong type
           if _.intersection(types, options.types).length == 0
             return

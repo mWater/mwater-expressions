@@ -1,7 +1,8 @@
 exports.Schema = require './Schema'
 exports.DataSource = require './DataSource'
 
-exports.ExpressionBuilder = require './ExpressionBuilder'
+exports.ExpressionCleaner = require './ExpressionCleaner'
+exports.ExpressionUtils = require './ExpressionUtils'
 exports.ExpressionCompiler = require './ExpressionCompiler'
 
 exports.LogicalExprComponent = require './ui/LogicalExprComponent'
