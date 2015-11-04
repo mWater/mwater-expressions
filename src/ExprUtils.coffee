@@ -1,6 +1,6 @@
 _ = require 'lodash'
 
-module.exports = class ExpressionUtils
+module.exports = class ExprUtils
   constructor: (schema) ->
     @schema = schema
 

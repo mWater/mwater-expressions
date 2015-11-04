@@ -2,11 +2,11 @@ assert = require('chai').assert
 fixtures = require './fixtures'
 _ = require 'lodash'
 
-ExpressionCompiler = require '../src/ExpressionCompiler'
+ExprCompiler = require '../src/ExprCompiler'
 
-describe "ExpressionCompiler", ->
+describe "ExprCompiler", ->
   before ->
-    @ec = new ExpressionCompiler(fixtures.simpleSchema())
+    @ec = new ExprCompiler(fixtures.simpleSchema())
 
   it "compiles field", ->
     jql = @ec.compileExpr(expr: { type: "field", table: "t1", column: "integer" }, tableAlias: "T1")
@@ -344,7 +344,7 @@ describe "ExpressionCompiler", ->
         # Customize t2
         schema.getTable("t2").jsonql = tableJsonql
         
-        ec = new ExpressionCompiler(schema)
+        ec = new ExprCompiler(schema)
 
         jql = ec.compileExpr(expr: { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "field", table: "t2", column: "integer" } }, tableAlias: "T1")
 
@@ -388,7 +388,7 @@ describe "ExpressionCompiler", ->
 
         schema.addTable({ id: "t1", contents:[{ id: "custom", name: "Custom", type: "text", jsonql: columnJsonql }]})
         
-        ec = new ExpressionCompiler(schema)
+        ec = new ExprCompiler(schema)
 
         jql = ec.compileExpr(expr: { type: "field", table: "t1", column: "custom" }, tableAlias: "T1")
 

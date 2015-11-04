@@ -1,11 +1,11 @@
 _ = require 'lodash'
-ExpressionUtils = require './ExpressionUtils'
+ExprUtils = require './ExprUtils'
 
 # Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
-module.exports = class ExpressionCleaner
+module.exports = class ExprCleaner
   constructor: (schema) ->
     @schema = schema
-    @exprUtils = new ExpressionUtils(schema)
+    @exprUtils = new ExprUtils(schema)
 
   # Clean an expression, returning null if completely invalid, otherwise removing
   # invalid parts. Attempts to correct invalid types by wrapping in other expressions.

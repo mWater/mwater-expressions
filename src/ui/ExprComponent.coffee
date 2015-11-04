@@ -3,7 +3,7 @@ React = require 'react'
 R = React.createElement
 H = React.DOM
 
-ExpressionUtils = require '../ExpressionUtils'
+ExprUtils = require '../ExprUtils'
 SelectExprComponent = require './SelectExprComponent'
 
 # Displays an expression of any type with controls to allow it to be altered
@@ -19,7 +19,7 @@ module.exports = class ExprComponent extends React.Component
     parentOp: React.PropTypes.string
 
   render: ->
-    exprUtils = new ExpressionUtils(@props.schema)
+    exprUtils = new ExprUtils(@props.schema)
 
     # If null, use SelectExprComponent, initially closed
     if not @props.value

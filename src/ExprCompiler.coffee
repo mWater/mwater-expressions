@@ -1,9 +1,9 @@
 _ = require 'lodash'
 injectTableAlias = require './injectTableAlias'
-ExpressionUtils = require './ExpressionUtils'
+ExprUtils = require './ExprUtils'
 
 # Compiles expressions to JsonQL
-module.exports = class ExpressionCompiler 
+module.exports = class ExprCompiler 
   constructor: (schema) ->
     @schema = schema
 
@@ -160,7 +160,7 @@ module.exports = class ExpressionCompiler
     expr = options.expr
 
     # Missing right-hand side means null condition
-    exprUtils = new ExpressionUtils(@schema)
+    exprUtils = new ExprUtils(@schema)
     if exprUtils.getComparisonRhsType(exprUtils.getExprType(expr.lhs), expr.op) and not expr.rhs?
       return null
 

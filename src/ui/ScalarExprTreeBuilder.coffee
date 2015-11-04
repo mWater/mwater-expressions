@@ -1,5 +1,5 @@
 _ = require 'lodash'
-ExpressionUtils = require '../ExpressionUtils'
+ExprUtils = require '../ExprUtils'
 
 # Builds a tree for selecting table + joins + expr of a scalar expression
 # Organizes columns, and follows joins
@@ -101,7 +101,7 @@ module.exports = class ScalarExprTreeBuilder
 
   # Include column, startTable, joins, initialValue, table, types
   createColumnNode: (options) ->
-    exprUtils = new ExpressionUtils(@schema)
+    exprUtils = new ExprUtils(@schema)
 
     column = options.column
 

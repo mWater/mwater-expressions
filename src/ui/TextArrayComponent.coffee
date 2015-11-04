@@ -1,8 +1,7 @@
 React = require 'react'
 H = React.DOM
 ReactSelect = require 'react-select'
-ExpressionCompiler = require '../ExpressionCompiler'
-ExpressionBuilder = require '../ExpressionBuilder'
+ExprCompiler = require '../ExprCompiler'
 
 # Displays a combo box that allows selecting multiple text values from an expression
 module.exports = class TextArrayComponent extends React.Component
@@ -22,7 +21,7 @@ module.exports = class TextArrayComponent extends React.Component
 
   getOptions: (input, cb) =>
     # Create query to get matches ordered by most frequent to least
-    exprCompiler = new ExpressionCompiler(@props.schema)
+    exprCompiler = new ExprCompiler(@props.schema)
 
     # select <compiled expr> as value, count(*) as number from <table> where <compiled expr> like 'input%' group by value order by number desc limit 50
     query = {

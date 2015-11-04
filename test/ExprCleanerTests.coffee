@@ -1,13 +1,13 @@
 assert = require('chai').assert
 _ = require 'lodash'
 Schema = require '../src/Schema'
-ExpressionCleaner = require '../src/ExpressionCleaner'
+ExprCleaner = require '../src/ExprCleaner'
 fixtures = require './fixtures'
 
-describe "ExpressionCleaner", ->
+describe "ExprCleaner", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
-    @exprCleaner = new ExpressionCleaner(@schema)
+    @exprCleaner = new ExprCleaner(@schema)
 
   describe "cleanExpr", ->
     describe "boolean required", ->
