@@ -2,8 +2,9 @@ React = require 'react'
 ReactDOM = require 'react-dom'
 R = React.createElement
 H = React.DOM
-ClickOutHandler = require('react-onclickout')
 Schema = require './Schema'
+
+SelectExprComponent = require './ui/SelectExprComponent'
 
 $ ->
   schema = new Schema()
@@ -29,63 +30,6 @@ $ ->
 
   ReactDOM.render(R(SelectExprComponent, table: "t1", schema: schema), document.getElementById("main"))
 
-ScalarExprTreeComponent = require './ui/ScalarExprTreeComponent'
-ScalarExprTreeBuilder = require './ui/ScalarExprTreeBuilder'
- 
-class SelectExprComponent extends React.Component
-  @propTypes:
-    schema: React.PropTypes.object.isRequired
-    table: React.PropTypes.string.isRequired # Table to restrict selections to (can still follow joins to other tables)
-    types: React.PropTypes.array # Optional types to limit to
-    includeCount: React.PropTypes.bool # Optionally include count at root level of a table
-
-  constructor: ->
-    super
-    @state = { active: true, filter: "" }
-  
-  handleActivate: => @setState(active: true)
-  handleDeactivate: => @setState(active: false)
-  handleFilterChange: (ev) =>
-    console.log ev.target.value
-    @setState(filter: ev.target.value)
-  handleTreeChange: (val) => console.log(val)
-
-  inputRef: (comp) =>
-    if comp
-      comp.focus()
-
-  render: ->
-    if @state.active
-      escapeRegex = (s) -> return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-      if @state.filter 
-        filter = escapeRegex(@state.filter, "i")
-
-      # Create tree 
-      treeBuilder = new ScalarExprTreeBuilder(@props.schema)
-      tree = treeBuilder.getTree(table: @props.table, types: @props.types, includeCount: @props.includeCount, filter: filter)
-
-      # Create tree component with value of table and path
-      dropdown = R ScalarExprTreeComponent, 
-        tree: tree,
-        onChange: @handleTreeChange
-        height: 350
-
-      R ClickOutHandler, onClickOut: @handleDeactivate,
-        R DropdownComponent, dropdown: dropdown,
-          H.input type: "text", className: "form-control", style: { maxWidth: "16em" }, ref: @inputRef, value: @state.filter, onChange: @handleFilterChange, placeholder: "Select..."
-
-    else
-      H.a onClick: @handleActivate, "Select..."
-
-class DropdownComponent extends React.Component
-  @propTypes: 
-    dropdown: React.PropTypes.node
-
-  render: ->
-    H.div className: "dropdown #{if @props.dropdown then "open" else ""}",
-      @props.children
-      H.div className: "dropdown-menu", style: { width: "100%" },
-        @props.dropdown
 
 
 # class SelectExprComponent extends React.Component

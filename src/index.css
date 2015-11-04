@@ -1,0 +1,12 @@
+.editable-link {
+  color: #478;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  padding: 2px;
+  border-radius: 5px;
+}
+
+.editable-link:hover {
+  background-color: #e7f0f3;
+}

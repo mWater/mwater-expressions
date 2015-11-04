@@ -3,7 +3,7 @@ H = React.DOM
 ActionCancelModalComponent = require './ActionCancelModalComponent'
 ScalarExprEditorComponent = require './ScalarExprEditorComponent'
 ExpressionBuilder = require '../ExpressionBuilder'
-EditableLinkComponent = require './EditableLinkComponent'
+LinkComponent = require './LinkComponent'
 
 # Component which displays a scalar expression and allows editing/selecting it
 # by clicking.
@@ -93,7 +93,7 @@ module.exports = class ScalarExprComponent extends React.Component
       linkProps.dropdownItems.push({ id: null, name: "Advanced..." })
       linkProps.onDropdownItemClicked = @handleDropdownItemClicked
 
-    return React.createElement(EditableLinkComponent, linkProps, 
+    return React.createElement(LinkComponent, linkProps, 
         if summary 
           summary 
         else if @props.preventRemove

@@ -3,7 +3,7 @@ H = React.DOM
 ScalarExprComponent = require './ScalarExprComponent'
 literalComponents = require './literalComponents'
 ExpressionBuilder = require '../ExpressionBuilder'
-EditableLinkComponent = require './EditableLinkComponent'
+LinkComponent = require './LinkComponent'
 TextArrayComponent = require './TextArrayComponent'
 DateRangeLiteralComponent = require './DateRangeLiteralComponent'
 
@@ -56,7 +56,7 @@ module.exports = class ComparisonExprComponent extends React.Component
           hideOp = true
 
       if not hideOp
-        opControl = React.createElement(EditableLinkComponent, 
+        opControl = React.createElement(LinkComponent, 
           dropdownItems: ops
           onDropdownItemClicked: @handleOpChange
           if currentOp then currentOp.name

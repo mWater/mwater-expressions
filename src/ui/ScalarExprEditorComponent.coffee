@@ -3,7 +3,7 @@ H = React.DOM
 ScalarExprTreeBuilder = require './ScalarExprTreeBuilder'
 ScalarExprTreeComponent = require './ScalarExprTreeComponent'
 ExpressionBuilder = require '../ExpressionBuilder'
-EditableLinkComponent = require './EditableLinkComponent'
+LinkComponent = require './LinkComponent'
 
 # Component which appears in popup to allow editing scalar expression
 module.exports = class ScalarExprEditorComponent extends React.Component
@@ -57,7 +57,7 @@ module.exports = class ScalarExprEditorComponent extends React.Component
         H.div null, 
           H.label null, "Aggregation"
         "When there are multiple values, use the "
-        React.createElement(EditableLinkComponent, 
+        React.createElement(LinkComponent, 
           dropdownItems: options
           onDropdownItemClicked: @handleAggrChange
           if currentOption then currentOption.name

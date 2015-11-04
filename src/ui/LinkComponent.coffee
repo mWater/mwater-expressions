@@ -3,7 +3,7 @@ H = React.DOM
 
 # Component that is blue to show that it is a link and responds to clicks
 # Also has a dropdown component if dropdown items are specified
-module.exports = class EditableLinkComponent extends React.Component
+module.exports = class LinkComponent extends React.Component
   @propTypes:
     onClick: React.PropTypes.func # Called on click
     onRemove: React.PropTypes.func # Adds an x if specified 
