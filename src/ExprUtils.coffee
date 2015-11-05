@@ -6,39 +6,82 @@ module.exports = class ExprUtils
 
     @opItems = []
 
+    # Adds an op item (particular combination of operands types with an operator)
+    # exprTypes can be a list or a function that returns true if matches
     addOpItem = (op, name, resultType, exprTypes) =>
       @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes)
+
+    # True if two numbers
+    nNumbers = (n) ->
+      (exprTypes) ->
+        for i in [0...n]
+          if exprTypes[i] and exprTypes[i] not in ['decimal', 'integer']
+            return false
+        return true
+
+    # True if n date/datetimes
+    nDates = (n) ->
+      (exprTypes) ->
+        for i in [0...n]
+          if exprTypes[i] and exprTypes[i] not in ['date', 'datetime']
+            return false
+        return true
+
 
     # TODO n?
     addOpItem("= any", "is", "boolean", ["text", "text[]"])
     addOpItem("= any", "is", "boolean", ["enum", "enum[]"])
 
-    addOpItem("=", "is", "boolean", ["integer", "integer"])
-    addOpItem("=", "is", "boolean", [["decimal", "integer"], ["decimal", "integer"]])
+    addOpItem("=", "is", "boolean", nNumbers(2))
     addOpItem("=", "is", "boolean", ["text", "text"])
     addOpItem("=", "is", "boolean", ["enum", "enum"])
     addOpItem("=", "is", "boolean", ["date", "date"])
     addOpItem("=", "is", "boolean", ["datetime", "datetime"])
     addOpItem("=", "is", "boolean", ["boolean", "boolean"])
 
-    addOpItem("and", "and", "boolean", ["boolean", "boolean"])
-    addOpItem("or", "or", "boolean", ["boolean", "boolean"])
+    addOpItem("<>", "is not", "boolean", nNumbers(2))
+    addOpItem("<>", "is not", "boolean", ["text", "text"])
+    addOpItem("<>", "is not", "boolean", ["enum", "enum"])
+    addOpItem("<>", "is not", "boolean", ["date", "date"])
+    addOpItem("<>", "is not", "boolean", ["datetime", "datetime"])
+    addOpItem("<>", "is not", "boolean", ["boolean", "boolean"])
 
-  # # Match an op optionally by op, 
-  # doesOpMatch(
+    addOpItem(">", "is greater than", "boolean", nNumbers(2))
+    addOpItem("<", "is less than", "boolean", nNumbers(2))
+    addOpItem(">=", "is greater or equal to", "boolean", nNumbers(2))
+    addOpItem("<=", "is less or equal to", "boolean", nNumbers(2))
+    addOpItem("<>", "is not", "boolean", nNumbers(2))
+
+    # And/or is a list of booleans
+    addOpItem("and", "and", "boolean", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "boolean"))
+    addOpItem("or", "or", "boolean", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "boolean"))
+
+    for op in ['+', '-', '*']
+      addOpItem(op, op, "integer", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "integer"))
+      addOpItem(op, op, "decimal", (exprTypes) -> _.all(exprTypes, (et) -> not et or et in ["integer", "decimal"]) and not _.all(exprTypes, (et) -> et == "integer"))
+
+    addOpItem("~*", "matches", "boolean", ["text", "text"])
+    addOpItem("= false", "is false", "boolean", [])
+    addOpItem("is null", "is blank", "boolean", [])
+    addOpItem("is not null", "is not blank", "boolean", [])
+
+    # Add in ranges
+    addOpItem("between", "is in range", "boolean", nNumbers(3))
+    addOpItem("between", "is in range", "boolean", nDates(3))
 
   findOpByResultType: (resultType, exprTypes...) ->
-    op = _.find @opItems, (op) =>
-      if op.resultType != resultType
+    op = _.find @opItems, (opItem) =>
+      if opItem.resultType != resultType
         return false
 
+      # Handle case of function
+      if _.isFunction(opItem.exprTypes)
+        return opItem.exprTypes(exprTypes)
+
+      # Handle list case
       for exprType, i in exprTypes
-        if exprType
-          if _.isArray(op.exprTypes[i])
-            if exprType not in op.exprTypes[i]
-              return false
-          else if exprType != op.exprTypes[i]
-            return false
+        if exprType and exprType != opItem.exprTypes[i]
+          return false
       return true
 
     if op
@@ -146,13 +189,13 @@ module.exports = class ExprUtils
           if opItem.op != expr.op
             return false
 
+          # Handle case of function
+          if _.isFunction(opItem.exprTypes)
+            return opItem.exprTypes(exprTypes)
+
           # Must match all known expression types
           for exprType, i in exprTypes
-            if exprType
-              if _.isArray(opItem.exprTypes[i])
-                if exprType not in opItem.exprTypes[i]
-                  return false
-              else if exprType != opItem.exprTypes[i]
+            if exprType and exprType != opItem.exprTypes[i]
                 return false
           return true
 
@@ -160,6 +203,7 @@ module.exports = class ExprUtils
         resultTypes = _.uniq(_.compact(_.pluck(opItems, "resultType")))
         if resultTypes.length == 1
           return resultTypes[0]
+        return null
 
       when "literal"
         return expr.valueType

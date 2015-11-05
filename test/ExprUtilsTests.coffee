@@ -52,7 +52,16 @@ describe "ExprUtils", ->
       assert.equal @exprUtils.getExprType({ type: "op", op: "=", exprs: [] }), "boolean"
 
     it "no type for {}", ->
-      assert not @exprUtils.getExprType({})
+      assert.isNull @exprUtils.getExprType({})
+
+    it "no type if ambiguous e.g. integer + unknown", ->
+      assert.isNull @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "integer" }, null]})
+
+    it "integer type if integer + integer", ->
+      assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "integer" }, { type: "field", table: "t1", column: "integer" }]}), "integer"
+
+    it "decimal type if integer + decimal", ->
+      assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "decimal" }, { type: "field", table: "t1", column: "integer" }]}), "decimal"
 
   describe "summarizeExpr", ->
     it "summarizes null", ->
