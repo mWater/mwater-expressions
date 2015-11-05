@@ -20,7 +20,7 @@ exports.TextComponent = React.createClass {
       value: if @props.value then @props.value.value
 }
 
-exports.DecimalComponent = React.createClass {
+exports.NumberComponent = React.createClass {
   propTypes: {
     value: React.PropTypes.object
     onChange: React.PropTypes.func.isRequired 
@@ -40,7 +40,7 @@ exports.DecimalComponent = React.createClass {
       return @setState(invalid: true, invalidText: ev.target.value)
 
     @setState(invalid: false, invalidText: null)
-    @props.onChange({ type: "literal", valueType: "decimal", value: val })
+    @props.onChange({ type: "literal", valueType: "number", value: val })
     
   render: ->
     H.div 
@@ -54,38 +54,6 @@ exports.DecimalComponent = React.createClass {
           value: (if @state.invalid then @state.invalidText) or (if @props.value then @props.value.value)
 }
 
-exports.IntegerComponent = React.createClass {
-  propTypes: {
-    value: React.PropTypes.object
-    onChange: React.PropTypes.func.isRequired 
-  }
-
-  getInitialState: -> { invalid: false, invalidText: null }
-
-  handleChange: (ev) ->
-    # If blank, null
-    if not ev.target.value
-      @setState(invalid: false, invalidText: null)
-      return @props.onChange(null)
-
-    # Check if valid number
-    val = parseInt(ev.target.value)
-    if not _.isFinite(val) or not ev.target.value.match(/^[0-9]+$/)
-      return @setState(invalid: true, invalidText: ev.target.value)
-
-    @setState(invalid: false, invalidText: null)
-    @props.onChange({ type: "literal", valueType: "integer", value: val })
-    
-  render: ->
-    H.div 
-      className: (if @state.invalid then "has-error")
-      style: { width: "6em", display: "inline-block" },
-        H.input 
-          className: "form-control input-sm",
-          type: "text", 
-          onChange: @handleChange,
-          value: (if @state.invalid then @state.invalidText) or (if @props.value then @props.value.value)
-}
 
 exports.EnumComponent = React.createClass {
   propTypes: {

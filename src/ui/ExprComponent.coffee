@@ -19,8 +19,14 @@ module.exports = class ExprComponent extends React.Component
     # For example, if this is inside an "and" op, we don't want to offer to wrap this expression in "and"
     parentOp: React.PropTypes.string
 
+    # Optionally tell the expr component that a literal expression is preferred (for right-hand side of comparisons)
+    preferLiteral: React.PropTypes.bool
+
   render: ->
     exprUtils = new ExprUtils(@props.schema)
+
+    # If null or placeholder
+    # TODO
 
     # If null, use SelectExprComponent, initially closed
     if not @props.value

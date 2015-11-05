@@ -67,10 +67,8 @@ module.exports = class ComparisonExprComponent extends React.Component
       switch rhsType
         when "text"
           rhsControl = React.createElement(literalComponents.TextComponent, key: "rhs", value: @props.value.rhs, onChange: @handleRhsChange)
-        when "integer"
-          rhsControl = React.createElement(literalComponents.IntegerComponent, key: "rhs", value: @props.value.rhs, onChange: @handleRhsChange)
-        when "decimal"
-          rhsControl = React.createElement(literalComponents.DecimalComponent, key: "rhs", value: @props.value.rhs, onChange: @handleRhsChange)
+        when "number"
+          rhsControl = React.createElement(literalComponents.NumberComponent, key: "rhs", value: @props.value.rhs, onChange: @handleRhsChange)
         when "date"
           rhsControl = React.createElement(literalComponents.DateComponent, key: "rhs", value: @props.value.rhs, onChange: @handleRhsChange)
         when "datetime"

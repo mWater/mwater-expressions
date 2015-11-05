@@ -52,14 +52,14 @@ module.exports = class ExpressionBuilder
         aggrs.push({ id: "max", name: "Maximum", type: type })
         aggrs.push({ id: "min", name: "Minimum", type: type })
 
-      when "integer", "decimal"
+      when "number"
         aggrs.push({ id: "sum", name: "Total", type: type })
-        aggrs.push({ id: "avg", name: "Average", type: "decimal" })
+        aggrs.push({ id: "avg", name: "Average", type: type })
         aggrs.push({ id: "max", name: "Maximum", type: type })
         aggrs.push({ id: "min", name: "Minimum", type: type })
 
     # Count is always last option
-    aggrs.push({ id: "count", name: "Number of", type: "integer" })
+    aggrs.push({ id: "count", name: "Number of", type: "number" })
 
     return aggrs
 
@@ -299,7 +299,7 @@ module.exports = class ExpressionBuilder
   getComparisonOps: (lhsType) ->
     ops = []
     switch lhsType
-      when "integer", "decimal"
+      when "number"
         ops.push({ id: "=", name: "equals" })
         ops.push({ id: ">", name: "is greater than" })
         ops.push({ id: ">=", name: "is greater or equal to" })

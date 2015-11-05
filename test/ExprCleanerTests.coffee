@@ -35,8 +35,8 @@ describe "ExprCleaner", ->
           { type: "op", table: "t1", op: "= any", exprs: [field]}
         )
 
-      it "wraps decimal with '='", ->
-        field = { type: "field", table: "t1", column: "decimal" }
+      it "wraps number with '='", ->
+        field = { type: "field", table: "t1", column: "number" }
         @clean(
           field
           { type: "op", table: "t1", op: "=", exprs: [field]}
@@ -44,13 +44,13 @@ describe "ExprCleaner", ->
 
   describe "cleanScalarExpr", ->
     it "leaves valid one alone", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
 
       assert.equal scalarExpr, @exprCleaner.cleanScalarExpr(scalarExpr)
 
     it "strips aggr if not needed", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
       scalarExpr = @exprCleaner.cleanScalarExpr(scalarExpr)
       assert not scalarExpr.aggr
@@ -62,7 +62,7 @@ describe "ExprCleaner", ->
       assert.equal scalarExpr.aggr, "last"
 
     it "strips where if wrong table", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       whereExpr = { type: "logical", table: "t1" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
       scalarExpr = @exprCleaner.cleanScalarExpr(scalarExpr)
@@ -70,7 +70,7 @@ describe "ExprCleaner", ->
       assert not scalarExpr.where
 
     it "strips if invalid join", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
       scalarExpr = @exprCleaner.cleanScalarExpr(scalarExpr)
       assert not scalarExpr
@@ -86,7 +86,7 @@ describe "ExprCleaner", ->
       expr = @exprCleaner.cleanComparisonExpr(expr)
       assert expr.rhs, "should keep"
 
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "integer", value: 3 } }
+      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "number", value: 3 } }
       expr = @exprCleaner.cleanComparisonExpr(expr)
       assert not expr.rhs, "should remove"
 

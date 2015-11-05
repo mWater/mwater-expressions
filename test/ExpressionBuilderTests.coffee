@@ -13,7 +13,7 @@ describe "ExpressionBuilder", ->
     ]})
 
     @schema = @schema.addTable({ id: "t2", name: "T2", contents: [
-      { id: "c1", name: "C1", type: "integer" }
+      { id: "c1", name: "C1", type: "number" }
       { id: "c2", name: "C2", type: "join", join: { fromTable: "t2", fromCol: "c1", toTable: "t1", toCol: "c1", op: "=", multiple: false } }
     ]})
 
@@ -32,7 +32,7 @@ describe "ExpressionBuilder", ->
       @schema = new Schema()
         .addTable({ id: "a", name: "A", ordering: "z", contents: [
           { id: "y", name: "Y", type: "text" }
-          { id: "z", name: "Z", type: "integer" }
+          { id: "z", name: "Z", type: "number" }
           ]})
       @exprBuilder = new ExpressionBuilder(@schema)
 
@@ -50,16 +50,16 @@ describe "ExpressionBuilder", ->
       field = { type: "field", table: "a", column: "y" }
       aggrs = @exprBuilder.getAggrs(field)
 
-      assert.equal _.findWhere(aggrs, id: "count").type, "integer"
+      assert.equal _.findWhere(aggrs, id: "count").type, "number"
       assert.isUndefined _.findWhere(aggrs, id: "sum")
       assert.isUndefined _.findWhere(aggrs, id: "avg")
 
-    it "includes sum, avg, etc for integer, decimal", ->
+    it "includes sum, avg, etc for number", ->
       field = { type: "field", table: "a", column: "z" }
       aggrs = @exprBuilder.getAggrs(field)
 
-      assert.equal _.findWhere(aggrs, id: "sum").type, "integer"
-      assert.equal _.findWhere(aggrs, id: "avg").type, "decimal"
+      assert.equal _.findWhere(aggrs, id: "sum").type, "number"
+      assert.equal _.findWhere(aggrs, id: "avg").type, "number"
       # TODO etc
 
     it "includes nothing for null", ->
@@ -70,7 +70,7 @@ describe "ExpressionBuilder", ->
       count = { type: "count", table: "a" }
       aggrs = @exprBuilder.getAggrs(count)
 
-      assert.equal _.findWhere(aggrs, id: "count").type, "integer"
+      assert.equal _.findWhere(aggrs, id: "count").type, "number"
       assert.equal aggrs.length, 1
 
   describe "summarizeExpr", ->
@@ -206,7 +206,7 @@ describe "ExpressionBuilder", ->
         aggr: "avg"
         joins: ["c2"]
       }
-      assert.equal @exprBuilder.getExprType(expr), "decimal"
+      assert.equal @exprBuilder.getExprType(expr), "number"
 
     it 'gets scalar type with count', ->
       expr = {
@@ -216,7 +216,7 @@ describe "ExpressionBuilder", ->
         aggr: "count"
         joins: ["c2"]
       }
-      assert.equal @exprBuilder.getExprType(expr), "integer"
+      assert.equal @exprBuilder.getExprType(expr), "number"
 
     it "gets literal types", ->
       assert.equal @exprBuilder.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean"
@@ -275,7 +275,7 @@ describe "ExpressionBuilder", ->
       expr = @exprBuilder.cleanComparisonExpr(expr)
       assert expr.rhs, "should keep"
 
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "integer", value: 3 } }
+      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "number", value: 3 } }
       expr = @exprBuilder.cleanComparisonExpr(expr)
       assert not expr.rhs, "should remove"
 
@@ -354,16 +354,16 @@ describe "ExpressionBuilder", ->
       assert.isNotNull @exprBuilder.validateScalarExpr(scalarExpr)
 
   describe "stringifyExprLiteral", ->
-    it "stringifies decimal", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
+    it "stringifies number", ->
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
       exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, 2.34)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
       assert.equal str, "2.34"
 
     it "stringifies null", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
       exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, null)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
       assert.equal str, "None"
 
     it "looks up enum", ->

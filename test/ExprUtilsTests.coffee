@@ -25,11 +25,11 @@ describe "ExprUtils", ->
       expr = {
         type: "scalar"
         table: "t1"
-        expr: { type: "field", table: "t2", column: "integer" }
+        expr: { type: "field", table: "t2", column: "number" }
         aggr: "avg"
         joins: ["1-2"]
       }
-      assert.equal @exprUtils.getExprType(expr), "decimal"
+      assert.equal @exprUtils.getExprType(expr), "number"
 
     it 'gets scalar type with count', ->
       expr = {
@@ -39,7 +39,7 @@ describe "ExprUtils", ->
         aggr: "count"
         joins: ["1-2"]
       }
-      assert.equal @exprUtils.getExprType(expr), "integer"
+      assert.equal @exprUtils.getExprType(expr), "number"
 
     it "gets literal types", ->
       assert.equal @exprUtils.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean"
@@ -54,37 +54,31 @@ describe "ExprUtils", ->
     it "no type for {}", ->
       assert.isNull @exprUtils.getExprType({})
 
-    it "no type if ambiguous e.g. integer + unknown", ->
-      assert.isNull @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "integer" }, null]})
-
-    it "integer type if integer + integer", ->
-      assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "integer" }, { type: "field", table: "t1", column: "integer" }]}), "integer"
-
-    it "decimal type if integer + decimal", ->
-      assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "decimal" }, { type: "field", table: "t1", column: "integer" }]}), "decimal"
+    it "number type if number + number", ->
+      assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]}), "number"
 
   describe "summarizeExpr", ->
     it "summarizes null", ->
       assert.equal @exprUtils.summarizeExpr(null), "None"
 
     it "summarizes field expr", ->
-      expr = { type: "field", table: "t1", column: "integer" }
-      assert.equal @exprUtils.summarizeExpr(expr), "Integer"
+      expr = { type: "field", table: "t1", column: "number" }
+      assert.equal @exprUtils.summarizeExpr(expr), "Number"
 
     it "summarizes simple scalar expr", ->
-      fieldExpr = { type: "field", table: "t1", column: "integer" }
+      fieldExpr = { type: "field", table: "t1", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
-      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Integer"
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Number"
 
     it "summarizes joined scalar expr", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr }
-      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Integer"
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number"
 
     it "summarizes joined aggr scalar expr", ->
-      fieldExpr = { type: "field", table: "t2", column: "integer" }
+      fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
-      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Total T1->T2 > Integer"
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Total T1->T2 > Number"
 
     it "simplifies when count", ->
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "count", table: "t2" }, aggr: "count" }
@@ -93,13 +87,13 @@ describe "ExprUtils", ->
     # TODO readd
     # it "uses named expression when matching one present", ->
     #   # Add named expression
-    #   @schema.addNamedExpr("t1", { id: "integer", name: "NE Column 1", expr: { type: "field", table: "t1", column: "integer" }})
+    #   @schema.addNamedExpr("t1", { id: "number", name: "NE Column 1", expr: { type: "field", table: "t1", column: "number" }})
 
     #   # Test with scalar that can simplify
     #   expr = {
     #     type: "scalar"
     #     table: "t1"
-    #     expr: { type: "field", table: "t1", column: "integer" }
+    #     expr: { type: "field", table: "t1", column: "number" }
     #     joins: []
     #   }
     #   assert.equal @exprUtils.summarizeExpr(expr), "NE Column 1"
@@ -109,12 +103,12 @@ describe "ExprUtils", ->
       assert.equal @exprUtils.summarizeAggrExpr(null), "None"
 
     it "summarizes field expr", ->
-      expr = { type: "field", table: "t1", column: "integer" }
-      assert.equal @exprUtils.summarizeAggrExpr(expr), "Integer"
+      expr = { type: "field", table: "t1", column: "number" }
+      assert.equal @exprUtils.summarizeAggrExpr(expr), "Number"
 
     it "summarizes field expr", ->
-      expr = { type: "field", table: "t2", column: "integer" }
-      assert.equal @exprUtils.summarizeAggrExpr(expr, "sum"), "Total Integer"
+      expr = { type: "field", table: "t2", column: "number" }
+      assert.equal @exprUtils.summarizeAggrExpr(expr, "sum"), "Total Number"
 
     it "simplifies when count", ->
       scalarExpr = { type: "scalar", table: "t1", joins: [], expr: { type: "count", table: "t1" } }

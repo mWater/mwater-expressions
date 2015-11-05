@@ -97,16 +97,16 @@ describe "ScalarExprTreeBuilder", ->
     it "includes direct types", ->
       @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
         { id: "c1", name: "C1", type: "text" }
-        { id: "c2", name: "C2", type: "integer" }
+        { id: "c2", name: "C2", type: "number" }
       ]})
 
       # Get nodes 
-      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["integer"] })
+      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["number"] })
       assert.equal nodes.length, 1
 
       # Get nodes of first table
-      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["decimal"] })
-      assert.equal nodes.length, 0, "Decimal not included"
+      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["enum"] })
+      assert.equal nodes.length, 0, "Number not included"
 
     it "includes types formed by aggregation", ->
       # Join column
@@ -117,9 +117,9 @@ describe "ScalarExprTreeBuilder", ->
       ]})
 
       # Go to 2nd child, children
-      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["integer"] })[0].children()
+      nodes = new ScalarExprTreeBuilder(@schema).getTree({ table: "t1", types: ["number"] })[0].children()
       
-      # Should include count and text field, because can be aggregated to integer via count
+      # Should include count and text field, because can be aggregated to number via count
       assert.equal nodes.length, 2, "Should include count and text"
 
       assert.equal nodes[0].name, "Number of T2"

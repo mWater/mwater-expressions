@@ -9,26 +9,26 @@ describe "ExprCompiler", ->
     @ec = new ExprCompiler(fixtures.simpleSchema())
 
   it "compiles field", ->
-    jql = @ec.compileExpr(expr: { type: "field", table: "t1", column: "integer" }, tableAlias: "T1")
+    jql = @ec.compileExpr(expr: { type: "field", table: "t1", column: "number" }, tableAlias: "T1")
     assert _.isEqual jql, {
       type: "field"
       tableAlias: "T1"
-      column: "integer"
+      column: "number"
     }
 
   it "compiles scalar with no joins, simplifying", ->
-    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "integer" }, joins: [] }
+    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "number" }, joins: [] }
     jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
 
-    assert _.isEqual(jql, { type: "field", tableAlias: "T1", column: "integer" }), JSON.stringify(jql, null, 2)
+    assert _.isEqual(jql, { type: "field", tableAlias: "T1", column: "number" }), JSON.stringify(jql, null, 2)
 
   it "compiles scalar with one join", ->
-    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "integer" }, joins: ["1-2"] }
+    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"] }
     jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
 
     assert _.isEqual(jql, {
       type: "scalar"
-      expr: { type: "field", tableAlias: "j1", column: "integer" }
+      expr: { type: "field", tableAlias: "j1", column: "number" }
       from: { type: "table", table: "t2", alias: "j1" }
       where: { type: "op", op: "=", exprs: [
         { type: "field", tableAlias: "j1", column: "t1" }
@@ -37,12 +37,12 @@ describe "ExprCompiler", ->
     }), JSON.stringify(jql, null, 2)
 
   it "compiles scalar with one join and sql aggr", ->
-    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "integer" }, joins: ["1-2"], aggr: "count" }
+    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"], aggr: "count" }
     jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
 
     assert _.isEqual(jql, {
       type: "scalar"
-      expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "j1", column: "integer" }] }
+      expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "j1", column: "number" }] }
       from: { type: "table", table: "t2", alias: "j1" }
       where: { type: "op", op: "=", exprs: [
         { type: "field", tableAlias: "j1", column: "t1" }
@@ -66,30 +66,30 @@ describe "ExprCompiler", ->
 
 
   it "compiles scalar with one join and last aggr", ->
-    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "integer" }, joins: ["1-2"], aggr: "last" }
+    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"], aggr: "last" }
     jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
 
     refJql = {
       type: "scalar"
-      expr: { type: "field", tableAlias: "j1", column: "integer" }
+      expr: { type: "field", tableAlias: "j1", column: "number" }
       from: { type: "table", table: "t2", alias: "j1" }
       where: { type: "op", op: "=", exprs: [
         { type: "field", tableAlias: "j1", column: "t1" }
         { type: "field", tableAlias: "T1", column: "primary" }
         ]}
-      orderBy: [{ expr: { type: "field", tableAlias: "j1", column: "integer" }, direction: "desc" }]
+      orderBy: [{ expr: { type: "field", tableAlias: "j1", column: "number" }, direction: "desc" }]
       limit: 1
     }
 
     assert _.isEqual(jql, refJql), "\n" + JSON.stringify(jql) + "\n" + JSON.stringify(refJql)
 
   it "compiles scalar with two joins", -> 
-    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "integer" }, joins: ["1-2", "2-1"], aggr: "count" }
+    expr = { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "number" }, joins: ["1-2", "2-1"], aggr: "count" }
     jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
 
     assert _.isEqual(jql, {
       type: "scalar"
-      expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "j2", column: "integer" }] }
+      expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "j2", column: "number" }] }
       from: { 
         type: "join" 
         left: { type: "table", table: "t2", alias: "j1" }
@@ -119,14 +119,14 @@ describe "ExprCompiler", ->
             "expr": {
               "type": "field",
               "table": "t2",
-              "column": "decimal"
+              "column": "number"
             },
             "joins": []
           },
           "op": "=",
           "rhs": {
             "type": "literal",
-            "valueType": "decimal",
+            "valueType": "number",
             "value": 3
           }
         }
@@ -136,7 +136,7 @@ describe "ExprCompiler", ->
     expr = { 
       type: "scalar", 
       table: "t1",      
-      expr: { type: "field", table: "t2", column: "integer" }, 
+      expr: { type: "field", table: "t2", column: "number" }, 
       joins: ["1-2"], 
       where: where
     }
@@ -144,7 +144,7 @@ describe "ExprCompiler", ->
 
     assert _.isEqual(jql, {
       type: "scalar"
-      expr: { type: "field", tableAlias: "j1", column: "integer" }
+      expr: { type: "field", tableAlias: "j1", column: "number" }
       from: { type: "table", table: "t2", alias: "j1" }
       where: {
         type: "op"
@@ -157,7 +157,7 @@ describe "ExprCompiler", ->
           }
           {
             type: "op", op: "=", exprs: [
-              { type: "field", tableAlias: "j1", column: "decimal" }
+              { type: "field", tableAlias: "j1", column: "number" }
               { type: "literal", value: 3 }
             ]
           }
@@ -167,8 +167,7 @@ describe "ExprCompiler", ->
 
   it "compiles literals", ->
     assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "text", value: "abc" }), { type: "literal", value: "abc" }
-    assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "integer", value: 123 }), { type: "literal", value: 123 }
-    assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "decimal", value: 123.4 }), { type: "literal", value: 123.4 }
+    assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "number", value: 123 }), { type: "literal", value: 123 }
     assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "enum", value: "id1" }), { type: "literal", value: "id1" }
     assert.deepEqual @ec.compileExpr(expr: { type: "literal", valueType: "boolean", value: true }), { type: "literal", value: true }
 
@@ -177,8 +176,8 @@ describe "ExprCompiler", ->
       expr = { 
         type: "comparison"
         op: "="
-        lhs: { type: "field", table: "t1", column: "integer" }
-        rhs: { type: "literal", valueType: "integer", value: 3 }
+        lhs: { type: "field", table: "t1", column: "number" }
+        rhs: { type: "literal", valueType: "number", value: 3 }
       }
 
       jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
@@ -187,7 +186,7 @@ describe "ExprCompiler", ->
         type: "op"
         op: "="
         exprs: [
-          { type: "field", tableAlias: "T1", column: "integer" }
+          { type: "field", tableAlias: "T1", column: "number" }
           { type: "literal", value: 3 }
         ]
         }), JSON.stringify(jql, null, 2)
@@ -211,26 +210,12 @@ describe "ExprCompiler", ->
         ]
         }), JSON.stringify(jql, null, 2)
 
-    
-    it "compiles = true", ->
-      expr = { type: "comparison", op: "= true", lhs: { type: "field", table: "t1", column: "integer" } }
-
-      jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
-
-      assert _.isEqual(jql, {
-        type: "op"
-        op: "="
-        exprs: [
-          { type: "field", tableAlias: "T1", column: "integer" }
-          { type: "literal", value: true }
-        ]
-        }), JSON.stringify(jql, null, 2)
-
+   
     it "compiles no rhs as null", ->
       expr = { 
         type: "comparison"
         op: "="
-        lhs: { type: "field", table: "t1", column: "integer" }
+        lhs: { type: "field", table: "t1", column: "number" }
       }
 
       jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
@@ -260,7 +245,7 @@ describe "ExprCompiler", ->
 
   describe "logicals", ->
     it "simplifies logical", ->
-      expr1 = { type: "comparison", op: "= true", lhs: { type: "field", table: "t1", column: "integer" } }
+      expr1 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "boolean" } }
 
       expr = { type: "logical", op: "and", exprs: [expr1] }
 
@@ -271,16 +256,16 @@ describe "ExprCompiler", ->
           type: "op"
           op: "="
           exprs: [
-            { type: "field", tableAlias: "T1", column: "integer" }
-            { type: "literal", value: true }
+            { type: "field", tableAlias: "T1", column: "boolean" }
+            { type: "literal", value: false }
           ]
         }
       ), JSON.stringify(jql, null, 2)
 
     it "compiles logical", ->
-      expr1 = { type: "comparison", op: "= true", lhs: { type: "field", table: "t1", column: "integer" } }
+      expr1 = { type: "comparison", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "number", value: 3 } }
 
-      expr2 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "decimal" } }
+      expr2 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "boolean" } }
 
       expr = { type: "logical", op: "and", exprs: [expr1, expr2] }
       jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
@@ -291,15 +276,15 @@ describe "ExprCompiler", ->
             type: "op"
             op: "="
             exprs: [
-              { type: "field", tableAlias: "T1", column: "integer" }
-              { type: "literal", value: true }
+              { type: "field", tableAlias: "T1", column: "number" }
+              { type: "literal", value: 3 }
             ]
           },
           {
             type: "op"
             op: "="
             exprs: [
-              { type: "field", tableAlias: "T1", column: "decimal" }
+              { type: "field", tableAlias: "T1", column: "boolean" }
               { type: "literal", value: false }
             ]
           }
@@ -307,9 +292,9 @@ describe "ExprCompiler", ->
       ), JSON.stringify(jql, null, 2)
 
     it "excluded blank condition", ->
-      expr1 = { type: "comparison", op: "= true", lhs: { type: "field", table: "t1", column: "integer" } }
+      expr1 = { type: "comparison", op: "= true", lhs: { type: "field", table: "t1", column: "number" } }
 
-      expr2 = { type: "comparison", op: "=", lhs: { type: "field", table: "t1", column: "decimal" } } # No RHS
+      expr2 = { type: "comparison", op: "=", lhs: { type: "field", table: "t1", column: "number" } } # No RHS
 
       expr = { type: "logical", op: "and", exprs: [expr1, expr2] }
       jql = @ec.compileExpr(expr: expr, tableAlias: "T1")
@@ -319,7 +304,7 @@ describe "ExprCompiler", ->
           type: "op"
           op: "="
           exprs: [
-            { type: "field", tableAlias: "T1", column: "integer" }
+            { type: "field", tableAlias: "T1", column: "number" }
             { type: "literal", value: true }
           ]
         }
@@ -335,7 +320,7 @@ describe "ExprCompiler", ->
             {
               type: "field"
               tableAlias: "abc"
-              column: "integer"
+              column: "number"
             }
           ]
           from: { type: "table", table: "t2", alias: "abc" }
@@ -346,7 +331,7 @@ describe "ExprCompiler", ->
         
         ec = new ExprCompiler(schema)
 
-        jql = ec.compileExpr(expr: { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "field", table: "t2", column: "integer" } }, tableAlias: "T1")
+        jql = ec.compileExpr(expr: { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "field", table: "t2", column: "number" } }, tableAlias: "T1")
 
         from = {
           type: "subquery",
@@ -356,7 +341,7 @@ describe "ExprCompiler", ->
               {
                 type: "field",
                 tableAlias: "abc",
-                column: "integer"
+                column: "number"
               }
             ],
             from: {
@@ -381,7 +366,7 @@ describe "ExprCompiler", ->
             {
               type: "field"
               tableAlias: "{alias}"  # Should be replaced!
-              column: "integer"
+              column: "number"
             }
           ]
         }
@@ -399,7 +384,7 @@ describe "ExprCompiler", ->
             {
               type: "field"
               tableAlias: "T1" # Replaced with table alias
-              column: "integer"
+              column: "number"
             }
           ]
         }
