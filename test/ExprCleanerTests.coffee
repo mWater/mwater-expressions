@@ -4,6 +4,11 @@ Schema = require '../src/Schema'
 ExprCleaner = require '../src/ExprCleaner'
 fixtures = require './fixtures'
 
+canonical = require 'canonical-json'
+
+compare = (actual, expected) ->
+  assert.equal canonical(actual), canonical(expected), "\n" + canonical(actual) + "\n" + canonical(expected)
+
 describe "ExprCleaner", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
@@ -11,8 +16,31 @@ describe "ExprCleaner", ->
 
   describe "cleanExpr", ->
     describe "boolean required", ->
-      it "wraps enum with '= any' with empty list", ->
-        expr = { type: "field", }
+      before ->
+        @clean = (before, afterExpected) ->
+          after = @exprCleaner.cleanExpr(before, { types: ["boolean"] })
+          compare(after, afterExpected)
+
+      it "wraps enum with '= any'", ->
+        field = { type: "field", table: "t1", column: "enum" }
+        @clean(
+          field
+          { type: "op", table: "t1", op: "= any", exprs: [field]}
+        )
+
+      it "wraps text with '= any'", ->
+        field = { type: "field", table: "t1", column: "text" }
+        @clean(
+          field
+          { type: "op", table: "t1", op: "= any", exprs: [field]}
+        )
+
+      it "wraps decimal with '='", ->
+        field = { type: "field", table: "t1", column: "decimal" }
+        @clean(
+          field
+          { type: "op", table: "t1", op: "=", exprs: [field]}
+        )
 
   describe "cleanScalarExpr", ->
     it "leaves valid one alone", ->

@@ -10,6 +10,7 @@ SelectExprComponent = require './SelectExprComponent'
 module.exports = class ExprComponent extends React.Component
   @propTypes:
     schema: React.PropTypes.object.isRequired
+    dataSource: React.PropTypes.object.isRequired # Data source to use to get values
     table: React.PropTypes.string.isRequired # Current table
     value: React.PropTypes.object   # Current value
     onChange: React.PropTypes.func  # Called with new expression
@@ -32,14 +33,69 @@ module.exports = class ExprComponent extends React.Component
     # Get type of expression
     type = exprUtils.getExprType(@props.value)
 
-    content = H.code null, JSON.stringify(@props.value)
+    # TODO
+    switch @props.value.type
+      when "scalar", "field" 
+        content = R ScalarExprComponent, schema: @props.schema, dataSource: @props.dataSource, value: @props.value, onChange: @props.onChange
+      when "op"
+        content = R OpExprComponent, schema: @props.schema, dataSource: @props.dataSource, value: @props.value, onChange: @props.onChange
+      else
+        content = H.code null, JSON.stringify(@props.value)
 
-    # If boolean, add +And link
-    # if type == "boolean"
-    content = R WrappedLinkComponent, links: [{ label: "+ And"}, { label: "+ Or"}], content
+    # If boolean, add + And link
+    if type == "boolean"
+      links = []
+      if @props.parentOp != "and" and @props.value.op != "and"
+        links.push({ label: "+ and", onClick: => @props.onChange({ type: "op", op: "and", table: @props.table, exprs: [@props.value, {}] }) })
+      if @props.parentOp != "or" and @props.value.op != "or"
+        links.push({ label: "+ or", onClick: => @props.onChange({ type: "op", op: "or", table: @props.table, exprs: [@props.value, {}] }) })
+      if links.length > 0
+        content = R WrappedLinkComponent, links: links, content
 
     return content
 
+class OpExprComponent extends React.Component
+  @propTypes:
+    schema: React.PropTypes.object.isRequired
+    dataSource: React.PropTypes.object.isRequired # Data source to use to get values
+    value: React.PropTypes.object   # Current value
+    onChange: React.PropTypes.func  # Called with new expression
+
+  render: ->
+    exprUtils = new ExprUtils(@props.schema)
+
+    switch @props.value.op
+      when "=", "= any"
+        return H.div style: { display: "inline-block" },
+          R ExprComponent, schema: @props.schema, dataSource: @props.dataSource, table: @props.value.table, value: @props.value.exprs[0], parentOp: @props.value.op, onChange: -> alert("todo")
+          @props.value.op #TODO
+          R ExprComponent, schema: @props.schema, dataSource: @props.dataSource, table: @props.value.table, value: @props.value.exprs[1], parentOp: @props.value.op, onChange: -> alert("todo")
+      when "and", "or"
+        # Vertical stack
+        return H.table null,
+          H.tbody null,
+            _.map @props.value.exprs, (expr, i) =>
+              H.tr null,
+                H.td null, 
+                  if i > 0 then @props.value.op
+                H.td null, 
+                  R ExprComponent, schema: @props.schema, dataSource: @props.dataSource, table: @props.value.table, value: @props.value.exprs[i], parentOp: @props.value.op, onChange: -> alert("todo")
+
+
+LinkComponent = require './LinkComponent'
+
+class ScalarExprComponent extends React.Component
+  @propTypes:
+    schema: React.PropTypes.object.isRequired
+    value: React.PropTypes.object   # Current value
+    onChange: React.PropTypes.func  # Called with new expression
+
+  render: ->
+    exprUtils = new ExprUtils(@props.schema)
+
+    R LinkComponent, {}, exprUtils.summarizeExpr(@props.value)
+
+# TODO DOC
 class WrappedLinkComponent extends React.Component
   @propTypes:
     links: React.PropTypes.array.isRequired # Shape is label, onClick
@@ -50,12 +106,13 @@ class WrappedLinkComponent extends React.Component
       left: 10
       bottom: 0 
     }, className: "hover-display-child",
-      _.map @props.links, (link) =>
-        H.a style: { 
+      _.map @props.links, (link, i) =>
+        H.a key: "#{i}", style: { 
           paddingLeft: 3
           paddingRight: 3
           backgroundColor: "white"
           cursor: "pointer"
+          fontSize: 12
         }, onClick: link.onClick,
           link.label
 

@@ -5,6 +5,7 @@ H = React.DOM
 Schema = require './Schema'
 
 ExprComponent = require './ui/ExprComponent'
+ExprCleaner = require './ExprCleaner'
 
 $ ->
   schema = new Schema()
@@ -33,11 +34,11 @@ $ ->
       @state = { value: {} }
 
     handleValueChange: (value) => 
-      #TODO CLEAN
+      value = new ExprCleaner(schema).cleanExpr(value, { types: ['boolean'] })
       @setState(value: value)
 
     render: ->
-      R(ExprComponent, schema: schema, table: "t1", value: @state.value, onChange: @handleValueChange)
+      R(ExprComponent, schema: schema, dataSource: {}, table: "t1", value: @state.value, onChange: @handleValueChange)
 
   ReactDOM.render(R(TestComponent), document.getElementById("main"))
 

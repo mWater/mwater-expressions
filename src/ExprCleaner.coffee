@@ -13,9 +13,13 @@ module.exports = class ExprCleaner
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
   #   types: optional array of types to limit to
-  cleanExpr: (expr, options) ->
+  cleanExpr: (expr, options={}) ->
     if not expr
       return null
+
+    # Allow {} placeholder
+    if _.isEmpty(expr)
+      return expr
 
     # Strip if wrong table
     if options.table and expr.type != "literal" and expr.table != options.table
@@ -28,7 +32,13 @@ module.exports = class ExprCleaner
     # Get type
     type = @exprUtils.getExprType(expr)
 
-    # If a boolean is
+    # If a type is required and expression is not, attempt to wrap with an op
+    if options.types and type not in options.types
+      for allowedType in options.types
+        op = @exprUtils.findOpByResultType(allowedType, type)
+        if op
+          # Found op that would convert type. Use it.
+          expr = { type: "op", op: op, table: expr.table, exprs: [expr] }
 
     switch expr.type
       when "field"
@@ -41,6 +51,8 @@ module.exports = class ExprCleaner
         return @cleanLogicalExpr(expr)
       when "count"
         return expr
+      when "op"
+        return @cleanOpExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -59,6 +71,13 @@ module.exports = class ExprCleaner
       return null
 
     return expr
+
+  cleanOpExpr: (expr, options) ->
+    switch expr.op
+      when "and", "or"
+        return  _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, options)))
+      else
+        return expr
 
   # Determines if an set of joins are valid
   areJoinsValid: (table, joins) ->
