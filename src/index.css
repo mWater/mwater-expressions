@@ -19,3 +19,7 @@
 .hover-display-parent:hover > .hover-display-child {
   visibility: visible;
 }
+
+.hover-grey-background:hover {
+	background-color: #EEE;
+}
