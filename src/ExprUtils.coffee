@@ -43,7 +43,7 @@ module.exports = class ExprUtils
       addOpItem(op, op, "number", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "number"))
 
     addOpItem("~*", "matches", "boolean", ["text", "text"])
-    addOpItem("= false", "is false", "boolean", [])
+    addOpItem("not", "is false", "boolean", [])
     addOpItem("is null", "is blank", "boolean", [])
     addOpItem("is not null", "is not blank", "boolean", [])
 
