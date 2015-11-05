@@ -6,23 +6,23 @@ module.exports = class ExprUtils
 
     @opItems = []
 
-    addOpItem = (op, name, resultType, exprTypes...) =>
+    addOpItem = (op, name, resultType, exprTypes) =>
       @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes)
 
     # TODO n?
-    addOpItem("= any", "is", "boolean", "text", "text[]")
-    addOpItem("= any", "is", "boolean", "enum", "enum[]")
+    addOpItem("= any", "is", "boolean", ["text", "text[]"])
+    addOpItem("= any", "is", "boolean", ["enum", "enum[]"])
 
-    addOpItem("=", "is", "boolean", "integer", "integer")
-    addOpItem("=", "is", "boolean", ["decimal", "integer"], ["decimal", "integer"])
-    addOpItem("=", "is", "boolean", "text", "text")
-    addOpItem("=", "is", "boolean", "enum", "enum")
-    addOpItem("=", "is", "boolean", "date", "date")
-    addOpItem("=", "is", "boolean", "datetime", "datetime")
-    addOpItem("=", "is", "boolean", "boolean", "boolean")
+    addOpItem("=", "is", "boolean", ["integer", "integer"])
+    addOpItem("=", "is", "boolean", [["decimal", "integer"], ["decimal", "integer"]])
+    addOpItem("=", "is", "boolean", ["text", "text"])
+    addOpItem("=", "is", "boolean", ["enum", "enum"])
+    addOpItem("=", "is", "boolean", ["date", "date"])
+    addOpItem("=", "is", "boolean", ["datetime", "datetime"])
+    addOpItem("=", "is", "boolean", ["boolean", "boolean"])
 
-    addOpItem("and", "and", "boolean", "boolean", "boolean")
-    addOpItem("or", "or", "boolean", "boolean", "boolean")
+    addOpItem("and", "and", "boolean", ["boolean", "boolean"])
+    addOpItem("or", "or", "boolean", ["boolean", "boolean"])
 
   # # Match an op optionally by op, 
   # doesOpMatch(
