@@ -7,12 +7,12 @@ fixtures = require './fixtures'
 describe "ExpressionBuilder", ->
   beforeEach ->
     @schema = new Schema()
-    @schema.addTable({ id: "t1", name: "T1", contents: [
+    @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
       { id: "c1", name: "C1", type: "text" }
       { id: "c2", name: "C2", type: "join", join: { fromTable: "t1", fromCol: "c1", toTable: "t2", toCol: "c1", op: "=", multiple: true } }
     ]})
 
-    @schema.addTable({ id: "t2", name: "T2", contents: [
+    @schema = @schema.addTable({ id: "t2", name: "T2", contents: [
       { id: "c1", name: "C1", type: "integer" }
       { id: "c2", name: "C2", type: "join", join: { fromTable: "t2", fromCol: "c1", toTable: "t1", toCol: "c1", op: "=", multiple: false } }
     ]})
@@ -41,7 +41,8 @@ describe "ExpressionBuilder", ->
       assert.equal _.findWhere(@exprBuilder.getAggrs(field), id: "last").type, "text"
 
     it "doesn't include most recent normally", ->
-      @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
+      @schema = @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
+      @exprBuilder = new ExpressionBuilder(@schema)
       field = { type: "field", table: "b", column: "x" }
       assert.isUndefined _.findWhere(@exprBuilder.getAggrs(field), id: "last")
 
@@ -354,26 +355,31 @@ describe "ExpressionBuilder", ->
 
   describe "stringifyExprLiteral", ->
     it "stringifies decimal", ->
-      @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
-      str = @exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, 2.34)
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
+      exprBuilder = new ExpressionBuilder(schema)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, 2.34)
       assert.equal str, "2.34"
 
     it "stringifies null", ->
-      @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
-      str = @exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, null)
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "decimal", name: "Decimal", type: "decimal" }] })
+      exprBuilder = new ExpressionBuilder(schema)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "decimal" }, null)
       assert.equal str, "None"
 
     it "looks up enum", ->
-      @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      str = @exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+      exprBuilder = new ExpressionBuilder(schema)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
       assert.equal str, "A"
 
     it "handles null enum", ->
-      @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      str = @exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+      exprBuilder = new ExpressionBuilder(schema)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
       assert.equal str, "None"
 
     it "handles invalid enum", ->
-      @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      str = @exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
+      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+      exprBuilder = new ExpressionBuilder(schema)
+      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
       assert.equal str, "???"

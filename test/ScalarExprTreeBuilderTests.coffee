@@ -6,11 +6,11 @@ Schema = require '../src/Schema'
 describe "ScalarExprTreeBuilder", ->
   beforeEach ->
     @schema = new Schema()
-    @schema.addTable({ id: "t1", name: "T1", contents: [
+    @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
       { id: "c1", name: "C1", type: "text" }
     ]})
 
-    @schema.addTable({ id: "t2", name: "T2", contents: [
+    @schema = @schema.addTable({ id: "t2", name: "T2", contents: [
       { id: "c1", name: "C1", type: "text" }
     ]})
 
@@ -21,7 +21,7 @@ describe "ScalarExprTreeBuilder", ->
 
   it "returns table sections if present", ->
     @schema = new Schema()
-    @schema.addTable({ id: "t1", contents: [
+    @schema = @schema.addTable({ id: "t1", contents: [
         { id: "c2", name: "C2", type: "text" }
         { name: "A", type: "section", contents: [
           { id: "c4", name: "C4", type: "text" }
@@ -77,7 +77,7 @@ describe "ScalarExprTreeBuilder", ->
     # Join column
     join = { fromTable: "t1", fromCol: "c1", toTable: "t2", toCol: "c1", op: "=", multiple: false }
     
-    @schema.addTable({ id: "t1", name: "T1", contents: [
+    @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
       { id: "c1", name: "C1", type: "text" }
       { id: "c2", name: "C2", type: "join", join: join }
     ]})
@@ -95,7 +95,7 @@ describe "ScalarExprTreeBuilder", ->
 
   describe "limits type", ->
     it "includes direct types", ->
-      @schema.addTable({ id: "t1", name: "T1", contents: [
+      @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
         { id: "c1", name: "C1", type: "text" }
         { id: "c2", name: "C2", type: "integer" }
       ]})
@@ -111,7 +111,7 @@ describe "ScalarExprTreeBuilder", ->
     it "includes types formed by aggregation", ->
       # Join column
       join = { fromTable: "t1", fromCol: "c1", toTable: "t2", toCol: "c1", op: "=", multiple: true }
-      @schema.addTable({ id: "t1", name: "T1", contents: [
+      @schema = @schema.addTable({ id: "t1", name: "T1", contents: [
         { id: "c1", name: "C1", type: "text" }
         { id: "c2", name: "C2", type: "join", join: join }
       ]})

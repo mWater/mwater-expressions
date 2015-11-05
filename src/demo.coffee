@@ -9,7 +9,7 @@ ExprCleaner = require './ExprCleaner'
 
 $ ->
   schema = new Schema()
-  schema.addTable({ id: "t1", name: "T1", contents: [
+  schema = schema.addTable({ id: "t1", name: "T1", contents: [
     { id: "text", name: "Text", type: "text" }
     { id: "integer", name: "Integer", type: "integer" }
     { id: "decimal", name: "Decimal", type: "decimal" }
@@ -20,7 +20,7 @@ $ ->
     { id: "1-2", name: "T1->T2", type: "join", join: { fromTable: "t1", fromColumn: "primary", toTable: "t2", toColumn: "t1", op: "=", multiple: true }}
   ]})
 
-  schema.addTable({ id: "t2", name: "T2", ordering: "integer", contents: [
+  schema = schema.addTable({ id: "t2", name: "T2", ordering: "integer", contents: [
     { id: "t1", name: "T1", type: "uuid" }
     { id: "text", name: "Text", type: "text" }
     { id: "integer", name: "Integer", type: "integer" }

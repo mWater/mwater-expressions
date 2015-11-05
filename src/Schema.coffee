@@ -2,8 +2,9 @@ _ = require 'lodash'
 React = require 'react'
 H = React.DOM
 
-# Schema for a database. Stores tables with columns (possibly in nested sections).
-# Format is as follows
+# Schema for a database. Immutable.
+# Stores tables with columns (possibly in nested sections).
+# See wiki for details of format
 module.exports = class Schema
   constructor: (json) ->
     @tables = []
@@ -15,19 +16,15 @@ module.exports = class Schema
     @columnMap = {}
 
     if json
-      # TODO
-      @loadJSON(json)
+      @tables = _.cloneDeep(json.tables)
 
-  loadJSON: (json) ->
-    @tables = _.cloneDeep(json.tables)
+      # Strip id type
+      @tables = _.map(@tables, @stripIdColumns)
 
-    # Strip id type
-    @tables = _.map(@tables, @stripIdColumns)
-
-    @reindex()
+      @_reindex()
 
   # Reloads the table and column map after table added/changed
-  reindex: ->
+  _reindex: ->
     @tableMap = {}
     @columnMap = {}
 
@@ -53,14 +50,12 @@ module.exports = class Schema
     return @columnMap["#{tableId}::#{columnId}"]
 
   # Add table with id, name, desc, primaryKey, ordering (column with natural order) and contents (array of columns/sections)
-  # Will replace table if already exists
+  # Will replace table if already exists. S
   addTable: (table) ->
-    # Remove existing
-    @tables = _.filter(@tables, (t) -> t.id != table.id)
-    
-    @tables.push(@stripIdColumns(_.cloneDeep(table)))
-    @reindex()
-    return this
+    # Remove existing and add new
+    tables = _.filter(@tables, (t) -> t.id != table.id)
+    tables.push(table)
+    return new Schema(tables: tables)
 
   # TODO readd someday
   getNamedExprs: (tableId) ->

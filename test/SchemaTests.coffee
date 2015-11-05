@@ -9,7 +9,7 @@ compare = (actual, expected) ->
 describe "Schema", ->
   it "adds and gets tables", ->
     schema = new Schema()
-    schema.addTable({ id: "a", name: "A", desc: "a table", contents: [{ id: "x", name: "X", type: "text" }] })
+    schema = schema.addTable({ id: "a", name: "A", desc: "a table", contents: [{ id: "x", name: "X", type: "text" }] })
     assert.equal schema.getTables()[0].id, "a"
     assert.equal schema.getTables()[0].name, "A"
     assert.equal schema.getTables()[0].desc, "a table"
@@ -18,8 +18,7 @@ describe "Schema", ->
     assert.equal schema.getColumn("a", "x").name, "X"
 
   it "loads from JSON", ->
-    schema = new Schema()
-    schema.loadJSON({
+    schema = new Schema({
       tables: [{
         id: "a"
         name: "A"
@@ -36,8 +35,7 @@ describe "Schema", ->
     assert.equal schema.getColumn("a", "x").name, "X"
 
   it "skips id types", ->
-    schema = new Schema()
-    schema.loadJSON({
+    schema = new Schema({
       tables: [{
         id: "a"
         name: "A"
