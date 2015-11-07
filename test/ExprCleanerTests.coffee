@@ -39,6 +39,10 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "and", table: "t1", exprs: []}
       compare(@exprCleaner.cleanExpr(expr), null)
 
+    it "allows empty 'and' children", ->
+      expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
+      compare(@exprCleaner.cleanExpr(expr), expr)
+
     describe "boolean required", ->
       before ->
         @clean = (before, afterExpected) ->

@@ -7,8 +7,8 @@ module.exports = class ExprUtils
     @opItems = []
 
     # Adds an op item (particular combination of operands types with an operator)
-    # exprTypes can be a list or a function that returns true if matches
-    addOpItem = (op, name, resultType, exprTypes) =>
+    # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
+    addOpItem = (op, name, resultType, exprTypes, moreExprType) =>
       @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes)
 
     # TODO n?
@@ -36,14 +36,16 @@ module.exports = class ExprUtils
     addOpItem("<>", "is not", "boolean", ["number", "number"])
 
     # And/or is a list of booleans
-    addOpItem("and", "and", "boolean", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "boolean"))
-    addOpItem("or", "or", "boolean", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "boolean"))
+    addOpItem("and", "and", "boolean", [], "boolean")
+    addOpItem("or", "or", "boolean", [], "boolean")
 
     for op in ['+', '-', '*']
-      addOpItem(op, op, "number", (exprTypes) -> _.all(exprTypes, (et) -> not et or et == "number"))
+      addOpItem(op, op, "number", [], "number")
+
+    addOpItem("/", "/", "number", ["number", "number"])
 
     addOpItem("~*", "matches", "boolean", ["text", "text"])
-    addOpItem("not", "is false", "boolean", [])
+    addOpItem("not", "is false", "boolean", ["boolean"])
     addOpItem("is null", "is blank", "boolean", [])
     addOpItem("is not null", "is not blank", "boolean", [])
 
@@ -52,23 +54,32 @@ module.exports = class ExprUtils
     addOpItem("between", "is in range", "boolean", ["date", "date", "date"])
     addOpItem("between", "is in range", "boolean", ["datetime", "datetime", "datetime"])
 
-  findOpByResultType: (resultType, exprTypes...) ->
-    op = _.find @opItems, (opItem) =>
-      if opItem.resultType != resultType
+  findOpByResultType: (resultType, exprTypes) ->
+    opItems = @findMatchingOpItems(resultType: resultType, exprTypes: exprTypes)
+    if opItems[0]
+      return opItems[0].op
+
+  # Search can contain resultType, exprTypes and op
+  findMatchingOpItems: (search) ->
+    return _.filter @opItems, (opItem) =>
+      if search.resultType and opItem.resultType != search.resultType
         return false
 
-      # Handle case of function
-      if _.isFunction(opItem.exprTypes)
-        return opItem.exprTypes(exprTypes)
+      if search.op and opItem.op != search.op
+        return false
 
-      # Handle list case
-      for exprType, i in exprTypes
-        if exprType and exprType != opItem.exprTypes[i]
-          return false
+      # Handle list of specified types
+      if search.exprTypes
+        for exprType, i in search.exprTypes
+          if i < opItem.exprTypes.length
+            if exprType and exprType != opItem.exprTypes[i]
+              return false
+          else if opItem.moreExprType
+            if exprType and exprType != opItem.moreExprType
+              return false
+
       return true
 
-    if op
-      return op.op
 
   # Determines if an set of joins contains a multiple
   isMultipleJoins: (table, joins) ->
@@ -164,24 +175,17 @@ module.exports = class ExprUtils
           return aggr.type
         return @getExprType(expr.expr)
       when "op"
+        # Check for single-type ops
+        opItems = @findMatchingOpItems(op: expr.op)
+        resultTypes = _.uniq(_.compact(_.pluck(opItems, "resultType")))
+        if resultTypes.length == 1
+          return resultTypes[0]
+
         # Get types of operand expressions
         exprTypes = _.map(expr.exprs, (e) => @getExprType(e))
 
         # Get possible ops
-        opItems = _.filter @opItems, (opItem) =>
-          # Must be correct op
-          if opItem.op != expr.op
-            return false
-
-          # Handle case of function
-          if _.isFunction(opItem.exprTypes)
-            return opItem.exprTypes(exprTypes)
-
-          # Must match all known expression types
-          for exprType, i in exprTypes
-            if exprType and exprType != opItem.exprTypes[i]
-                return false
-          return true
+        opItems = @findMatchingOpItems(op: expr.op, exprTypes: exprTypes)
 
         # Get unique resultTypes
         resultTypes = _.uniq(_.compact(_.pluck(opItems, "resultType")))

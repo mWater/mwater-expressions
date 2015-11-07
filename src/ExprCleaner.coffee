@@ -38,7 +38,7 @@ module.exports = class ExprCleaner
 
     # If a type is required and expression is not, attempt to wrap with an op
     if options.type and type and type != options.type
-      op = @exprUtils.findOpByResultType(options.type, type)
+      op = @exprUtils.findOpByResultType(options.type, [type])
       if op
         # Found op that would convert type. Use it.
         expr = { type: "op", op: op, table: expr.table, exprs: [expr] }
