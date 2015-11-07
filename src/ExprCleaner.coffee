@@ -12,7 +12,7 @@ module.exports = class ExprCleaner
   # e.g. if an enum is chosen when a boolean is required, it will be wrapped in "= any" op
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
-  #   types: optional array of types to limit to
+  #   type: optional types to limit to
   cleanExpr: (expr, options={}) ->
     if not expr
       return null
@@ -21,8 +21,12 @@ module.exports = class ExprCleaner
     if _.isEmpty(expr)
       return expr
 
-    # Strip if wrong table
+    # Strip if wrong table 
     if options.table and expr.type != "literal" and expr.table != options.table
+      return null
+
+    # Strip if no table
+    if not expr.table and expr.type != "literal" 
       return null
 
     # Strip if non-existent table
@@ -33,12 +37,11 @@ module.exports = class ExprCleaner
     type = @exprUtils.getExprType(expr)
 
     # If a type is required and expression is not, attempt to wrap with an op
-    if options.types and type not in options.types
-      for allowedType in options.types
-        op = @exprUtils.findOpByResultType(allowedType, type)
-        if op
-          # Found op that would convert type. Use it.
-          expr = { type: "op", op: op, table: expr.table, exprs: [expr] }
+    if options.type and type and type != options.type
+      op = @exprUtils.findOpByResultType(options.type, type)
+      if op
+        # Found op that would convert type. Use it.
+        expr = { type: "op", op: op, table: expr.table, exprs: [expr] }
 
     switch expr.type
       when "field"
@@ -75,7 +78,15 @@ module.exports = class ExprCleaner
   cleanOpExpr: (expr, options) ->
     switch expr.op
       when "and", "or"
-        return  _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, options)))
+        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, type: "boolean", table: expr.table)))
+
+        # Simplify
+        if expr.exprs.length == 1
+          return expr.exprs[0]
+        if expr.exprs.length == 0
+          return null
+
+        return expr
       else
         return expr
 

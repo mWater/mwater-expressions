@@ -159,7 +159,8 @@ module.exports = class ExprUtils
         if expr.aggr
           aggr = _.findWhere(@getAggrs(expr.expr), id: expr.aggr)
           if not aggr
-            throw new Error("Aggregation #{expr.aggr} not found for scalar")
+            # Type is unknown as a result
+            return null
           return aggr.type
         return @getExprType(expr.expr)
       when "op"
