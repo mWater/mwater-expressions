@@ -17,20 +17,21 @@ module.exports = class ExprCompiler
 
     switch expr.type 
       when "field"
-        compiledExpr =  @compileFieldExpr(options)
+        compiledExpr = @compileFieldExpr(options)
       when "scalar"
-        compiledExpr =  @compileScalarExpr(options)
-      when "comparison"
-        compiledExpr =  @compileComparisonExpr(options)
-      when "logical"
-        compiledExpr =  @compileLogicalExpr(options)
-      when "literal"
-        compiledExpr =  { type: "literal", value: expr.value }
+        compiledExpr = @compileScalarExpr(options)
+      when "literal" 
+        compiledExpr = { type: "literal", value: expr.value }
       when "count"
         compiledExpr = null
+      when "op"
+        compiledExpr = @compileOpExpr(options)
+      when "comparison" # DEPRECATED
+        compiledExpr = @compileComparisonExpr(options)
+      when "logical" # DEPRECATED
+        compiledExpr = @compileLogicalExpr(options)
       else
         throw new Error("Expr type #{expr.type} not supported")
-
     return compiledExpr
 
   compileFieldExpr: (options) ->
@@ -155,6 +156,91 @@ module.exports = class ExprCompiler
       scalar.limit = limit
 
     return scalar
+
+  compileOpExpr: (options) ->
+    expr = options.expr
+
+    compiledExprs = _.map(expr.exprs, (e) => @compileExpr(expr: e, tableAlias: options.tableAlias))
+
+    # Handle multi
+    switch expr.op
+      when "and", "or", "+", "*"
+        # Strip nulls
+        compiledExprs = _.compact(compiledExprs)
+        if compiledExprs.length == 0
+          return null
+
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: compiledExprs
+        }
+      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*"
+        # Null if any not present
+        if _.any(compiledExprs, (ce) -> not ce?)
+          return null
+
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: compiledExprs
+        }
+      when '= any'
+        # Null if any not present
+        if _.any(compiledExprs, (ce) -> not ce?)
+          return null
+
+        # Null if empty list on rhs
+        if expr.exprs[1].type == "literal"
+          if not expr.exprs[1].value or (_.isArray(expr.exprs[1].value) and expr.exprs[1].value.length == 0)
+            return null
+
+        return { type: "op", op: "=", modifier: "any", exprs: compiledExprs }
+
+      when "between"
+        # Null if first not present
+        if not compiledExprs[0]
+          return null
+
+        # Null if second and third not present
+        if not compiledExprs[1] and not compiledExprs[2]
+          return null
+
+        # >= if third missing
+        if not compiledExprs[2]
+          return {
+            type: "op"
+            op: ">="
+            exprs: [compiledExprs[0], compiledExprs[1]]
+          }
+
+        # <= if second missing
+        if not compiledExprs[1]
+          return {
+            type: "op"
+            op: "<="
+            exprs: [compiledExprs[0], compiledExprs[2]]
+          }
+
+        # Between
+        return {
+          type: "op"
+          op: "between"
+          exprs: compiledExprs
+        }
+
+      when "not", "is null", "is not null"
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: expr.op
+          exprs: compiledExprs
+        }
+
+      else
+        throw new Error("Unknown op #{expr.op}")
 
   compileComparisonExpr: (options) ->
     expr = options.expr

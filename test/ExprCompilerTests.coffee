@@ -173,19 +173,337 @@ describe "ExprCompiler", ->
     @compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
 
   describe "ops", ->
-    it "compiles and"
-    it "compiles or"
-    it "compiles +"
-    it "compiles -"
-    it "compiles *"
-    it "compiles /"
-    it "compiles between"
-    it "compiles not"
-    it "compiles ~*"
-    it "compiles <>"
-    it "compiles = any"
-    it "compiles is null"
-    it "compiles is not null"
+    before ->
+      @bool1 = { type: "literal", valueType: "boolean", value: true }
+      @bool1JsonQL = { type: "literal", value: true }
+      @bool2 = { type: "literal", valueType: "boolean", value: false }
+      @bool2JsonQL = { type: "literal", value: false }
+
+      @number1 = { type: "literal", valueType: "number", value: 2 }
+      @number1JsonQL = { type: "literal", value: 2 }
+      @number2 = { type: "literal", valueType: "number", value: 3 }
+      @number2JsonQL = { type: "literal", value: 3 }
+
+      @text1 = { type: "literal", valueType: "text", value: "a" }
+      @text1JsonQL = { type: "literal", value: "a" }
+      @text2 = { type: "literal", valueType: "text", value: "b" }
+      @text2JsonQL = { type: "literal", value: "b" }
+
+      @date1 = { type: "literal", valueType: "date", value: "2014-01-01" }
+      @date1JsonQL = { type: "literal", value: "2014-01-01" }
+      @date2 = { type: "literal", valueType: "date", value: "2014-12-31" }
+      @date2JsonQL = { type: "literal", value: "2014-12-31" }
+      @date3 = { type: "literal", valueType: "date", value: "2015-01-01" }
+      @date3JsonQL = { type: "literal", value: "2015-01-01" }
+
+    it "compiles and", ->
+      @compile(
+        { 
+          type: "op"
+          op: "and"
+          exprs: [@bool1, @bool2]
+        }
+        { 
+          type: "op"
+          op: "and"
+          exprs: [@bool1JsonQL, @bool2JsonQL]
+        }
+      )
+
+    it "compiles or", ->
+      @compile(
+        { 
+          type: "op"
+          op: "or"
+          exprs: [@bool1, @bool2]
+        }
+        { 
+          type: "op"
+          op: "or"
+          exprs: [@bool1JsonQL, @bool2JsonQL]
+        }
+      )
+
+    it "compiles or with nulls", ->
+      @compile(
+        { 
+          type: "op"
+          op: "or"
+          exprs: [@bool1, null]
+        }
+        { 
+          type: "op"
+          op: "or"
+          exprs: [@bool1JsonQL]
+        }
+      )
+
+    it "compiles or with all nulls", ->
+      @compile(
+        { 
+          type: "op"
+          op: "or"
+          exprs: [null, null]
+        }
+        null
+      )
+
+    it "compiles +, *", ->
+      for op in ["+", "*"]
+        @compile(
+          {
+            type: "op"
+            op: op
+            exprs: [@number1, @number2, @number1, null]
+          }
+          {
+            type: "op"
+            op: op
+            exprs: [@number1JsonQL, @number2JsonQL, @number1JsonQL]
+          }
+        )
+
+    it "compiles -, /", ->
+      for op in ["-", "/"]
+        @compile(
+          {
+            type: "op"
+            op: op
+            exprs: [@number1, @number2]
+          }
+          {
+            type: "op"
+            op: op
+            exprs: [@number1JsonQL, @number2JsonQL]
+          }
+        )
+
+        @compile(
+          {
+            type: "op"
+            op: op
+            exprs: [null, @number2]
+          }
+          null
+        )
+
+    it "compiles between", ->
+      @compile(
+        {
+          type: "op"
+          op: "between"
+          exprs: [@date1, @date2, @date3]
+        }
+        {
+          type: "op"
+          op: "between"
+          exprs: [@date1JsonQL, @date2JsonQL, @date3JsonQL]
+        }
+      )
+
+    it "compiles between with first null (null)", ->
+      @compile(
+        {
+          type: "op"
+          op: "between"
+          exprs: [null, @date2, @date3]
+        }
+        null
+      )
+
+    it "compiles between with second null (<=)", ->
+      @compile(
+        {
+          type: "op"
+          op: "between"
+          exprs: [@date1, null, @date3]
+        }
+        {
+          type: "op"
+          op: "<="
+          exprs: [@date1JsonQL, @date3JsonQL]
+        }
+      )
+
+    it "compiles between with third null (>=)", ->
+      @compile(
+        {
+          type: "op"
+          op: "between"
+          exprs: [@date1, @date2, null]
+        }
+        {
+          type: "op"
+          op: ">="
+          exprs: [@date1JsonQL, @date2JsonQL]
+        }
+      )
+
+    it "compiles not", ->
+      @compile(
+        {
+          type: "op"
+          op: "not"
+          exprs: [@bool1]
+        }
+        {
+          type: "op"
+          op: "not"
+          exprs: [@bool1JsonQL]
+        }
+      )
+
+      @compile(
+        {
+          type: "op"
+          op: "not"
+          exprs: [null]
+        }
+        null
+      )
+
+    it "compiles =, <>, >, >=, <, <=", ->
+      for op in ["=", "<>", ">", ">=", "<", "<="]
+        # Normal
+        @compile(
+          {
+            type: "op"
+            op: op
+            exprs: [@number1, @number2]
+          }
+          {
+            type: "op"
+            op: op
+            exprs: [@number1JsonQL, @number2JsonQL]
+          }
+        )
+
+        # Missing value
+        @compile(
+          {
+            type: "op"
+            op: op
+            exprs: [@number1, null]
+          }
+          null
+        )
+
+    it "compiles ~*", ->
+      @compile(
+        {
+          type: "op"
+          op: "~*"
+          exprs: [@text1, @text2]
+        }
+        {
+          type: "op"
+          op: "~*"
+          exprs: [@text1JsonQL, @text2JsonQL]
+        }
+      )
+
+      # Missing value
+      @compile(
+        {
+          type: "op"
+          op: "~*"
+          exprs: [@text1, null]
+        }
+        null
+      )
+
+    it "compiles = any", ->
+      @compile(
+        { 
+          type: "op"
+          op: "= any", 
+          exprs: [
+            { type: "field", table: "t1", column: "enum" } 
+            { type: "literal", valueType: "enum[]", value: ["a", "b"] }
+          ]
+        }
+        {
+          type: "op"
+          op: "="
+          modifier: "any"
+          exprs: [
+            { type: "field", tableAlias: "T1", column: "enum" }
+            { type: "literal", value: ["a", "b"] }
+          ]
+        }
+      )
+
+    it "compiles empty = any", ->
+      @compile(
+        { 
+          type: "op"
+          op: "= any", 
+          exprs: [
+            { type: "field", table: "t1", column: "enum" } 
+            { type: "literal", valueType: "enum[]", value: [] }
+          ]
+        }
+        null
+      )
+
+    it "compiles invalid = any", ->
+      @compile(
+        { 
+          type: "op"
+          op: "= any", 
+          exprs: [
+            null
+            { type: "literal", valueType: "enum[]", value: [] }
+          ]
+        }
+        null
+      )
+
+    it "compiles is null", ->
+      @compile(
+        {
+          type: "op"
+          op: "is null"
+          exprs: [@number1]
+        }
+        {
+          type: "op"
+          op: "is null"
+          exprs: [@number1JsonQL]
+        }
+      )
+
+      @compile(
+        {
+          type: "op"
+          op: "is null"
+          exprs: [null]
+        }
+        null
+      )
+
+    it "compiles is not null", ->
+      @compile(
+        {
+          type: "op"
+          op: "is not null"
+          exprs: [@number1]
+        }
+        {
+          type: "op"
+          op: "is not null"
+          exprs: [@number1JsonQL]
+        }
+      )
+
+      @compile(
+        {
+          type: "op"
+          op: "is not null"
+          exprs: [null]
+        }
+        null
+      )
 
   describe "custom jsonql", ->
     describe "table", ->
