@@ -21,6 +21,12 @@ module.exports = class ExprCleaner
     if _.isEmpty(expr)
       return expr
 
+    # Handle upgrades from old version
+    if expr.type == "comparison"
+      return @cleanComparisonExpr(expr, options)
+    if expr.type == "logical"
+      return @cleanLogicalExpr(expr, options)
+      
     # Strip if wrong table 
     if options.table and expr.type != "literal" and expr.table != options.table
       return null
@@ -45,10 +51,6 @@ module.exports = class ExprCleaner
         return @cleanFieldExpr(expr, options)
       when "scalar"
         return @cleanScalarExpr(expr, options)
-      when "comparison"
-        return @cleanComparisonExpr(expr)
-      when "logical"
-        return @cleanLogicalExpr(expr)
       when "count"
         return expr
       when "op"
@@ -140,49 +142,23 @@ module.exports = class ExprCleaner
 
     return expr
 
-  # Removes parts that are invalid, leaving table alone
-  cleanComparisonExpr: (expr) =>
-    # TODO always creates new
-    expr = _.extend({}, expr, lhs: @cleanExpr(expr.lhs, expr.table))
+  cleanComparisonExpr: (expr, options) =>
+    # Upgrade to op
+    newExpr = { type: "op", table: expr.table, op: expr.op, exprs: [expr.lhs] }
+    if expr.rhs
+      newExpr.exprs.push(expr.rhs)
 
-    # Remove op, rhs if no lhs
-    if not expr.lhs 
-      expr = { type: "comparison", table: expr.table }
+    # If = true
+    if expr.op == "= true"
+      newExpr = expr.lhs
 
-    # Remove op if wrong type
-    if expr.op and expr.op not in _.pluck(@exprUtils.getComparisonOps(@exprUtils.getExprType(expr.lhs)), "id")
-      expr = _.omit(expr, "op")
+    if expr.op == "= false"
+      newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
 
-    # Default op
-    if expr.lhs and not expr.op
-      expr = _.extend({}, expr, op: @exprUtils.getComparisonOps(@exprUtils.getExprType(expr.lhs))[0].id)
+    return @cleanExpr(newExpr, options)
 
-    if expr.op and expr.rhs and expr.lhs
-      # Remove rhs if wrong type
-      if @exprUtils.getComparisonRhsType(@exprUtils.getExprType(expr.lhs), expr.op) != @exprUtils.getExprType(expr.rhs)
-        expr = _.omit(expr, "rhs")        
-      # Remove rhs if wrong enum
-      else if @exprUtils.getComparisonRhsType(@exprUtils.getExprType(expr.lhs), expr.op) == "enum" 
-        if expr.rhs.type == "literal" and expr.rhs.value not in _.pluck(@exprUtils.getExprValues(expr.lhs), "id")
-          expr = _.omit(expr, "rhs")
-      # Remove rhs if empty enum list
-      else if @exprUtils.getComparisonRhsType(@exprUtils.getExprType(expr.lhs), expr.op) == "enum[]" 
-        if expr.rhs.type == "literal"
-          # Filter invalid values
-          expr.rhs.value = _.intersection(_.pluck(@exprUtils.getExprValues(expr.lhs), "id"), expr.rhs.value)
+  cleanLogicalExpr: (expr, options) =>
+    newExpr = { type: "op", op: expr.op, table: expr.table, exprs: expr.exprs }
 
-          # Remove if empty
-          if expr.rhs.value.length == 0
-            expr = _.omit(expr, "rhs")
-      else if @exprUtils.getComparisonRhsType(@exprUtils.getExprType(expr.lhs), expr.op) == "text[]" 
-        if expr.rhs.type == "literal"
-          # Remove if empty
-          if expr.rhs.value.length == 0
-            expr = _.omit(expr, "rhs")
-
-    return expr
-
-  cleanLogicalExpr: (expr) =>
-    # TODO always makes new
-    expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanComparisonExpr(e)))
+    return @cleanExpr(newExpr, options)
 

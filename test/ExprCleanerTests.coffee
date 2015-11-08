@@ -13,59 +13,60 @@ describe "ExprCleaner", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
     @exprCleaner = new ExprCleaner(@schema)
+    @clean = (expr, expected, options) =>
+      compare(@exprCleaner.cleanExpr(expr, options), expected)
 
-  describe "cleanExpr", ->
-    it "nulls if wrong table", ->
-      assert.isNull @exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, table: "t2")
+  it "nulls if wrong table", ->
+    assert.isNull @exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, table: "t2")
 
-    it "preserves 'and' by cleaning child expressions with boolean type", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
+  it "preserves 'and' by cleaning child expressions with boolean type", ->
+    expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
 
-      compare(@exprCleaner.cleanExpr(expr), {
-        type: "op"
-        op: "and"
-        table: "t1"
-        exprs: [
-          # Removed
-          null
-          # Untouched
-          { type: "field", table: "t1", column: "boolean" }
-        ]})
+    compare(@exprCleaner.cleanExpr(expr), {
+      type: "op"
+      op: "and"
+      table: "t1"
+      exprs: [
+        # Removed
+        null
+        # Untouched
+        { type: "field", table: "t1", column: "boolean" }
+      ]})
 
-    it "simplifies and", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "field", table: "t1", column: "boolean" })
+  it "simplifies and", ->
+    expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }]}
+    compare(@exprCleaner.cleanExpr(expr), { type: "field", table: "t1", column: "boolean" })
 
-      expr = { type: "op", op: "and", table: "t1", exprs: []}
-      compare(@exprCleaner.cleanExpr(expr), null)
+    expr = { type: "op", op: "and", table: "t1", exprs: []}
+    compare(@exprCleaner.cleanExpr(expr), null)
 
-    it "cleans invalid literal enum valueIds", ->
-      expr = { type: "literal", valueType: "enum", value: "a" }
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b", "c"]), expr)
+  it "cleans invalid literal enum valueIds", ->
+    expr = { type: "literal", valueType: "enum", value: "a" }
+    compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
+    compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
+    compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b", "c"]), expr)
 
-    it "cleans invalid field enum valueIds", ->
-      expr = { type: "field", table: "t1", column: "enum" }
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
+  it "cleans invalid field enum valueIds", ->
+    expr = { type: "field", table: "t1", column: "enum" }
+    compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
+    compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
 
-    it "allows empty 'and' children", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
-      compare(@exprCleaner.cleanExpr(expr), expr)
+  it "allows empty 'and' children", ->
+    expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
+    compare(@exprCleaner.cleanExpr(expr), expr)
 
-    describe "boolean required", ->
-      before ->
-        @clean = (before, afterExpected) ->
-          after = @exprCleaner.cleanExpr(before, type: "boolean")
-          compare(after, afterExpected)
+  describe "boolean required", ->
+    before ->
+      @clean = (before, afterExpected) ->
+        after = @exprCleaner.cleanExpr(before, type: "boolean")
+        compare(after, afterExpected)
 
-      it "strips enum", ->
-        field = { type: "field", table: "t1", column: "enum" }
-        @clean(
-          field
-          null
-        )
+    it "strips enum", ->
+      field = { type: "field", table: "t1", column: "enum" }
+      @clean(
+        field
+        null
+      )
 
   describe "scalar", ->
     it "leaves valid one alone", ->
@@ -106,45 +107,34 @@ describe "ExprCleaner", ->
       scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
       compare(fieldExpr, scalarExpr)
 
-  # describe "cleanComparisonExpr", ->
-  #   it "removes op if no lhs", ->
-  #     expr = { type: "comparison", op: "=" }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert not expr.op
+  # Version 1 expression should be upgraded to version 2
+  describe "upgrade", ->
+    it "scalar is simplified", ->
+      @clean(
+        { type: "scalar", table: "t1", joins: [], expr: { type: "field", table: "t1", column: "number" } }
+        { type: "field", table: "t1", column: "number" }
+      )
 
-  #   it "removes rhs if wrong type", ->
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert expr.rhs, "should keep"
+    it "logical becomes op", ->
+      @clean(
+        { type: "logical", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }
+        { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }        
+      )
 
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "number", value: 3 } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert not expr.rhs, "should remove"
+    it "comparison becomes op", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
+        { type: "op", op: "~*", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "literal", valueType: "text", value: "x" }] }        
+      )
 
-  #   it "removes rhs if invalid enum", ->
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "a" } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert expr.rhs, "should keep"
+    it "= true is simplified", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= true" }
+        { type: "field", table: "t1", column: "boolean" }
+      )
 
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "x" } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert not expr.rhs
-
-  #   it "removes rhs if empty enum[]", ->
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: ['a'] } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert expr.rhs, "should keep"
-
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: [] } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert not expr.rhs
-
-  #   it "defaults op", ->
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" } }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert.equal expr.op, "= any"
-
-  #   it "removes invalid op", ->
-  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: ">" }
-  #     expr = @exprCleaner.cleanComparisonExpr(expr)
-  #     assert.equal expr.op, "= any"
+    it "= false becomes 'not'", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= false" }
+        { type: "op", op: "not", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }] }
+      )
