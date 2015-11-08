@@ -26,7 +26,7 @@ module.exports = class ExprCleaner
       return @cleanComparisonExpr(expr, options)
     if expr.type == "logical"
       return @cleanLogicalExpr(expr, options)
-      
+
     # Strip if wrong table 
     if options.table and expr.type != "literal" and expr.table != options.table
       return null
@@ -155,10 +155,19 @@ module.exports = class ExprCleaner
     if expr.op == "= false"
       newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
 
+    if expr.op == "between" and expr.rhs and expr.rhs.type == "literal" and expr.rhs.valueType == "daterange"
+      newExpr.exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0] }, { type: "literal", valueType: "date", value: expr.rhs.value[1] }]
+
+    if expr.op == "between" and expr.rhs and expr.rhs.type == "literal" and expr.rhs.valueType == "datetimerange"
+      # If date, convert datetime to date
+      if @exprUtils.getExprType(expr.lhs) == "date"
+        newExpr.exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) }, { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }]
+      else        
+        newExpr.exprs = [expr.lhs, { type: "literal", valueType: "datetime", value: expr.rhs.value[0] }, { type: "literal", valueType: "datetime", value: expr.rhs.value[1] }]
+
     return @cleanExpr(newExpr, options)
 
   cleanLogicalExpr: (expr, options) =>
     newExpr = { type: "op", op: expr.op, table: expr.table, exprs: expr.exprs }
-
     return @cleanExpr(newExpr, options)
 

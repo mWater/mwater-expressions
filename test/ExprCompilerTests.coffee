@@ -171,7 +171,7 @@ describe "ExprCompiler", ->
     @compile({ type: "literal", valueType: "enum", value: "id1" }, { type: "literal", value: "id1" })
     @compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
 
-  describe "comparisons", ->
+  describe "comparisons (deprecated)", ->
     it "compiles =", ->
       @compile(
         { 
@@ -235,7 +235,7 @@ describe "ExprCompiler", ->
         })
 
 
-  describe "logicals", ->
+  describe "logicals (deprecated)", ->
     it "simplifies logical", ->
       expr1 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "boolean" } }
 

@@ -138,3 +138,53 @@ describe "ExprCleaner", ->
         { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= false" }
         { type: "op", op: "not", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }] }
       )
+
+    it "between becomes 3 parameters date", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "date" }, op: "between", rhs: { type: "literal", valueType: "daterange", value: ["2014-01-01", "2014-12-31"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "date" }            
+            { type: "literal", valueType: "date", value: "2014-01-01" }
+            { type: "literal", valueType: "date", value: "2014-12-31" }
+          ]
+        }
+      )
+
+    it "between becomes 3 parameters datetime", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "datetime" }, op: "between", rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01", "2014-12-31"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "datetime" }
+            { type: "literal", valueType: "datetime", value: "2014-01-01" }
+            { type: "literal", valueType: "datetime", value: "2014-12-31" }
+          ]
+        }
+      )
+
+    it "between becomes 3 parameters date if were datetime on date", ->
+      @clean(
+        { 
+          type: "comparison"
+          table: "t1"
+          lhs: { type: "field", table: "t1", column: "date" }
+          op: "between"
+          rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01T01:02:04", "2014-12-31T01:02:04"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "date" }
+            { type: "literal", valueType: "date", value: "2014-01-01" }
+            { type: "literal", valueType: "date", value: "2014-12-31" }
+          ]
+        }
+      )
