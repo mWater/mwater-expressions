@@ -36,18 +36,15 @@ module.exports = class ExprCleaner
     # Get type
     type = @exprUtils.getExprType(expr)
 
-    # If a type is required and expression is not, attempt to wrap with an op
-    if options.type and type and type != options.type
-      op = @exprUtils.findOpByResultType(options.type, [type])
-      if op
-        # Found op that would convert type. Use it.
-        expr = { type: "op", op: op, table: expr.table, exprs: [expr] }
+    # Strip if wrong type
+    if type and options.type and type != options.type
+      return null
 
     switch expr.type
       when "field"
-        return @cleanFieldExpr(expr)
+        return @cleanFieldExpr(expr, options)
       when "scalar"
-        return @cleanScalarExpr(expr)
+        return @cleanScalarExpr(expr, options)
       when "comparison"
         return @cleanComparisonExpr(expr)
       when "logical"
@@ -56,11 +53,13 @@ module.exports = class ExprCleaner
         return expr
       when "op"
         return @cleanOpExpr(expr, options)
+      when "literal"
+        return @cleanLiteralExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
   # Removes references to non-existent tables
-  cleanFieldExpr: (expr) ->
+  cleanFieldExpr: (expr, options) ->
     # Empty expression
     if not expr.column or not expr.table
       return null
@@ -70,8 +69,14 @@ module.exports = class ExprCleaner
       return null
 
     # Missing column
-    if not @schema.getColumn(expr.table, expr.column)
+    column = @schema.getColumn(expr.table, expr.column)
+    if not column
       return null
+
+    # Invalid enums
+    if options.valueIds and column.type == "enum"
+      if _.difference(_.pluck(column.values, "id"), options.valueIds).length > 0
+        return null
 
     return expr
 
@@ -103,7 +108,10 @@ module.exports = class ExprCleaner
     return true
 
   # Strips/defaults invalid aggr and where of a scalar expression
-  cleanScalarExpr: (expr) ->
+  cleanScalarExpr: (expr, options) ->
+    if expr.joins.length == 0
+      return @cleanExpr(expr.expr, options)
+
     if not @exprUtils.areJoinsValid(expr.table, expr.joins)
       return null
 
@@ -116,6 +124,19 @@ module.exports = class ExprCleaner
     # Clean where
     if expr.where
       expr.where = @cleanExpr(expr.where)
+
+    return expr
+
+  cleanLiteralExpr: (expr, options) ->
+    # TODO strip if no value?
+
+    # Remove if enum type is wrong
+    if expr.valueType == "enum" and options.valueIds and expr.value and expr.value not in options.valueIds
+      return null
+
+    # Remove invalid enum types
+    if expr.valueType == "enum[]" and options.valueIds and expr.value
+      expr = _.extend({}, expr, value: _.intersection(options.valueIds, expr.value))
 
     return expr
 

@@ -26,8 +26,8 @@ describe "ExprCleaner", ->
         op: "and"
         table: "t1"
         exprs: [
-          # Wrapped in =any to make boolean
-          { type: "op", table: "t1", op: "= any", exprs: [{ type: "field", table: "t1", column: "text" }] }
+          # Removed
+          null
           # Untouched
           { type: "field", table: "t1", column: "boolean" }
         ]})
@@ -39,6 +39,17 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "and", table: "t1", exprs: []}
       compare(@exprCleaner.cleanExpr(expr), null)
 
+    it "cleans invalid literal enum valueIds", ->
+      expr = { type: "literal", valueType: "enum", value: "a" }
+      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
+      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
+      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b", "c"]), expr)
+
+    it "cleans invalid field enum valueIds", ->
+      expr = { type: "field", table: "t1", column: "enum" }
+      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
+      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
+
     it "allows empty 'and' children", ->
       expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
       compare(@exprCleaner.cleanExpr(expr), expr)
@@ -49,25 +60,11 @@ describe "ExprCleaner", ->
           after = @exprCleaner.cleanExpr(before, type: "boolean")
           compare(after, afterExpected)
 
-      it "wraps enum with '= any'", ->
+      it "strips enum", ->
         field = { type: "field", table: "t1", column: "enum" }
         @clean(
           field
-          { type: "op", table: "t1", op: "= any", exprs: [field]}
-        )
-
-      it "wraps text with '= any'", ->
-        field = { type: "field", table: "t1", column: "text" }
-        @clean(
-          field
-          { type: "op", table: "t1", op: "= any", exprs: [field]}
-        )
-
-      it "wraps number with '='", ->
-        field = { type: "field", table: "t1", column: "number" }
-        @clean(
-          field
-          { type: "op", table: "t1", op: "=", exprs: [field]}
+          null
         )
 
   describe "scalar", ->
@@ -103,7 +100,11 @@ describe "ExprCleaner", ->
       scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
       assert not scalarExpr
 
-    it "simplifies if no joins"
+    it "simplifies if no joins", ->
+      fieldExpr = { type: "field", table: "t1", column: "number" }
+      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
+      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+      compare(fieldExpr, scalarExpr)
 
   # describe "cleanComparisonExpr", ->
   #   it "removes op if no lhs", ->
