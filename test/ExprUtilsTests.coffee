@@ -3,11 +3,66 @@ fixtures = require './fixtures'
 _ = require 'lodash'
 
 ExprUtils = require '../src/ExprUtils'
+Schema = require '../src/Schema'
 
 describe "ExprUtils", ->
-  before ->
+  beforeEach ->
     @exprUtils = new ExprUtils(fixtures.simpleSchema())
 
+  it "determines if multiple joins", ->
+    assert.isTrue @exprUtils.isMultipleJoins("t1", ["1-2"])
+    assert.isFalse @exprUtils.isMultipleJoins("t2", ["2-1"])
+
+  it "follows joins", ->
+    assert.equal @exprUtils.followJoins("t1", []), "t1"
+    assert.equal @exprUtils.followJoins("t1", ["1-2"]), "t2"
+
+  describe "getAggrs", ->
+    beforeEach ->
+      @schema = new Schema()
+        .addTable({ id: "a", name: "A", ordering: "z", contents: [
+          { id: "y", name: "Y", type: "text" }
+          { id: "z", name: "Z", type: "number" }
+          ]})
+      @exprUtils = new ExprUtils(@schema)
+
+    it "includes last if has natural ordering", ->
+      field = { type: "field", table: "a", column: "y" }
+      assert.equal _.findWhere(@exprUtils.getAggrs(field), id: "last").type, "text"
+
+    it "doesn't include most recent normally", ->
+      @schema = @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
+      @exprUtils = new ExprUtils(@schema)
+      field = { type: "field", table: "b", column: "x" }
+      assert.isUndefined _.findWhere(@exprUtils.getAggrs(field), id: "last")
+
+    it "includes count for text", ->
+      field = { type: "field", table: "a", column: "y" }
+      aggrs = @exprUtils.getAggrs(field)
+
+      assert.equal _.findWhere(aggrs, id: "count").type, "number"
+      assert.isUndefined _.findWhere(aggrs, id: "sum")
+      assert.isUndefined _.findWhere(aggrs, id: "avg")
+
+    it "includes sum, avg, etc for number", ->
+      field = { type: "field", table: "a", column: "z" }
+      aggrs = @exprUtils.getAggrs(field)
+
+      assert.equal _.findWhere(aggrs, id: "sum").type, "number"
+      assert.equal _.findWhere(aggrs, id: "avg").type, "number"
+      # TODO etc
+
+    it "includes nothing for null", ->
+      aggrs = @exprUtils.getAggrs(null)
+      assert.equal aggrs.length, 0
+
+    it "includes only count for count type", ->
+      count = { type: "count", table: "a" }
+      aggrs = @exprUtils.getAggrs(count)
+
+      assert.equal _.findWhere(aggrs, id: "count").type, "number"
+      assert.equal aggrs.length, 1
+  
   describe "getExprType", ->
     it 'gets field type', ->
       assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text"
@@ -113,3 +168,24 @@ describe "ExprUtils", ->
     it "simplifies when count", ->
       scalarExpr = { type: "scalar", table: "t1", joins: [], expr: { type: "count", table: "t1" } }
       assert.equal @exprUtils.summarizeAggrExpr(scalarExpr, "count"), "Number of T1"
+
+  describe "stringifyExprLiteral", ->
+    it "stringifies number", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
+      assert.equal str, "2.34"
+
+    it "stringifies null", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
+      assert.equal str, "None"
+
+    it "looks up enum", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
+      assert.equal str, "A"
+
+    it "handles null enum", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
+      assert.equal str, "None"
+
+    it "handles invalid enum", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
+      assert.equal str, "???"

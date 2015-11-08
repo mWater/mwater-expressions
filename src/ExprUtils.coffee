@@ -80,6 +80,14 @@ module.exports = class ExprUtils
 
       return true
 
+  # Follows a list of joins to determine final table
+  followJoins: (startTable, joins) ->
+    t = startTable
+    for j in joins
+      joinCol = @schema.getColumn(t, j)
+      t = joinCol.join.toTable
+
+    return t
 
   # Determines if an set of joins contains a multiple
   isMultipleJoins: (table, joins) ->
@@ -308,3 +316,23 @@ module.exports = class ExprUtils
       return aggrName + " " + @summarizeExpr(expr)
     else
       return @summarizeExpr(expr)
+
+  # Converts all literals to string, using name of enums
+  stringifyExprLiteral: (expr, literal) ->
+    if not literal?
+      return "None"
+
+    values = @getExprValues(expr)
+    if values
+      item = _.findWhere(values, id: literal)
+      if item
+        return item.name
+      return "???"
+
+    if literal == true
+      return "True"
+    if literal == false
+      return "False"
+
+    return "#{literal}"
+

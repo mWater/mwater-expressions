@@ -19,59 +19,59 @@ describe "ExpressionBuilder", ->
 
     @exprBuilder = new ExpressionBuilder(@schema)
 
-  it "determines if multiple joins", ->
-    assert.isTrue @exprBuilder.isMultipleJoins("t1", ["c2"])
-    assert.isFalse @exprBuilder.isMultipleJoins("t2", ["c2"])
+  # it "determines if multiple joins", ->
+  #   assert.isTrue @exprBuilder.isMultipleJoins("t1", ["c2"])
+  #   assert.isFalse @exprBuilder.isMultipleJoins("t2", ["c2"])
 
-  it "follows joins", ->
-    assert.equal @exprBuilder.followJoins("t1", []), "t1"
-    assert.equal @exprBuilder.followJoins("t1", ["c2"]), "t2"
+  # it "follows joins", ->
+  #   assert.equal @exprBuilder.followJoins("t1", []), "t1"
+  #   assert.equal @exprBuilder.followJoins("t1", ["c2"]), "t2"
   
-  describe "getAggrs", ->
-    beforeEach ->
-      @schema = new Schema()
-        .addTable({ id: "a", name: "A", ordering: "z", contents: [
-          { id: "y", name: "Y", type: "text" }
-          { id: "z", name: "Z", type: "number" }
-          ]})
-      @exprBuilder = new ExpressionBuilder(@schema)
+  # describe "getAggrs", ->
+  #   beforeEach ->
+  #     @schema = new Schema()
+  #       .addTable({ id: "a", name: "A", ordering: "z", contents: [
+  #         { id: "y", name: "Y", type: "text" }
+  #         { id: "z", name: "Z", type: "number" }
+  #         ]})
+  #     @exprBuilder = new ExpressionBuilder(@schema)
 
-    it "includes last if has natural ordering", ->
-      field = { type: "field", table: "a", column: "y" }
-      assert.equal _.findWhere(@exprBuilder.getAggrs(field), id: "last").type, "text"
+  #   it "includes last if has natural ordering", ->
+  #     field = { type: "field", table: "a", column: "y" }
+  #     assert.equal _.findWhere(@exprBuilder.getAggrs(field), id: "last").type, "text"
 
-    it "doesn't include most recent normally", ->
-      @schema = @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
-      @exprBuilder = new ExpressionBuilder(@schema)
-      field = { type: "field", table: "b", column: "x" }
-      assert.isUndefined _.findWhere(@exprBuilder.getAggrs(field), id: "last")
+  #   it "doesn't include most recent normally", ->
+  #     @schema = @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
+  #     @exprBuilder = new ExpressionBuilder(@schema)
+  #     field = { type: "field", table: "b", column: "x" }
+  #     assert.isUndefined _.findWhere(@exprBuilder.getAggrs(field), id: "last")
 
-    it "includes count for text", ->
-      field = { type: "field", table: "a", column: "y" }
-      aggrs = @exprBuilder.getAggrs(field)
+  #   it "includes count for text", ->
+  #     field = { type: "field", table: "a", column: "y" }
+  #     aggrs = @exprBuilder.getAggrs(field)
 
-      assert.equal _.findWhere(aggrs, id: "count").type, "number"
-      assert.isUndefined _.findWhere(aggrs, id: "sum")
-      assert.isUndefined _.findWhere(aggrs, id: "avg")
+  #     assert.equal _.findWhere(aggrs, id: "count").type, "number"
+  #     assert.isUndefined _.findWhere(aggrs, id: "sum")
+  #     assert.isUndefined _.findWhere(aggrs, id: "avg")
 
-    it "includes sum, avg, etc for number", ->
-      field = { type: "field", table: "a", column: "z" }
-      aggrs = @exprBuilder.getAggrs(field)
+  #   it "includes sum, avg, etc for number", ->
+  #     field = { type: "field", table: "a", column: "z" }
+  #     aggrs = @exprBuilder.getAggrs(field)
 
-      assert.equal _.findWhere(aggrs, id: "sum").type, "number"
-      assert.equal _.findWhere(aggrs, id: "avg").type, "number"
-      # TODO etc
+  #     assert.equal _.findWhere(aggrs, id: "sum").type, "number"
+  #     assert.equal _.findWhere(aggrs, id: "avg").type, "number"
+  #     # TODO etc
 
-    it "includes nothing for null", ->
-      aggrs = @exprBuilder.getAggrs(null)
-      assert.equal aggrs.length, 0
+  #   it "includes nothing for null", ->
+  #     aggrs = @exprBuilder.getAggrs(null)
+  #     assert.equal aggrs.length, 0
 
-    it "includes only count for count type", ->
-      count = { type: "count", table: "a" }
-      aggrs = @exprBuilder.getAggrs(count)
+  #   it "includes only count for count type", ->
+  #     count = { type: "count", table: "a" }
+  #     aggrs = @exprBuilder.getAggrs(count)
 
-      assert.equal _.findWhere(aggrs, id: "count").type, "number"
-      assert.equal aggrs.length, 1
+  #     assert.equal _.findWhere(aggrs, id: "count").type, "number"
+  #     assert.equal aggrs.length, 1
 
   describe "summarizeExpr", ->
     it "summarizes null", ->
@@ -114,21 +114,21 @@ describe "ExpressionBuilder", ->
     #   }
     #   assert.equal @exprBuilder.summarizeExpr(expr), "NE Column 1"
 
-  describe "summarizeAggrExpr", ->
-    it "summarizes null", ->
-      assert.equal @exprBuilder.summarizeAggrExpr(null), "None"
+  # describe "summarizeAggrExpr", ->
+  #   it "summarizes null", ->
+  #     assert.equal @exprBuilder.summarizeAggrExpr(null), "None"
 
-    it "summarizes field expr", ->
-      expr = { type: "field", table: "t1", column: "c1" }
-      assert.equal @exprBuilder.summarizeAggrExpr(expr), "C1"
+  #   it "summarizes field expr", ->
+  #     expr = { type: "field", table: "t1", column: "c1" }
+  #     assert.equal @exprBuilder.summarizeAggrExpr(expr), "C1"
 
-    it "summarizes field expr", ->
-      expr = { type: "field", table: "t2", column: "c1" }
-      assert.equal @exprBuilder.summarizeAggrExpr(expr, "sum"), "Total C1"
+  #   it "summarizes field expr", ->
+  #     expr = { type: "field", table: "t2", column: "c1" }
+  #     assert.equal @exprBuilder.summarizeAggrExpr(expr, "sum"), "Total C1"
 
-    it "simplifies when count", ->
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: { type: "count", table: "t1" } }
-      assert.equal @exprBuilder.summarizeAggrExpr(scalarExpr, "count"), "Number of T1"
+  #   it "simplifies when count", ->
+  #     scalarExpr = { type: "scalar", table: "t1", joins: [], expr: { type: "count", table: "t1" } }
+  #     assert.equal @exprBuilder.summarizeAggrExpr(scalarExpr, "count"), "Number of T1"
 
   describe "simplifyExpr", ->
     it "simplifies simple scalar to field", ->
@@ -181,205 +181,205 @@ describe "ExpressionBuilder", ->
       assert @exprBuilder.areExprsEqual(expr, { type: "field", table: "t1", column: "c1" })
       assert not @exprBuilder.areExprsEqual(expr, { type: "field", table: "t1", column: "c2" })
 
-  describe "getExprTable", ->
-    it "gets table", ->
-      assert.equal @exprBuilder.getExprTable({ type: "field", table: "t1", column: "c1" }), "t1"
+  # describe "getExprTable", ->
+  #   it "gets table", ->
+  #     assert.equal @exprBuilder.getExprTable({ type: "field", table: "t1", column: "c1" }), "t1"
 
-  describe "getExprType", ->
-    it 'gets field type', ->
-      assert.equal @exprBuilder.getExprType({ type: "field", table: "t1", column: "c1" }), "text"
+  # describe "getExprType", ->
+  #   it 'gets field type', ->
+  #     assert.equal @exprBuilder.getExprType({ type: "field", table: "t1", column: "c1" }), "text"
 
-    it 'gets scalar type', ->
-      expr = {
-        type: "scalar"
-        table: "t1"
-        expr: { type: "field", table: "t1", column: "c1" }
-        joins: []
-      }
-      assert.equal @exprBuilder.getExprType(expr), "text"
+  #   it 'gets scalar type', ->
+  #     expr = {
+  #       type: "scalar"
+  #       table: "t1"
+  #       expr: { type: "field", table: "t1", column: "c1" }
+  #       joins: []
+  #     }
+  #     assert.equal @exprBuilder.getExprType(expr), "text"
 
-    it 'gets scalar type with aggr', ->
-      expr = {
-        type: "scalar"
-        table: "t1"
-        expr: { type: "field", table: "t2", column: "c1" }
-        aggr: "avg"
-        joins: ["c2"]
-      }
-      assert.equal @exprBuilder.getExprType(expr), "number"
+  #   it 'gets scalar type with aggr', ->
+  #     expr = {
+  #       type: "scalar"
+  #       table: "t1"
+  #       expr: { type: "field", table: "t2", column: "c1" }
+  #       aggr: "avg"
+  #       joins: ["c2"]
+  #     }
+  #     assert.equal @exprBuilder.getExprType(expr), "number"
 
-    it 'gets scalar type with count', ->
-      expr = {
-        type: "scalar"
-        table: "t1"
-        expr: { type: "count", table: "t2" }
-        aggr: "count"
-        joins: ["c2"]
-      }
-      assert.equal @exprBuilder.getExprType(expr), "number"
+  #   it 'gets scalar type with count', ->
+  #     expr = {
+  #       type: "scalar"
+  #       table: "t1"
+  #       expr: { type: "count", table: "t2" }
+  #       aggr: "count"
+  #       joins: ["c2"]
+  #     }
+  #     assert.equal @exprBuilder.getExprType(expr), "number"
 
-    it "gets literal types", ->
-      assert.equal @exprBuilder.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean"
+  #   it "gets literal types", ->
+  #     assert.equal @exprBuilder.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean"
 
-  describe "cleanExpr", ->
-    describe "boolean required", ->
-      it "wraps enum with '= any' with empty list", ->
-        expr = { type: "field", }
+  # describe "cleanExpr", ->
+  #   describe "boolean required", ->
+  #     it "wraps enum with '= any' with empty list", ->
+  #       expr = { type: "field", }
 
 
-  describe "cleanScalarExpr", ->
-    it "leaves valid one alone", ->
-      fieldExpr = { type: "field", table: "t2", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "sum" }
+  # describe "cleanScalarExpr", ->
+  #   it "leaves valid one alone", ->
+  #     fieldExpr = { type: "field", table: "t2", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "sum" }
 
-      assert.equal scalarExpr, @exprBuilder.cleanScalarExpr(scalarExpr)
+  #     assert.equal scalarExpr, @exprBuilder.cleanScalarExpr(scalarExpr)
 
-    it "strips aggr if not needed", ->
-      fieldExpr = { type: "field", table: "t2", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
-      assert not scalarExpr.aggr
+  #   it "strips aggr if not needed", ->
+  #     fieldExpr = { type: "field", table: "t2", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
+  #     scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
+  #     assert not scalarExpr.aggr
 
-    it "defaults aggr if needed and wrong", ->
-      fieldExpr = { type: "field", table: "t2", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "latest" }
-      scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
-      assert.equal scalarExpr.aggr, "sum"
+  #   it "defaults aggr if needed and wrong", ->
+  #     fieldExpr = { type: "field", table: "t2", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "latest" }
+  #     scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
+  #     assert.equal scalarExpr.aggr, "sum"
 
-    it "strips where if wrong table", ->
-      fieldExpr = { type: "field", table: "t2", column: "c1" }
-      whereExpr = { type: "logical", table: "t1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
-      assert.equal scalarExpr.aggr, "sum"
-      assert not scalarExpr.where
+  #   it "strips where if wrong table", ->
+  #     fieldExpr = { type: "field", table: "t2", column: "c1" }
+  #     whereExpr = { type: "logical", table: "t1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: ['c2'], expr: fieldExpr, aggr: "sum" }
+  #     scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
+  #     assert.equal scalarExpr.aggr, "sum"
+  #     assert not scalarExpr.where
 
-    it "strips if invalid join", ->
-      fieldExpr = { type: "field", table: "t2", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
-      assert not scalarExpr
+  #   it "strips if invalid join", ->
+  #     fieldExpr = { type: "field", table: "t2", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
+  #     scalarExpr = @exprBuilder.cleanScalarExpr(scalarExpr)
+  #     assert not scalarExpr
 
-  describe "cleanComparisonExpr", ->
-    beforeEach ->
-      @schema = fixtures.simpleSchema()
-      @exprBuilder = new ExpressionBuilder(@schema)
+  # describe "cleanComparisonExpr", ->
+  #   beforeEach ->
+  #     @schema = fixtures.simpleSchema()
+  #     @exprBuilder = new ExpressionBuilder(@schema)
 
-    it "removes op if no lhs", ->
-      expr = { type: "comparison", op: "=" }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert not expr.op
+  #   it "removes op if no lhs", ->
+  #     expr = { type: "comparison", op: "=" }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert not expr.op
 
-    it "removes rhs if wrong type", ->
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert expr.rhs, "should keep"
+  #   it "removes rhs if wrong type", ->
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert expr.rhs, "should keep"
 
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "number", value: 3 } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert not expr.rhs, "should remove"
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "number", value: 3 } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert not expr.rhs, "should remove"
 
-    it "removes rhs if invalid enum", ->
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "a" } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert expr.rhs, "should keep"
+  #   it "removes rhs if invalid enum", ->
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "a" } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert expr.rhs, "should keep"
 
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "x" } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert not expr.rhs
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "=", rhs: { type: "literal", valueType: "enum", value: "x" } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert not expr.rhs
 
-    it "removes rhs if empty enum[]", ->
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: ['a'] } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert expr.rhs, "should keep"
+  #   it "removes rhs if empty enum[]", ->
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: ['a'] } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert expr.rhs, "should keep"
 
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: [] } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert not expr.rhs
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "enum" }, op: "= any", rhs: { type: "literal", valueType: "enum[]", value: [] } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert not expr.rhs
 
-    it "defaults op", ->
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" } }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert.equal expr.op, "= any"
+  #   it "defaults op", ->
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" } }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert.equal expr.op, "= any"
 
-    it "removes invalid op", ->
-      expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: ">" }
-      expr = @exprBuilder.cleanComparisonExpr(expr)
-      assert.equal expr.op, "= any"
+  #   it "removes invalid op", ->
+  #     expr = { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: ">" }
+  #     expr = @exprBuilder.cleanComparisonExpr(expr)
+  #     assert.equal expr.op, "= any"
 
-  describe "validateComparisonExpr", ->
-    it "null for valid", ->
-      expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, op: "~*", rhs: { type: "text", value: "x" } }
-      assert.isNull @exprBuilder.validateComparisonExpr(expr)
+  # describe "validateComparisonExpr", ->
+  #   it "null for valid", ->
+  #     expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, op: "~*", rhs: { type: "text", value: "x" } }
+  #     assert.isNull @exprBuilder.validateComparisonExpr(expr)
 
-    it "requires lhs", ->
-      expr = { type: "comparison", op: "~*", rhs: { type: "text", value: "x" } }
-      assert.isNotNull @exprBuilder.validateComparisonExpr(expr)
+  #   it "requires lhs", ->
+  #     expr = { type: "comparison", op: "~*", rhs: { type: "text", value: "x" } }
+  #     assert.isNotNull @exprBuilder.validateComparisonExpr(expr)
 
-    it "requires op", ->
-      expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, rhs: { type: "literal", valueType: "text", value: "x" } }
-      assert.isNotNull @exprBuilder.validateComparisonExpr(expr)
+  #   it "requires op", ->
+  #     expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, rhs: { type: "literal", valueType: "text", value: "x" } }
+  #     assert.isNotNull @exprBuilder.validateComparisonExpr(expr)
 
-    it "does not require rhs (allows blank = no filter)", ->
-      expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, op: "~*" }
-      assert.isNull @exprBuilder.validateComparisonExpr(expr)
+  #   it "does not require rhs (allows blank = no filter)", ->
+  #     expr = { type: "comparison", lhs: { type: "field", table: "t1", column: "c1" }, op: "~*" }
+  #     assert.isNull @exprBuilder.validateComparisonExpr(expr)
 
-    it "requires rhs if has type"
-    it "requires rhs type to match"
+  #   it "requires rhs if has type"
+  #   it "requires rhs type to match"
 
-  describe "validateLogicalExpr", ->
-    it "checks all exprs"
+  # describe "validateLogicalExpr", ->
+  #   it "checks all exprs"
 
-  describe "validateScalarExpr", ->
-    it "null for valid", ->
-      fieldExpr = { type: "field", table: "t1", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
-      assert.isNull @exprBuilder.validateScalarExpr(scalarExpr)
+  # describe "validateScalarExpr", ->
+  #   it "null for valid", ->
+  #     fieldExpr = { type: "field", table: "t1", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
+  #     assert.isNull @exprBuilder.validateScalarExpr(scalarExpr)
 
-    it "validates expr", ->
-      fieldExpr = { type: "field", table: "t1", column: "c1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: null }
-      assert.isNull @exprBuilder.validateScalarExpr(scalarExpr)
+  #   it "validates expr", ->
+  #     fieldExpr = { type: "field", table: "t1", column: "c1" }
+  #     scalarExpr = { type: "scalar", table: "t1", joins: [], expr: null }
+  #     assert.isNull @exprBuilder.validateScalarExpr(scalarExpr)
 
-      scalarExpr = { type: "scalar", table: null, joins: [], expr: null }
-      assert.isNotNull @exprBuilder.validateScalarExpr(scalarExpr)
+  #     scalarExpr = { type: "scalar", table: null, joins: [], expr: null }
+  #     assert.isNotNull @exprBuilder.validateScalarExpr(scalarExpr)
 
-    it "checks aggr" # No need, as will be cleaned and autofilled by cleaning
-    it "validates where", ->
-      fieldExpr = { type: "field", table: "t1", column: "c1" }
-      whereExpr = { type: "logical", table: "t1", exprs: [
-        { type: "comparison", table: "t1" }
-        ]}
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, where: whereExpr }
-      assert.isNotNull @exprBuilder.validateScalarExpr(scalarExpr)
+  #   it "checks aggr" # No need, as will be cleaned and autofilled by cleaning
+  #   it "validates where", ->
+  #     fieldExpr = { type: "field", table: "t1", column: "c1" }
+  #     whereExpr = { type: "logical", table: "t1", exprs: [
+  #       { type: "comparison", table: "t1" }
+  #       ]}
+  #     scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, where: whereExpr }
+  #     assert.isNotNull @exprBuilder.validateScalarExpr(scalarExpr)
 
-  describe "stringifyExprLiteral", ->
-    it "stringifies number", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
-      exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
-      assert.equal str, "2.34"
+  # describe "stringifyExprLiteral", ->
+  #   it "stringifies number", ->
+  #     schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
+  #     exprBuilder = new ExpressionBuilder(schema)
+  #     str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
+  #     assert.equal str, "2.34"
 
-    it "stringifies null", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
-      exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
-      assert.equal str, "None"
+  #   it "stringifies null", ->
+  #     schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "number", name: "Number", type: "number" }] })
+  #     exprBuilder = new ExpressionBuilder(schema)
+  #     str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
+  #     assert.equal str, "None"
 
-    it "looks up enum", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
-      assert.equal str, "A"
+  #   it "looks up enum", ->
+  #     schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+  #     exprBuilder = new ExpressionBuilder(schema)
+  #     str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
+  #     assert.equal str, "A"
 
-    it "handles null enum", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
-      assert.equal str, "None"
+  #   it "handles null enum", ->
+  #     schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+  #     exprBuilder = new ExpressionBuilder(schema)
+  #     str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
+  #     assert.equal str, "None"
 
-    it "handles invalid enum", ->
-      schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
-      exprBuilder = new ExpressionBuilder(schema)
-      str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
-      assert.equal str, "???"
+  #   it "handles invalid enum", ->
+  #     schema = @schema.addTable({ id: "t1", name: "T1", contents:[{ id: "enum", name: "Enum", type: "enum", values: [{ id: "a", name: "A" }] }] })
+  #     exprBuilder = new ExpressionBuilder(schema)
+  #     str = exprBuilder.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
+  #     assert.equal str, "???"
