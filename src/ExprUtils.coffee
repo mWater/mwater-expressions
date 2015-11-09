@@ -101,59 +101,6 @@ module.exports = class ExprUtils
 
     return false
 
-  # Get all comparison ops (id and name) for a given left hand side type
-  getComparisonOps: (lhsType) ->
-    ops = []
-    switch lhsType
-      when "number"
-        ops.push({ id: "=", name: "equals" })
-        ops.push({ id: ">", name: "is greater than" })
-        ops.push({ id: ">=", name: "is greater or equal to" })
-        ops.push({ id: "<", name: "is less than" })
-        ops.push({ id: "<=", name: "is less than or equal to" })
-      when "text"
-        ops.push({ id: "= any", name: "is one of" })
-        ops.push({ id: "=", name: "is" })
-        ops.push({ id: "~*", name: "matches" })
-      when "date", "datetime"
-        ops.push({ id: "between", name: "between" })
-        ops.push({ id: ">", name: "after" })
-        ops.push({ id: "<", name: "before" })
-      when "enum"
-        ops.push({ id: "= any", name: "is one of" })
-        ops.push({ id: "=", name: "is" })
-      when "boolean"
-        ops.push({ id: "= true", name: "is true"})
-        ops.push({ id: "= false", name: "is false"})
-
-    ops.push({ id: "is null", name: "has no value"})
-    ops.push({ id: "is not null", name: "has a value"})
-
-    return ops
-
-  # Get the right hand side type for a comparison
-  getComparisonRhsType: (lhsType, op) ->
-    if op in ['= true', '= false', 'is null', 'is not null']
-      return null
-
-    if op in ['= any']
-      if lhsType == "enum"
-        return 'enum[]'
-      else if lhsType == "text"
-        return "text[]"
-      else
-        throw new Error("Invalid lhs type for op = any")
-
-    if op == "between"
-      if lhsType == "date"
-        return 'daterange'
-      if lhsType == "datetime"
-        return 'datetimerange'
-      else
-        throw new Error("Invalid lhs type for op between")
-
-    return lhsType
-
   # Return array of { id: <enum value>, name: <localized label of enum value> }
   getExprValues: (expr) ->
     if expr.type == "field"
@@ -203,6 +150,12 @@ module.exports = class ExprUtils
 
       when "literal"
         return expr.valueType
+      when "case"
+        # Use type of first then
+        if expr.cases[0]
+          return @getExprType(expr.cases[0].then)
+        return @getExprType(expr.else)
+
       when "count"
         return "count"
       else
@@ -336,3 +289,55 @@ module.exports = class ExprUtils
 
     return "#{literal}"
 
+  # Get all comparison ops (id and name) for a given left hand side type DEPRECATED
+  getComparisonOps: (lhsType) ->
+    ops = []
+    switch lhsType
+      when "number"
+        ops.push({ id: "=", name: "equals" })
+        ops.push({ id: ">", name: "is greater than" })
+        ops.push({ id: ">=", name: "is greater or equal to" })
+        ops.push({ id: "<", name: "is less than" })
+        ops.push({ id: "<=", name: "is less than or equal to" })
+      when "text"
+        ops.push({ id: "= any", name: "is one of" })
+        ops.push({ id: "=", name: "is" })
+        ops.push({ id: "~*", name: "matches" })
+      when "date", "datetime"
+        ops.push({ id: "between", name: "between" })
+        ops.push({ id: ">", name: "after" })
+        ops.push({ id: "<", name: "before" })
+      when "enum"
+        ops.push({ id: "= any", name: "is one of" })
+        ops.push({ id: "=", name: "is" })
+      when "boolean"
+        ops.push({ id: "= true", name: "is true"})
+        ops.push({ id: "= false", name: "is false"})
+
+    ops.push({ id: "is null", name: "has no value"})
+    ops.push({ id: "is not null", name: "has a value"})
+
+    return ops
+
+  # Get the right hand side type for a comparison DEPRECATED
+  getComparisonRhsType: (lhsType, op) ->
+    if op in ['= true', '= false', 'is null', 'is not null']
+      return null
+
+    if op in ['= any']
+      if lhsType == "enum"
+        return 'enum[]'
+      else if lhsType == "text"
+        return "text[]"
+      else
+        throw new Error("Invalid lhs type for op = any")
+
+    if op == "between"
+      if lhsType == "date"
+        return 'daterange'
+      if lhsType == "datetime"
+        return 'datetimerange'
+      else
+        throw new Error("Invalid lhs type for op between")
+
+    return lhsType

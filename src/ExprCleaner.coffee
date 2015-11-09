@@ -44,7 +44,9 @@ module.exports = class ExprCleaner
 
     # Strip if wrong type
     if type and options.type and type != options.type
-      return null
+      # case statements should be preserved as they are a variable type and they will have their then clauses cleaned
+      if expr.type != "case"
+        return null
 
     switch expr.type
       when "field"
@@ -57,6 +59,8 @@ module.exports = class ExprCleaner
         return @cleanOpExpr(expr, options)
       when "literal"
         return @cleanLiteralExpr(expr, options)
+      when "case"
+        return @cleanCaseExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -139,6 +143,24 @@ module.exports = class ExprCleaner
     # Remove invalid enum types
     if expr.valueType == "enum[]" and options.valueIds and expr.value
       expr = _.extend({}, expr, value: _.intersection(options.valueIds, expr.value))
+
+    return expr
+
+  cleanCaseExpr: (expr, options) ->
+    # Simplify if no cases
+    if expr.cases.length == 0
+      return expr.else or null
+
+    # Clean whens as boolean
+    expr = _.extend({}, expr, 
+      cases: _.map(expr.cases, (c) => 
+        _.extend({}, c, {
+          when: @cleanExpr(c.when, type: "boolean", table: expr.table)
+          then: @cleanExpr(c.then, type: options.type, table: expr.table)
+        })
+      )
+      else: @cleanExpr(expr.else, type: options.type, table: expr.table)
+    )
 
     return expr
 
