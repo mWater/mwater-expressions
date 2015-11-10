@@ -4,7 +4,7 @@ H = React.DOM
 
 # Schema for a database. Immutable.
 # Stores tables with columns (possibly in nested sections).
-# See wiki for details of format
+# See https://github.com/mWater/mwater-expressions/wiki/Schema-and-Types for details of format
 module.exports = class Schema
   constructor: (json) ->
     @tables = []
