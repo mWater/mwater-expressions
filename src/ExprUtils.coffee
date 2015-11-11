@@ -54,11 +54,6 @@ module.exports = class ExprUtils
     addOpItem("between", "is in range", "boolean", ["date", "date", "date"])
     addOpItem("between", "is in range", "boolean", ["datetime", "datetime", "datetime"])
 
-  findOpByResultType: (resultType, exprTypes) ->
-    opItems = @findMatchingOpItems(resultType: resultType, exprTypes: exprTypes)
-    if opItems[0]
-      return opItems[0].op
-
   # Search can contain resultType, exprTypes and op
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>

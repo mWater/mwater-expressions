@@ -189,3 +189,9 @@ describe "ExprUtils", ->
     it "handles invalid enum", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
       assert.equal str, "???"
+
+  describe "findMatchingOpItems", ->
+    it "finds = any for text lhs with boolean result", ->
+      opItem = @exprUtils.findMatchingOpItems(resultType: "boolean", exprTypes: ["text"])[0]
+      assert.equal opItem.op, "= any"
+      assert.equal opItem.exprTypes[0], "text"
