@@ -24,6 +24,40 @@ describe "ExprCompiler", ->
         column: "number"
       })
 
+  describe "case", ->
+    before ->
+      @bool1 = { type: "literal", valueType: "boolean", value: true }
+      @bool1JsonQL = { type: "literal", value: true }
+      @bool2 = { type: "literal", valueType: "boolean", value: false }
+      @bool2JsonQL = { type: "literal", value: false }
+
+      @number1 = { type: "literal", valueType: "number", value: 2 }
+      @number1JsonQL = { type: "literal", value: 2 }
+      @number2 = { type: "literal", valueType: "number", value: 3 }
+      @number2JsonQL = { type: "literal", value: 3 }
+      @number3 = { type: "literal", valueType: "number", value: 4 }
+      @number3JsonQL = { type: "literal", value: 4 }
+
+    it "compiles case", ->
+      @compile(
+        { 
+          type: "case"
+          table: "t1"
+          cases: [
+            { when: @bool1, then: @number1 }
+            { when: @bool2, then: @number2 }
+          ]
+          else: @number3
+        }
+        {
+          type: "case"
+          cases: [
+            { when: @bool1JsonQL, then: @number1JsonQL }
+            { when: @bool2JsonQL, then: @number2JsonQL }
+          ]
+          else: @number3JsonQL
+        })
+
   describe "scalar", ->
     it "compiles scalar with no joins, simplifying", ->
       @compile(

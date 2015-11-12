@@ -26,6 +26,8 @@ module.exports = class ExprCompiler
         compiledExpr = null
       when "op"
         compiledExpr = @compileOpExpr(options)
+      when "case"
+        compiledExpr = @compileCaseExpr(options)
       when "comparison" # DEPRECATED
         compiledExpr = @compileComparisonExpr(options)
       when "logical" # DEPRECATED
@@ -241,6 +243,20 @@ module.exports = class ExprCompiler
 
       else
         throw new Error("Unknown op #{expr.op}")
+
+
+  compileCaseExpr: (options) ->
+    expr = options.expr
+
+    return {
+      type: "case"
+      cases: _.map(expr.cases, (c) =>
+        {
+          when: @compileExpr(expr: c.when, tableAlias: options.tableAlias)
+          then: @compileExpr(expr: c.then, tableAlias: options.tableAlias)
+        })
+      else: @compileExpr(expr: expr.else, tableAlias: options.tableAlias)
+    }
 
   compileComparisonExpr: (options) ->
     expr = options.expr

@@ -64,6 +64,9 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "=", table: "t1", exprs: [null, {}]}
       compare(@exprCleaner.cleanExpr(expr), null)
 
+      expr = { type: "op", op: "=", table: "t1", exprs: [null, null]}
+      compare(@exprCleaner.cleanExpr(expr), null)
+
     it "does not allow enum = enum[]", ->
       expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}
       compare(@exprCleaner.cleanExpr(expr).exprs[1], null)
