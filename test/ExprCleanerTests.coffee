@@ -80,6 +80,10 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
 
+    it "allows null unary expressions", ->
+      expr = { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
+
   describe "case", ->
     it "cleans else", ->
       expr = { 

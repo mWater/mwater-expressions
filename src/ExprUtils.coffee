@@ -46,8 +46,8 @@ module.exports = class ExprUtils
 
     addOpItem("~*", "matches", "boolean", ["text", "text"])
     addOpItem("not", "is false", "boolean", ["boolean"])
-    addOpItem("is null", "is blank", "boolean", [])
-    addOpItem("is not null", "is not blank", "boolean", [])
+    addOpItem("is null", "is blank", "boolean", [null])
+    addOpItem("is not null", "is not blank", "boolean", [null])
 
     # Add in ranges
     addOpItem("between", "is in range", "boolean", ["number", "number", "number"])
@@ -68,7 +68,7 @@ module.exports = class ExprUtils
       if search.exprTypes
         for exprType, i in search.exprTypes
           if i < opItem.exprTypes.length
-            if exprType and exprType != opItem.exprTypes[i]
+            if exprType and opItem.exprTypes[i] and exprType != opItem.exprTypes[i]
               return false
           else if opItem.moreExprType
             if exprType and exprType != opItem.moreExprType
