@@ -49,9 +49,36 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
       compare(@exprCleaner.cleanExpr(expr), expr)
 
-    it "nulls op if wrong type", ->
+    it "allows empty '+' children", ->
+      expr = { type: "op", op: "+", table: "t1", exprs: [{}, {}]}
+      compare(@exprCleaner.cleanExpr(expr), expr)
+
+    it "nulls if wrong type", ->
       expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
       compare(@exprCleaner.cleanExpr(expr, type: "number"), null)
+
+    it "nulls if missing lhs of non-+/*/and/or expr", ->
+      expr = { type: "op", op: "= any", table: "t1", exprs: [null, {}]}
+      compare(@exprCleaner.cleanExpr(expr), null)
+
+      expr = { type: "op", op: "=", table: "t1", exprs: [null, {}]}
+      compare(@exprCleaner.cleanExpr(expr), null)
+
+    it "does not allow enum = enum[]", ->
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}
+      compare(@exprCleaner.cleanExpr(expr).exprs[1], null)
+
+    it "defaults op if lhs changes", ->
+      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+
+    it "removes extra exprs", ->
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null, null]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+
+    it "adds missing exprs", ->
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
 
   describe "case", ->
     it "cleans else", ->
@@ -107,8 +134,6 @@ describe "ExprCleaner", ->
           cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
           else: null
         })
-
-
 
   describe "literal", ->
     it "cleans invalid literal enum valueIds", ->

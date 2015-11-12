@@ -98,7 +98,53 @@ module.exports = class ExprCleaner
           return null
 
         return expr
-      else
+      when "+", "*"
+        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, type: "number", table: expr.table)))
+
+        # Simplify
+        if expr.exprs.length == 1
+          return expr.exprs[0]
+        if expr.exprs.length == 0
+          return null
+
+        return expr
+      else 
+        # Need LHS for a normal op. Placeholder ok
+        if not expr.exprs[0]
+          return null
+
+        lhsType = @exprUtils.getExprType(expr.exprs[0])
+
+        # Get opItem
+        opItems = @exprUtils.findMatchingOpItems(op: expr.op, exprTypes: [lhsType])
+
+        # If ambiguous, just clean subexprs and return
+        if opItems.length > 1
+          return _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
+            @cleanExpr(e, table: expr.table)
+          )})
+
+        # If not found, default opItem
+        if not opItems[0]
+          opItem = @exprUtils.findMatchingOpItems(exprTypes: [lhsType])[0]
+          expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr.exprs[0] or null] }  
+        else
+          opItem = opItems[0]
+
+        # Pad or trim number of expressions
+        while expr.exprs.length < opItem.exprTypes.length
+          exprs = expr.exprs.slice()
+          exprs.push(null)
+          expr = _.extend({}, expr, { exprs: exprs })
+
+        if expr.exprs.length > opItem.exprTypes.length
+          expr = _.extend({}, expr, { exprs: _.take(expr.exprs, opItem.exprTypes.length) })          
+
+        # Clean all sub expressions
+        expr = _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
+          @cleanExpr(e, table: expr.table, type: opItem.exprTypes[i])
+          )})
+
         return expr
 
   # Determines if an set of joins are valid

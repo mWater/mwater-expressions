@@ -9,11 +9,11 @@ module.exports = class ExprUtils
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
     addOpItem = (op, name, resultType, exprTypes, moreExprType) =>
-      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes)
+      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType)
 
     # TODO n?
-    addOpItem("= any", "is", "boolean", ["text", "text[]"])
-    addOpItem("= any", "is", "boolean", ["enum", "enum[]"])
+    addOpItem("= any", "is any of", "boolean", ["text", "text[]"])
+    addOpItem("= any", "is any of", "boolean", ["enum", "enum[]"])
 
     addOpItem("=", "is", "boolean", ["number", "number"])
     addOpItem("=", "is", "boolean", ["text", "text"])
@@ -22,26 +22,26 @@ module.exports = class ExprUtils
     addOpItem("=", "is", "boolean", ["datetime", "datetime"])
     addOpItem("=", "is", "boolean", ["boolean", "boolean"])
 
-    addOpItem("<>", "is not", "boolean", ["number", "number"])
     addOpItem("<>", "is not", "boolean", ["text", "text"])
     addOpItem("<>", "is not", "boolean", ["enum", "enum"])
     addOpItem("<>", "is not", "boolean", ["date", "date"])
     addOpItem("<>", "is not", "boolean", ["datetime", "datetime"])
     addOpItem("<>", "is not", "boolean", ["boolean", "boolean"])
 
+    addOpItem("<>", "is not", "boolean", ["number", "number"])
     addOpItem(">", "is greater than", "boolean", ["number", "number"])
     addOpItem("<", "is less than", "boolean", ["number", "number"])
     addOpItem(">=", "is greater or equal to", "boolean", ["number", "number"])
     addOpItem("<=", "is less or equal to", "boolean", ["number", "number"])
-    addOpItem("<>", "is not", "boolean", ["number", "number"])
 
     # And/or is a list of booleans
     addOpItem("and", "and", "boolean", [], "boolean")
     addOpItem("or", "or", "boolean", [], "boolean")
 
-    for op in ['+', '-', '*']
+    for op in ['+', '*']
       addOpItem(op, op, "number", [], "number")
 
+    addOpItem("-", "-", "number", ["number", "number"])
     addOpItem("/", "/", "number", ["number", "number"])
 
     addOpItem("~*", "matches", "boolean", ["text", "text"])
@@ -99,6 +99,8 @@ module.exports = class ExprUtils
 
   # Return array of { id: <enum value>, name: <localized label of enum value> }
   getExprValues: (expr) ->
+    if not expr 
+      return
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
       return column.values
@@ -182,7 +184,7 @@ module.exports = class ExprUtils
 
     type = @getExprType(expr)
 
-    # If null type, retun none
+    # If null type, return none
     if not type
       return []
     
