@@ -13,6 +13,7 @@ module.exports = class ExprCleaner
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
   #   type: optional types to limit to
+  #   valueIds: ids of enum values that are valid if type is enum
   cleanExpr: (expr, options={}) ->
     if not expr
       return null
