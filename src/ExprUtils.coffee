@@ -250,8 +250,8 @@ module.exports = class ExprUtils
       str += joinCol.name + " > "
       t = joinCol.join.toTable
 
-    # Special case for count of count type to be rendered Number of {last join name}
-    if expr.aggr and exprType == "count"
+    # Special case for id type to be rendered as {last join name}
+    if exprType == "id"
       str = str.substring(0, str.length - 3)
     else
       str += @summarizeExpr(expr.expr)

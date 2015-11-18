@@ -135,9 +135,13 @@ describe "ExprUtils", ->
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
       assert.equal @exprUtils.summarizeExpr(scalarExpr), "Total T1->T2 > Number"
 
-    it "simplifies when count", ->
-      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "count", table: "t2" }, aggr: "count" }
+    it "simplifies when count id", ->
+      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "id", table: "t2" }, aggr: "count" }
       assert.equal @exprUtils.summarizeExpr(scalarExpr), "Number of T1->T2"
+
+    it "simplifies when id", ->
+      scalarExpr = { type: "scalar", table: "t2", joins: ['2-1'], expr: { type: "id", table: "t1" } }
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T2->T1"
 
     # TODO readd
     # it "uses named expression when matching one present", ->
