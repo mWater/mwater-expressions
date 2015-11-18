@@ -119,6 +119,8 @@ module.exports = class ExprUtils
         if column
           return column.type
         return null
+      when "id"
+        return "id"
       when "scalar"
         if expr.aggr
           aggr = _.findWhere(@getAggrs(expr.expr), id: expr.aggr)

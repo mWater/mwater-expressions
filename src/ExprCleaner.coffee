@@ -27,6 +27,8 @@ module.exports = class ExprCleaner
       return @cleanComparisonExpr(expr, options)
     if expr.type == "logical"
       return @cleanLogicalExpr(expr, options)
+    if expr.type == "count"
+      return @cleanCountExpr(expr, options)
 
     # Strip if wrong table 
     if options.table and expr.type != "literal" and expr.table != options.table
@@ -62,6 +64,8 @@ module.exports = class ExprCleaner
         return @cleanLiteralExpr(expr, options)
       when "case"
         return @cleanCaseExpr(expr, options)
+      when "id"
+        return @cleanIdExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -178,6 +182,16 @@ module.exports = class ExprCleaner
     if expr.where
       expr.where = @cleanExpr(expr.where)
 
+    # Clean inner expr
+    innerTable = @exprUtils.followJoins(expr.table, expr.joins)
+
+    # Get inner expression type (must match unless is count which can count anything)
+    innerType = if expr.aggr != "count" then options.type
+    expr = _.extend({}, expr, { 
+      expr: @cleanExpr(expr.expr, table: innerTable, type: innerType, valueIds: options.valueIds)
+    })    
+
+
     return expr
 
   cleanLiteralExpr: (expr, options) ->
@@ -211,6 +225,10 @@ module.exports = class ExprCleaner
 
     return expr
 
+  cleanIdExpr: (expr, options) ->
+    # Nothing to do
+    return expr
+
   cleanComparisonExpr: (expr, options) =>
     # Upgrade to op
     newExpr = { type: "op", table: expr.table, op: expr.op, exprs: [expr.lhs] }
@@ -238,5 +256,9 @@ module.exports = class ExprCleaner
 
   cleanLogicalExpr: (expr, options) =>
     newExpr = { type: "op", op: expr.op, table: expr.table, exprs: expr.exprs }
+    return @cleanExpr(newExpr, options)
+
+  cleanCountExpr: (expr, options) =>
+    newExpr = { type: "id", table: expr.table }
     return @cleanExpr(newExpr, options)
 

@@ -159,7 +159,7 @@ describe "ExprCleaner", ->
       fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
 
-      assert.equal scalarExpr, @exprCleaner.cleanExpr(scalarExpr)
+      compare(scalarExpr, @exprCleaner.cleanExpr(scalarExpr))
 
     it "strips aggr if not needed", ->
       fieldExpr = { type: "field", table: "t2", column: "number" }
@@ -195,6 +195,12 @@ describe "ExprCleaner", ->
 
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
+    it "count becomes id", ->
+      @clean(
+        { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
+        { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "id", table: "t2" } }
+      )
+
     it "scalar is simplified", ->
       @clean(
         { type: "scalar", table: "t1", joins: [], expr: { type: "field", table: "t1", column: "number" } }
