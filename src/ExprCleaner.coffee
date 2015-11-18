@@ -13,7 +13,7 @@ module.exports = class ExprCleaner
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
   #   type: optional types to limit to
-  #   valueIds: ids of enum values that are valid if type is enum
+  #   enumValueIds: ids of enum values that are valid if type is enum
   cleanExpr: (expr, options={}) ->
     if not expr
       return null
@@ -85,8 +85,8 @@ module.exports = class ExprCleaner
       return null
 
     # Invalid enums
-    if options.valueIds and column.type == "enum"
-      if _.difference(_.pluck(column.values, "id"), options.valueIds).length > 0
+    if options.enumValueIds and column.type == "enum"
+      if _.difference(_.pluck(column.enumValues, "id"), options.enumValueIds).length > 0
         return null
 
     return expr
@@ -188,9 +188,8 @@ module.exports = class ExprCleaner
     # Get inner expression type (must match unless is count which can count anything)
     innerType = if expr.aggr != "count" then options.type
     expr = _.extend({}, expr, { 
-      expr: @cleanExpr(expr.expr, table: innerTable, type: innerType, valueIds: options.valueIds)
+      expr: @cleanExpr(expr.expr, table: innerTable, type: innerType, enumValueIds: options.enumValueIds)
     })    
-
 
     return expr
 
@@ -198,12 +197,12 @@ module.exports = class ExprCleaner
     # TODO strip if no value?
 
     # Remove if enum type is wrong
-    if expr.valueType == "enum" and options.valueIds and expr.value and expr.value not in options.valueIds
+    if expr.valueType == "enum" and options.enumValueIds and expr.value and expr.value not in options.enumValueIds
       return null
 
     # Remove invalid enum types
-    if expr.valueType == "enum[]" and options.valueIds and expr.value
-      expr = _.extend({}, expr, value: _.intersection(options.valueIds, expr.value))
+    if expr.valueType == "enum[]" and options.enumValueIds and expr.value
+      expr = _.extend({}, expr, value: _.intersection(options.enumValueIds, expr.value))
 
     return expr
 

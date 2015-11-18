@@ -145,14 +145,14 @@ describe "ExprCleaner", ->
   describe "literal", ->
     it "cleans invalid literal enum valueIds", ->
       expr = { type: "literal", valueType: "enum", value: "a" }
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b", "c"]), expr)
+      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
+      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
+      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b", "c"]), expr)
 
     it "cleans invalid field enum valueIds", ->
       expr = { type: "field", table: "t1", column: "enum" }
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, valueIds: ["b"]), null)
+      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
+      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
 
   describe "scalar", ->
     it "leaves valid one alone", ->

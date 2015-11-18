@@ -98,15 +98,15 @@ module.exports = class ExprUtils
     return false
 
   # Return array of { id: <enum value>, name: <localized label of enum value> }
-  getExprValues: (expr) ->
+  getExprEnumValues: (expr) ->
     if not expr 
       return
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
-      return column.values
+      return column.enumValues
     if expr.type == "scalar"
       if expr.expr
-        return @getExprValues(expr.expr)  
+        return @getExprEnumValues(expr.expr)  
 
   # Gets the type of an expression
   getExprType: (expr) ->
@@ -275,9 +275,9 @@ module.exports = class ExprUtils
     if not literal?
       return "None"
 
-    values = @getExprValues(expr)
-    if values
-      item = _.findWhere(values, id: literal)
+    enumValues = @getExprEnumValues(expr)
+    if enumValues
+      item = _.findWhere(enumValues, id: literal)
       if item
         return item.name
       return "???"
