@@ -91,12 +91,12 @@ describe "ExprCompiler", ->
             ]}
         })
 
-    it "compiles scalar with one join and count(*) aggr", ->
+    it "compiles scalar with one join and count(<primary key>) aggr", ->
       @compile(
-        { type: "scalar", table: "t1", expr: { type: "count", table: "t2" }, joins: ["1-2"], aggr: "count" }
+        { type: "scalar", table: "t1", expr: { type: "id", table: "t2" }, joins: ["1-2"], aggr: "count" }
         {
           type: "scalar"
-          expr: { type: "op", op: "count", exprs: [] }
+          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "j1", column: "primary" }] }
           from: { type: "table", table: "t2", alias: "j1" }
           where: { type: "op", op: "=", exprs: [
             { type: "field", tableAlias: "j1", column: "t1" }

@@ -16,18 +16,20 @@ module.exports = class ExprCompiler
       return null
 
     switch expr.type 
+      when "id"
+        compiledExpr = { type: "field", tableAlias: options.tableAlias, column: @schema.getTable(expr.table).primaryKey }
       when "field"
         compiledExpr = @compileFieldExpr(options)
       when "scalar"
         compiledExpr = @compileScalarExpr(options)
       when "literal" 
         compiledExpr = { type: "literal", value: expr.value }
-      when "count"
-        compiledExpr = null
       when "op"
         compiledExpr = @compileOpExpr(options)
       when "case"
         compiledExpr = @compileCaseExpr(options)
+      when "count" # DEPRECATED
+        compiledExpr = null
       when "comparison" # DEPRECATED
         compiledExpr = @compileComparisonExpr(options)
       when "logical" # DEPRECATED

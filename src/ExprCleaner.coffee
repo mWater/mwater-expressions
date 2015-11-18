@@ -57,8 +57,6 @@ module.exports = class ExprCleaner
         return @cleanFieldExpr(expr, options)
       when "scalar"
         return @cleanScalarExpr(expr, options)
-      when "count"
-        return expr
       when "op"
         return @cleanOpExpr(expr, options)
       when "literal"

@@ -2,7 +2,7 @@ Schema = require '../src/Schema'
 
 exports.simpleSchema = ->
   schema = new Schema()
-  schema = schema.addTable({ id: "t1", name: "T1", contents: [
+  schema = schema.addTable({ id: "t1", name: "T1", primaryKey: "primary", contents: [
     { id: "text", name: "Text", type: "text" }
     { id: "number", name: "Number", type: "number" }
     { id: "enum", name: "Enum", type: "enum", enumValues: [{ id: "a", name: "A"}, { id: "b", name: "B"}] }
@@ -12,7 +12,7 @@ exports.simpleSchema = ->
     { id: "1-2", name: "T1->T2", type: "join", join: { fromTable: "t1", fromColumn: "primary", toTable: "t2", toColumn: "t1", op: "=", multiple: true }}
   ]})
 
-  schema = schema.addTable({ id: "t2", name: "T2", ordering: "number", contents: [
+  schema = schema.addTable({ id: "t2", name: "T2", primaryKey: "primary", ordering: "number", contents: [
     { id: "t1", name: "T1", type: "uuid" }
     { id: "text", name: "Text", type: "text" }
     { id: "number", name: "Number", type: "number" }
