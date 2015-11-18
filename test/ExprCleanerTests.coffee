@@ -23,6 +23,11 @@ describe "ExprCleaner", ->
     field = { type: "field", table: "t1", column: "enum" }
     assert.isNull @exprCleaner.cleanExpr(field, type: "boolean")
 
+  it "nulls if wrong idTable", ->
+    field = { type: "id", table: "t1" }
+    assert @exprCleaner.cleanExpr(field, type: "id", idTable: "t1")
+    assert.isNull @exprCleaner.cleanExpr(field, type: "id", idTable: "t2")
+
   describe "op", ->
     it "preserves 'and' by cleaning child expressions with boolean type", ->
       expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
@@ -87,6 +92,10 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
 
+    it "removes invalid enums on rhs", ->
+      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a", "x"] }]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}) # x is gone
+
   describe "case", ->
     it "cleans else", ->
       expr = { 
@@ -135,6 +144,21 @@ describe "ExprCleaner", ->
         else: null
       }
       compare(@exprCleaner.cleanExpr(expr, type: "text"), 
+        {
+          type: "case"
+          table: "t1"
+          cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
+          else: null
+        })
+
+    it "cleans thens as specified enumValueIds", ->
+      expr = { 
+        type: "case"
+        table: "t1"
+        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "enum", value: "x" }}]
+        else: null
+      }
+      compare(@exprCleaner.cleanExpr(expr, type: "enum", enumValueIds: ['a']), 
         {
           type: "case"
           table: "t1"

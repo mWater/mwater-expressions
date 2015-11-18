@@ -14,6 +14,7 @@ module.exports = class ExprCleaner
   #   table: optional current table. expression must be related to this table or will be stripped
   #   type: optional types to limit to
   #   enumValueIds: ids of enum values that are valid if type is enum
+  #   idTable: table that type of id must be from
   cleanExpr: (expr, options={}) ->
     if not expr
       return null
@@ -146,8 +147,13 @@ module.exports = class ExprCleaner
           expr = _.extend({}, expr, { exprs: _.take(expr.exprs, opItem.exprTypes.length) })          
 
         # Clean all sub expressions
+        if expr.exprs[0]
+          enumValues = @exprUtils.getExprEnumValues(expr.exprs[0])
+          if enumValues
+            enumValueIds = _.pluck(enumValues, "id")
+
         expr = _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-          @cleanExpr(e, table: expr.table, type: opItem.exprTypes[i])
+          @cleanExpr(e, table: expr.table, type: opItem.exprTypes[i], enumValueIds: enumValueIds)
           )})
 
         return expr
@@ -188,7 +194,7 @@ module.exports = class ExprCleaner
     # Get inner expression type (must match unless is count which can count anything)
     innerType = if expr.aggr != "count" then options.type
     expr = _.extend({}, expr, { 
-      expr: @cleanExpr(expr.expr, table: innerTable, type: innerType, enumValueIds: options.enumValueIds)
+      expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, type: innerType }))
     })    
 
     return expr
@@ -216,16 +222,18 @@ module.exports = class ExprCleaner
       cases: _.map(expr.cases, (c) => 
         _.extend({}, c, {
           when: @cleanExpr(c.when, type: "boolean", table: expr.table)
-          then: @cleanExpr(c.then, type: options.type, table: expr.table)
+          then: @cleanExpr(c.then, options)
         })
       )
-      else: @cleanExpr(expr.else, type: options.type, table: expr.table)
+      else: @cleanExpr(expr.else, options)
     )
 
     return expr
 
   cleanIdExpr: (expr, options) ->
-    # Nothing to do
+    # Null if wrong table
+    if options.idTable and expr.table != options.idTable
+      return null
     return expr
 
   cleanComparisonExpr: (expr, options) =>
