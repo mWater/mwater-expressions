@@ -165,9 +165,9 @@ describe "ExprUtils", ->
       expr = { type: "field", table: "t2", column: "number" }
       assert.equal @exprUtils.summarizeAggrExpr(expr, "sum"), "Total Number"
 
-    it "simplifies when count", ->
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: { type: "count", table: "t1" } }
-      assert.equal @exprUtils.summarizeAggrExpr(scalarExpr, "count"), "Number of T1"
+    it "summarizes id", ->
+      expr = { type: "id", table: "t1" }
+      assert.equal @exprUtils.summarizeAggrExpr(expr, "count"), "Number of T1"
 
   describe "stringifyExprLiteral", ->
     it "stringifies number", ->

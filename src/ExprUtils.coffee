@@ -229,8 +229,8 @@ module.exports = class ExprUtils
         return @summarizeScalarExpr(expr)
       when "field"
         return @schema.getColumn(expr.table, expr.column).name
-      when "count"
-        return "Number of " + @schema.getTable(expr.table).name
+      when "id"
+        return @schema.getTable(expr.table).name
       else
         throw new Error("Unsupported type #{expr.type}")
 
@@ -263,8 +263,8 @@ module.exports = class ExprUtils
   summarizeAggrExpr: (expr, aggr) ->
     exprType = @getExprType(expr)
 
-    # Add aggr if not a count type
-    if aggr and exprType != "count"
+    # Add aggr
+    if aggr 
       aggrName = _.findWhere(@getAggrs(expr), { id: aggr }).name
       return aggrName + " " + @summarizeExpr(expr)
     else
