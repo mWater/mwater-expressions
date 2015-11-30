@@ -50,9 +50,9 @@ module.exports = class ExprUtils
     addOpItem("is not null", "is not blank", "boolean", [null])
 
     # Add in ranges
-    addOpItem("between", "is in range", "boolean", ["number", "number", "number"])
-    addOpItem("between", "is in range", "boolean", ["date", "date", "date"])
-    addOpItem("between", "is in range", "boolean", ["datetime", "datetime", "datetime"])
+    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
+    addOpItem("between", "is between", "boolean", ["date", "date", "date"])
+    addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
 
   # Search can contain resultType, exprTypes and op
   # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: }
