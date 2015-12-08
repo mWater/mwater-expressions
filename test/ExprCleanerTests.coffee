@@ -72,12 +72,12 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "=", table: "t1", exprs: [null, null]}
       compare(@exprCleaner.cleanExpr(expr), null)
 
-    it "does not allow enum = enum[]", ->
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}
+    it "does not allow enum = enumset", ->
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
       compare(@exprCleaner.cleanExpr(expr).exprs[1], null)
 
     it "defaults op if lhs changes", ->
-      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}
+      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
 
     it "removes extra exprs", ->
@@ -93,8 +93,8 @@ describe "ExprCleaner", ->
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
 
     it "removes invalid enums on rhs", ->
-      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a", "x"] }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enum[]", value: ["a"] }]}) # x is gone
+      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a", "x"] }]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}) # x is gone
 
   describe "case", ->
     it "cleans else", ->
@@ -254,6 +254,13 @@ describe "ExprCleaner", ->
         { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= false" }
         { type: "op", op: "not", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }] }
       )
+
+    it "enum[] becomes enumset", ->
+      @clean(
+        { type: "literal", valueType: "enum[]", value: ["a", "b"] }
+        { type: "literal", valueType: "enumset", value: ["a", "b"] }
+      )
+      
 
     it "between becomes 3 parameters date", ->
       @clean(

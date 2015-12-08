@@ -30,6 +30,8 @@ module.exports = class ExprCleaner
       return @cleanLogicalExpr(expr, options)
     if expr.type == "count"
       return @cleanCountExpr(expr, options)
+    if expr.type == "literal" and expr.valueType == "enum[]"
+      expr = { type: "literal", valueType: "enumset", value: expr.value }
 
     # Strip if wrong table 
     if options.table and expr.type != "literal" and expr.table != options.table
@@ -205,7 +207,7 @@ module.exports = class ExprCleaner
       return null
 
     # Remove invalid enum types
-    if expr.valueType == "enum[]" and options.enumValueIds and expr.value
+    if expr.valueType == "enumset" and options.enumValueIds and expr.value
       expr = _.extend({}, expr, value: _.intersection(options.enumValueIds, expr.value))
 
     return expr

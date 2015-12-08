@@ -6,6 +6,7 @@ exports.simpleSchema = ->
     { id: "text", name: "Text", type: "text" }
     { id: "number", name: "Number", type: "number" }
     { id: "enum", name: "Enum", type: "enum", enumValues: [{ id: "a", name: "A"}, { id: "b", name: "B"}] }
+    { id: "enumset", name: "EnumSet", type: "enumset", enumValues: [{ id: "a", name: "A"}, { id: "b", name: "B"}] }
     { id: "date", name: "Date", type: "date" }
     { id: "datetime", name: "Datetime", type: "datetime" }
     { id: "boolean", name: "Boolean", type: "boolean" }

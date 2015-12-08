@@ -242,6 +242,20 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
+      when "contains"
+        # Null if either not present
+        if not compiledExprs[0] or not compiledExprs[1]
+          return null
+
+        # Cast both to jsonb and use @>
+        return {
+          type: "op"
+          op: "@>"
+          exprs: [
+            { type: "op", op: "::jsonb", exprs: [compiledExprs[0]] }
+            { type: "op", op: "::jsonb", exprs: [compiledExprs[1]] }
+          ]
+        }
 
       else
         throw new Error("Unknown op #{expr.op}")

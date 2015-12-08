@@ -453,7 +453,7 @@ describe "ExprCompiler", ->
           op: "= any", 
           exprs: [
             { type: "field", table: "t1", column: "enum" } 
-            { type: "literal", valueType: "enum[]", value: ["a", "b"] }
+            { type: "literal", valueType: "enumset", value: ["a", "b"] }
           ]
         }
         {
@@ -474,7 +474,7 @@ describe "ExprCompiler", ->
           op: "= any", 
           exprs: [
             { type: "field", table: "t1", column: "enum" } 
-            { type: "literal", valueType: "enum[]", value: [] }
+            { type: "literal", valueType: "enumset", value: [] }
           ]
         }
         null
@@ -487,7 +487,7 @@ describe "ExprCompiler", ->
           op: "= any", 
           exprs: [
             null
-            { type: "literal", valueType: "enum[]", value: [] }
+            { type: "literal", valueType: "enumset", value: [] }
           ]
         }
         null
@@ -538,6 +538,27 @@ describe "ExprCompiler", ->
         }
         null
       )
+
+    it "compiles contains", ->
+      @compile(
+        { 
+          type: "op"
+          op: "contains", 
+          exprs: [
+            { type: "field", table: "t1", column: "enumset" } 
+            { type: "literal", valueType: "enumset", value: ["a", "b"] }
+          ]
+        }
+        {
+          type: "op"
+          op: "@>"
+          exprs: [
+            { type: "op", op: "::jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }]}
+            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["a", "b"] }]}
+          ]
+        }
+      )
+
 
   describe "custom jsonql", ->
     describe "table", ->

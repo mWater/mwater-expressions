@@ -13,7 +13,10 @@ module.exports = class ExprUtils
 
     # TODO n?
     addOpItem("= any", "is any of", "boolean", ["text", "text[]"])
-    addOpItem("= any", "is any of", "boolean", ["enum", "enum[]"])
+    addOpItem("= any", "is any of", "boolean", ["enum", "enumset"])
+
+    addOpItem("contains", "includes all of", "boolean", ["enumset", "enumset"])
+    # addOpItem("intersects", "includes any of", "boolean", ["enumset", "enumset"]) Painful to implement...
 
     addOpItem("=", "is", "boolean", ["number", "number"])
     addOpItem("=", "is", "boolean", ["text", "text"])
