@@ -93,7 +93,7 @@ module.exports = class ExprUtils
     t = table
     for j in joins
       joinCol = @schema.getColumn(t, j)
-      if joinCol.join.multiple
+      if joinCol.join.type in ['1-n', 'n-n']
         return true
 
       t = joinCol.join.toTable

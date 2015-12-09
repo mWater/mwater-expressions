@@ -6,3 +6,4 @@ exports.ExprUtils = require './ExprUtils'
 exports.ExprCompiler = require './ExprCompiler'
 
 exports.injectTableAlias = require './injectTableAlias'
+exports.injectTableAliases = require './injectTableAliases'

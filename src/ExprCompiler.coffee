@@ -1,5 +1,6 @@
 _ = require 'lodash'
 injectTableAlias = require './injectTableAlias'
+injectTableAliases = require './injectTableAliases'
 ExprUtils = require './ExprUtils'
 
 # Compiles expressions to JsonQL
@@ -65,13 +66,17 @@ module.exports = class ExprCompiler
     if expr.joins and expr.joins.length > 0
       join = @schema.getColumn(expr.table, expr.joins[0]).join
 
-      where = { 
-        type: "op", op: join.op
-        exprs: [
-          @compileColumnRef(join.toColumn, "j1")
-          @compileColumnRef(join.fromColumn, tableAlias)
-        ]
-       }
+      if join.jsonql
+        where = injectTableAliases(join.jsonql, { "{from}": tableAlias, "{to}": "j1" })
+      else
+        # Use manual columns
+        where = { 
+          type: "op", op: "="
+          exprs: [
+            @compileColumnRef(join.toColumn, "j1")
+            @compileColumnRef(join.fromColumn, tableAlias)
+          ]
+         }
 
       from = @compileTable(join.toTable, "j1")
 
@@ -83,19 +88,25 @@ module.exports = class ExprCompiler
     if expr.joins.length > 1
       for i in [1...expr.joins.length]
         join = @schema.getColumn(table, expr.joins[i]).join
+
+        if join.jsonql
+          onClause = injectTableAliases(join.jsonql, { "{from}": "j#{i}", "{to}": "j#{i+1}" })
+        else
+          # Use manual columns
+          onClause = { 
+            type: "op", op: "="
+            exprs: [
+              @compileColumnRef(join.fromColumn, "j#{i}")
+              @compileColumnRef(join.toColumn, "j#{i+1}")
+            ]
+           }
+
         from = {
           type: "join"
           left: from
           right: @compileTable(join.toTable, "j#{i+1}")
           kind: "left"
-          on: { 
-            type: "op"
-            op: join.op
-            exprs: [
-              @compileColumnRef(join.fromColumn, "j#{i}")
-              @compileColumnRef(join.toColumn, "j#{i+1}")
-            ]
-          }
+          on: onClause
         }
 
         # We are now at jn
