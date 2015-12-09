@@ -213,11 +213,30 @@ module.exports = class ExprUtils
 
     return aggrs
 
+  localizeString: (name, locale) ->
+    return ExprUtils.localizeString(name, locale)
+
+  # Localize a string that is { en: "english word", etc. }. Works with null and plain strings too.
+  @localizeString: (name, locale) ->
+    if not name
+      return name
+
+    # Simple string
+    if typeof(name) == "string"
+      return name
+
+    if name[locale or "en"]
+      return name[locale or "en"]
+
+    if name._base and name[name._base]
+      return name[name._base]
+
+    return null
 
   # Summarizes expression as text
-  summarizeExpr: (expr) ->
+  summarizeExpr: (expr, locale) ->
     if not expr
-      return "None"
+      return "None" # TODO localize
 
     # # Check named expresions
     # namedExpr = _.find(@schema.getNamedExprs(expr.table), (ne) =>
@@ -229,20 +248,20 @@ module.exports = class ExprUtils
 
     switch expr.type
       when "scalar"
-        return @summarizeScalarExpr(expr)
+        return @summarizeScalarExpr(expr, locale)
       when "field"
-        return @schema.getColumn(expr.table, expr.column).name
+        return @localizeString(@schema.getColumn(expr.table, expr.column).name, locale)
       when "id"
-        return @schema.getTable(expr.table).name
+        return @localizeString(@schema.getTable(expr.table).name, locale)
       else
         throw new Error("Unsupported type #{expr.type}")
 
-  summarizeScalarExpr: (expr) ->
+  summarizeScalarExpr: (expr, locale) ->
     exprType = @getExprType(expr.expr)
 
     # Add aggr
     if expr.aggr 
-      str = _.findWhere(@getAggrs(expr.expr), { id: expr.aggr }).name + " "
+      str = _.findWhere(@getAggrs(expr.expr), { id: expr.aggr }).name + " " # TODO localize
     else
       str = ""
 
@@ -250,39 +269,39 @@ module.exports = class ExprUtils
     t = expr.table
     for join in expr.joins
       joinCol = @schema.getColumn(t, join)
-      str += joinCol.name + " > "
+      str += @localizeString(joinCol.name, locale) + " > "
       t = joinCol.join.toTable
 
     # Special case for id type to be rendered as {last join name}
     if exprType == "id"
       str = str.substring(0, str.length - 3)
     else
-      str += @summarizeExpr(expr.expr)
+      str += @summarizeExpr(expr.expr, locale)
 
     return str
 
   # Summarize an expression with optional aggregation
   # TODO Remove to AxisBuilder
-  summarizeAggrExpr: (expr, aggr) ->
+  summarizeAggrExpr: (expr, aggr, locale) ->
     exprType = @getExprType(expr)
 
     # Add aggr
     if aggr 
       aggrName = _.findWhere(@getAggrs(expr), { id: aggr }).name
-      return aggrName + " " + @summarizeExpr(expr)
+      return aggrName + " " + @summarizeExpr(expr, locale)
     else
-      return @summarizeExpr(expr)
+      return @summarizeExpr(expr, locale)
 
   # Converts all literals to string, using name of enums
-  stringifyExprLiteral: (expr, literal) ->
+  stringifyExprLiteral: (expr, literal, locale) ->
     if not literal?
-      return "None"
+      return "None" # TODO localize
 
     enumValues = @getExprEnumValues(expr)
     if enumValues
       item = _.findWhere(enumValues, id: literal)
       if item
-        return item.name
+        return @localizeString(item.name, locale)
       return "???"
 
     if literal == true

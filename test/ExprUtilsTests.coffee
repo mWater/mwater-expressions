@@ -17,6 +17,12 @@ describe "ExprUtils", ->
     assert.equal @exprUtils.followJoins("t1", []), "t1"
     assert.equal @exprUtils.followJoins("t1", ["1-2"]), "t2"
 
+  it "localizes strings", ->
+    assert.equal @exprUtils.localizeString("apple", "en"), "apple"
+    assert.equal @exprUtils.localizeString({ en: "apple", fr: "pomme" }, "fr"), "pomme"
+    assert.equal @exprUtils.localizeString({ en: "apple", fr: "pomme" }, null), "apple"
+    assert.equal @exprUtils.localizeString({ _base: "fr", fr: "pomme" }, null), "pomme"
+
   describe "getAggrs", ->
     beforeEach ->
       @schema = new Schema()
