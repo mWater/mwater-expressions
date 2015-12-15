@@ -198,7 +198,7 @@ module.exports = class ExprUtils
       return []
     
     table = @schema.getTable(expr.table)
-    if table.ordering and type != "count"
+    if table.ordering and type not in ["id", "count"] # count is legacy. TODO remove
       aggrs.push({ id: "last", name: "Latest", type: type })
 
     switch type
@@ -206,14 +206,14 @@ module.exports = class ExprUtils
         aggrs.push({ id: "max", name: "Maximum", type: type })
         aggrs.push({ id: "min", name: "Minimum", type: type })
 
-      when "number"
+      when "number", "integer", "decimal" # integer and decimal are legacy. TODO remove
         aggrs.push({ id: "sum", name: "Total", type: type })
         aggrs.push({ id: "avg", name: "Average", type: type })
         aggrs.push({ id: "max", name: "Maximum", type: type })
         aggrs.push({ id: "min", name: "Minimum", type: type })
 
-    # Count is always last option
-    aggrs.push({ id: "count", name: "Number of", type: "number" })
+      when "id", "count" # count is legacy. TODO remove
+        aggrs.push({ id: "count", name: "Number of", type: "number" })
 
     return aggrs
 

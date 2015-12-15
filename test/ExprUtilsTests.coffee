@@ -42,11 +42,12 @@ describe "ExprUtils", ->
       field = { type: "field", table: "b", column: "x" }
       assert.isUndefined _.findWhere(@exprUtils.getAggrs(field), id: "last")
 
-    it "includes count for text", ->
+    it "does not include count for text", ->
       field = { type: "field", table: "a", column: "y" }
       aggrs = @exprUtils.getAggrs(field)
 
-      assert.equal _.findWhere(aggrs, id: "count").type, "number"
+      assert.isUndefined _.findWhere(aggrs, id: "count")
+      assert.isUndefined _.findWhere(aggrs, id: "avg")
       assert.isUndefined _.findWhere(aggrs, id: "sum")
       assert.isUndefined _.findWhere(aggrs, id: "avg")
 
@@ -205,3 +206,4 @@ describe "ExprUtils", ->
       opItem = @exprUtils.findMatchingOpItems(resultType: "boolean", exprTypes: ["text"])[0]
       assert.equal opItem.op, "= any"
       assert.equal opItem.exprTypes[0], "text"
+
