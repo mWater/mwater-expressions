@@ -57,12 +57,16 @@ module.exports = class ExprUtils
     addOpItem("between", "is between", "boolean", ["date", "date", "date"])
     addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
 
-  # Search can contain resultType, exprTypes and op
+  # Search can contain resultType, exprTypes and op. resultType can be an array of options
   # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: }
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
-      if search.resultType and opItem.resultType != search.resultType
-        return false
+      if search.resultType 
+        if _.isArray(search.resultType)
+          if opItem.resultType not in search.resultType
+            return false
+        else if opItem.resultType != search.resultType
+          return false
 
       if search.op and opItem.op != search.op
         return false
