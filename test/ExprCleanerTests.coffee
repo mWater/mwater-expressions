@@ -225,6 +225,12 @@ describe "ExprCleaner", ->
         { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "id", table: "t2" } }
       )
 
+    it "scalar count becomes id", ->
+      @clean(
+        { type: "scalar", table: "t1", expr: { type: "count", table: "t1" }, joins: [] }
+        { type: "id", table: "t1" }
+      )
+
     it "scalar is simplified", ->
       @clean(
         { type: "scalar", table: "t1", joins: [], expr: { type: "field", table: "t1", column: "number" } }
