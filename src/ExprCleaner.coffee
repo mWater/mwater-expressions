@@ -12,7 +12,7 @@ module.exports = class ExprCleaner
   # e.g. if an enum is chosen when a boolean is required, it will be wrapped in "= any" op
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
-  #   type: optional types to limit to
+  #   types: optional types to limit to
   #   enumValueIds: ids of enum values that are valid if type is enum
   #   idTable: table that type of id must be from
   cleanExpr: (expr, options={}) ->
@@ -49,7 +49,7 @@ module.exports = class ExprCleaner
     type = @exprUtils.getExprType(expr)
 
     # Strip if wrong type
-    if type and options.type and type != options.type
+    if type and options.types and type not in options.types
       # case statements should be preserved as they are a variable type and they will have their then clauses cleaned
       if expr.type != "case"
         return null
@@ -95,7 +95,7 @@ module.exports = class ExprCleaner
   cleanOpExpr: (expr, options) ->
     switch expr.op
       when "and", "or"
-        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, type: "boolean", table: expr.table)))
+        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, types: ["boolean"], table: expr.table)))
 
         # Simplify
         if expr.exprs.length == 1
@@ -105,7 +105,7 @@ module.exports = class ExprCleaner
 
         return expr
       when "+", "*"
-        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, type: "number", table: expr.table)))
+        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, types: ["number"], table: expr.table)))
 
         # Simplify
         if expr.exprs.length == 1
@@ -153,7 +153,7 @@ module.exports = class ExprCleaner
             enumValueIds = _.pluck(enumValues, "id")
 
         expr = _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-          @cleanExpr(e, table: expr.table, type: opItem.exprTypes[i], enumValueIds: enumValueIds)
+          @cleanExpr(e, table: expr.table, types: (if opItem.exprTypes[i] then [opItem.exprTypes[i]]), enumValueIds: enumValueIds)
           )})
 
         return expr
@@ -192,9 +192,9 @@ module.exports = class ExprCleaner
     innerTable = @exprUtils.followJoins(expr.table, expr.joins)
 
     # Get inner expression type (must match unless is count which can count anything)
-    innerType = if expr.aggr != "count" then options.type
+    innerTypes = if expr.aggr != "count" then options.types
     expr = _.extend({}, expr, { 
-      expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, type: innerType }))
+      expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, types: innerTypes }))
     })    
 
     return expr
@@ -221,7 +221,7 @@ module.exports = class ExprCleaner
     expr = _.extend({}, expr, 
       cases: _.map(expr.cases, (c) => 
         _.extend({}, c, {
-          when: @cleanExpr(c.when, type: "boolean", table: expr.table)
+          when: @cleanExpr(c.when, types: ["boolean"], table: expr.table)
           then: @cleanExpr(c.then, options)
         })
       )

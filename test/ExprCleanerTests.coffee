@@ -21,12 +21,12 @@ describe "ExprCleaner", ->
 
   it "nulls if wrong type", ->
     field = { type: "field", table: "t1", column: "enum" }
-    assert.isNull @exprCleaner.cleanExpr(field, type: "boolean")
+    assert.isNull @exprCleaner.cleanExpr(field, types: ["boolean"])
 
   it "nulls if wrong idTable", ->
     field = { type: "id", table: "t1" }
-    assert @exprCleaner.cleanExpr(field, type: "id", idTable: "t1")
-    assert.isNull @exprCleaner.cleanExpr(field, type: "id", idTable: "t2")
+    assert @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t1")
+    assert.isNull @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t2")
 
   describe "op", ->
     it "preserves 'and' by cleaning child expressions with boolean type", ->
@@ -60,7 +60,7 @@ describe "ExprCleaner", ->
 
     it "nulls if wrong type", ->
       expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
-      compare(@exprCleaner.cleanExpr(expr, type: "number"), null)
+      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), null)
 
     it "nulls if missing lhs of non-+/*/and/or expr", ->
       expr = { type: "op", op: "= any", table: "t1", exprs: [null, {}]}
@@ -104,7 +104,7 @@ describe "ExprCleaner", ->
         cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
         else: { type: "literal", valueType: "text", value: "abc" }
       }
-      compare(@exprCleaner.cleanExpr(expr, type: "number"), 
+      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
         {
           type: "case"
           table: "t1"
@@ -118,7 +118,7 @@ describe "ExprCleaner", ->
         table: "t1"
         cases: [{ when: { type: "literal", valueType: "number", value: 123 }, then: { type: "literal", valueType: "number", value: 123 }}]
       }
-      compare(@exprCleaner.cleanExpr(expr, type: "number"), 
+      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
         {
           type: "case"
           table: "t1"
@@ -133,7 +133,7 @@ describe "ExprCleaner", ->
         cases: []
         else: { type: "literal", valueType: "text", value: "abc" }
       }
-      compare(@exprCleaner.cleanExpr(expr, type: "text"), 
+      compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
         { type: "literal", valueType: "text", value: "abc" })
 
     it "cleans thens as specified type", ->
@@ -143,7 +143,7 @@ describe "ExprCleaner", ->
         cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
         else: null
       }
-      compare(@exprCleaner.cleanExpr(expr, type: "text"), 
+      compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
         {
           type: "case"
           table: "t1"
@@ -158,7 +158,7 @@ describe "ExprCleaner", ->
         cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "enum", value: "x" }}]
         else: null
       }
-      compare(@exprCleaner.cleanExpr(expr, type: "enum", enumValueIds: ['a']), 
+      compare(@exprCleaner.cleanExpr(expr, types: ["enum"], enumValueIds: ['a']), 
         {
           type: "case"
           table: "t1"
