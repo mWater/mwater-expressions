@@ -150,6 +150,12 @@ describe "ExprUtils", ->
       scalarExpr = { type: "scalar", table: "t2", joins: ['2-1'], expr: { type: "id", table: "t1" } }
       assert.equal @exprUtils.summarizeExpr(scalarExpr), "T2->T1"
 
+    it "summarizes +/-/*//", ->
+      fieldExpr = { type: "field", table: "t2", column: "number" }
+      literalExpr = { type: "literal", valueType: "number", value: 5 }
+      opExpr = { type: "op", op: "+", exprs: [fieldExpr, literalExpr]}
+      assert.equal @exprUtils.summarizeExpr(opExpr), "Number + 5"
+
     # TODO readd
     # it "uses named expression when matching one present", ->
     #   # Add named expression

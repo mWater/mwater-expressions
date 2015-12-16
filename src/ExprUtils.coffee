@@ -257,6 +257,10 @@ module.exports = class ExprUtils
         return @localizeString(@schema.getColumn(expr.table, expr.column).name, locale)
       when "id"
         return @localizeString(@schema.getTable(expr.table).name, locale)
+      when "op"
+        return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + expr.op + " ")
+      when "literal"
+        return expr.value + ""
       else
         throw new Error("Unsupported type #{expr.type}")
 

@@ -220,7 +220,6 @@ describe "ExprCleaner", ->
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
     it "count becomes id", ->
-      debugger
       @clean(
         { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
         { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "id", table: "t2" } }
