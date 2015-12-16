@@ -24,3 +24,11 @@ module.exports = class MWaterDataSource extends DataSource
       .fail (xhr) =>
         cb(new Error(xhr.responseText))
 
+  # Get the url to download an image (by id from an image or imagelist column)
+  # Height, if specified, is minimum height needed. May return larger image
+  getImageUrl: (imageId, height) ->
+    url = @apiUrl + "images/#{imageId}"
+    if height
+      url += "?h=#{height}"
+
+    return url
