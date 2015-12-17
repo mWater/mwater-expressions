@@ -64,7 +64,10 @@ module.exports = class ExprCompiler
 
     # First join is in where clause
     if expr.joins and expr.joins.length > 0
-      join = @schema.getColumn(expr.table, expr.joins[0]).join
+      joinColumn = @schema.getColumn(expr.table, expr.joins[0])
+      if not joinColumn
+        throw new Error("Join column #{expr.table}:#{expr.joins[0]} not found")
+      join = joinColumn.join
 
       if join.jsonql
         where = injectTableAliases(join.jsonql, { "{from}": tableAlias, "{to}": "j1" })
