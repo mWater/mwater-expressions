@@ -2,6 +2,7 @@ _ = require 'lodash'
 injectTableAlias = require './injectTableAlias'
 injectTableAliases = require './injectTableAliases'
 ExprUtils = require './ExprUtils'
+moment = require 'moment'
 
 # Compiles expressions to JsonQL
 module.exports = class ExprCompiler 
@@ -268,6 +269,123 @@ module.exports = class ExprCompiler
           exprs: [
             { type: "op", op: "::jsonb", exprs: [compiledExprs[0]] }
             { type: "op", op: "::jsonb", exprs: [compiledExprs[1]] }
+          ]
+        }
+
+      when 'thisyear'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").add(1, 'years').format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'lastyear'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").subtract(1, 'years').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'thismonth'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").add(1, 'months').format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'lastmonth'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").subtract(1, 'months').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'today'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'yesterday'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(1, 'days').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'last7days'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(7, 'days').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'last30days'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(30, 'days').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+          ]
+        }
+
+      when 'last365days'
+        if not compiledExprs[0]
+          return null
+
+        return { 
+          type: "op"
+          op: "and"
+          exprs: [
+            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(365, 'days').format("YYYY-MM-DD") ] }
+            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
           ]
         }
 

@@ -2,6 +2,7 @@ assert = require('chai').assert
 fixtures = require './fixtures'
 _ = require 'lodash'
 canonical = require 'canonical-json'
+moment = require 'moment'
 
 ExprCompiler = require '../src/ExprCompiler'
 
@@ -558,6 +559,160 @@ describe "ExprCompiler", ->
           ]
         }
       )
+
+    describe "relative dates", ->
+      it "thisyear", ->
+        @compile(
+          {
+            type: "op"
+            op: "thisyear"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().startOf('year').format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().startOf('year').add(1, "years").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "lastyear", ->
+        @compile(
+          {
+            type: "op"
+            op: "lastyear"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().startOf('year').subtract(1, "years").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().startOf('year').format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "thismonth", ->
+        @compile(
+          {
+            type: "op"
+            op: "thismonth"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().startOf('month').format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().startOf('month').add(1, "months").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "lastmonth", ->
+        @compile(
+          {
+            type: "op"
+            op: "lastmonth"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().startOf('month').subtract(1, "months").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().startOf('month').format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "today", ->
+        @compile(
+          {
+            type: "op"
+            op: "today"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().add(1, "days").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "yesterday", ->
+        @compile(
+          {
+            type: "op"
+            op: "yesterday"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().subtract(1, "days").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "last7days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last7days"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().subtract(7, "days").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().add(1, "days").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "last30days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last30days"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().subtract(30, "days").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().add(1, "days").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
+
+      it "last365days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last365days"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@date1JsonQL, moment().subtract(365, "days").format("YYYY-MM-DD")]}
+              { type: "op", op: "<", exprs: [@date1JsonQL, moment().add(1, "days").format("YYYY-MM-DD")]}
+            ]
+          }
+        )
 
 
   describe "custom jsonql", ->

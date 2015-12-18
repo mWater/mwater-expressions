@@ -18,6 +18,22 @@ module.exports = class ExprUtils
     addOpItem("contains", "includes all of", "boolean", ["enumset", "enumset"])
     # addOpItem("intersects", "includes any of", "boolean", ["enumset", "enumset"]) Painful to implement...
 
+    # Add relative dates
+    relativeDateOps = [
+      ['thisyear', 'is this year']
+      ['lastyear', 'is last year']
+      ['thismonth', 'is this month']
+      ['lastmonth', 'is last month']
+      ['today', 'is today']
+      ['yesterday', 'is yesterday']
+      ['last7days', 'is in last 7 days']
+      ['last30days', 'is in last 30 days']
+      ['last365days', 'is in last 365 days']
+    ]
+    for relativeDateOp in relativeDateOps
+      addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['date'])
+      addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['datetime'])
+
     addOpItem("=", "is", "boolean", ["number", "number"])
     addOpItem("=", "is", "boolean", ["text", "text"])
     addOpItem("=", "is", "boolean", ["enum", "enum"])
