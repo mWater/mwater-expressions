@@ -180,6 +180,13 @@ module.exports = class ExprUtils
 
     return true
 
+  # Gets the expression table
+  getExprTable: (expr) ->
+    if not expr
+      return null
+
+    return expr.table
+
   getAggrTypes: (expr) ->
     # Get available aggregations
     aggrs = @getAggrs(expr)

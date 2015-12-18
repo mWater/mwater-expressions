@@ -23,6 +23,9 @@ describe "ExprUtils", ->
     assert.equal @exprUtils.localizeString({ en: "apple", fr: "pomme" }, null), "apple"
     assert.equal @exprUtils.localizeString({ _base: "fr", fr: "pomme" }, null), "pomme"
 
+  it "getExprTable", ->
+    assert.equal @exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz"
+
   describe "getAggrs", ->
     beforeEach ->
       @schema = new Schema()
