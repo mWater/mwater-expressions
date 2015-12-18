@@ -78,3 +78,5 @@ describe "Schema", ->
     })
 
     assert.equal schema.getColumn("a", "x").name, "X"
+    assert.equal schema.getColumns("a").length, 1
+    assert.equal schema.getColumns("a")[0].name, "X"

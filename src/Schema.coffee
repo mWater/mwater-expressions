@@ -49,6 +49,23 @@ module.exports = class Schema
   getColumn: (tableId, columnId) ->
     return @columnMap["#{tableId}::#{columnId}"]
 
+  # Gets the columns in order, flattened out from sections
+  getColumns: (tableId) ->
+    columns = []
+    searchContent = (item) =>
+      # Recurse for sections
+      if item.type == "section"
+        for item2 in item.contents
+          searchContent(item2)
+      else
+        columns.push(item)
+
+    table = @getTable(tableId)
+    for item in table.contents
+      searchContent(item)
+
+    return columns
+
   # Add table with id, name, desc, primaryKey, ordering (column with natural order) and contents (array of columns/sections)
   # Will replace table if already exists. S
   addTable: (table) ->
