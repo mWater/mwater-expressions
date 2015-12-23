@@ -200,6 +200,10 @@ module.exports = class ExprCleaner
     return expr
 
   cleanLiteralExpr: (expr, options) ->
+    # Convert old types
+    if expr.valueType in ['decimal', 'integer']
+      expr = _.extend({}, expr, { valueType: "number"})
+      
     # TODO strip if no value?
 
     # Remove if enum type is wrong
@@ -241,6 +245,9 @@ module.exports = class ExprCleaner
     newExpr = { type: "op", table: expr.table, op: expr.op, exprs: [expr.lhs] }
     if expr.rhs
       newExpr.exprs.push(expr.rhs)
+
+    # Clean sub-expressions to handle legacy literals
+    newExpr.exprs = _.map(newExpr.exprs, (e) => @cleanExpr(e))
 
     # If = true
     if expr.op == "= true"

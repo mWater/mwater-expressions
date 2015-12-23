@@ -35,7 +35,6 @@ module.exports = class ExprUtils
       addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['datetime'])
 
     # Add in ranges
-    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
     addOpItem("between", "is between", "boolean", ["date", "date", "date"])
     addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
 
@@ -57,6 +56,8 @@ module.exports = class ExprUtils
     addOpItem("<", "is less than", "boolean", ["number", "number"])
     addOpItem(">=", "is greater or equal to", "boolean", ["number", "number"])
     addOpItem("<=", "is less or equal to", "boolean", ["number", "number"])
+
+    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
 
     # And/or is a list of booleans
     addOpItem("and", "and", "boolean", [], "boolean")

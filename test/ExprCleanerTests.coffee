@@ -266,7 +266,6 @@ describe "ExprCleaner", ->
         { type: "literal", valueType: "enum[]", value: ["a", "b"] }
         { type: "literal", valueType: "enumset", value: ["a", "b"] }
       )
-      
 
     it "between becomes 3 parameters date", ->
       @clean(
@@ -317,3 +316,38 @@ describe "ExprCleaner", ->
           ]
         }
       )
+
+    it "upgrades complex expression with legacy literals", ->
+      expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
+      expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
+      value = { type: "logical", table: "t1", op: "and", exprs: [expr1, expr2] }      
+
+      @clean(
+        value,
+        { 
+          type: "op"
+          op: "and"
+          table: "t1"
+          exprs: [
+            { 
+              type: "op"
+              table: "t1"
+              op: "="
+              exprs: [
+                { type: "field", table: "t1", column: "number" }
+                { type: "literal", valueType: "number", value: 4 }
+              ]
+            }
+            { 
+              type: "op"
+              table: "t1"
+              op: "="
+              exprs: [
+                { type: "field", table: "t1", column: "number" }
+                { type: "literal", valueType: "number", value: 5 }
+              ]
+            }
+          ]
+        }
+      )
+
