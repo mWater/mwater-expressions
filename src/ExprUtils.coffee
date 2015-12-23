@@ -34,6 +34,11 @@ module.exports = class ExprUtils
       addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['date'])
       addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['datetime'])
 
+    # Add in ranges
+    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
+    addOpItem("between", "is between", "boolean", ["date", "date", "date"])
+    addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
+
     addOpItem("=", "is", "boolean", ["number", "number"])
     addOpItem("=", "is", "boolean", ["text", "text"])
     addOpItem("=", "is", "boolean", ["enum", "enum"])
@@ -67,11 +72,6 @@ module.exports = class ExprUtils
     addOpItem("not", "is false", "boolean", ["boolean"])
     addOpItem("is null", "is blank", "boolean", [null])
     addOpItem("is not null", "is not blank", "boolean", [null])
-
-    # Add in ranges
-    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
-    addOpItem("between", "is between", "boolean", ["date", "date", "date"])
-    addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
 
   # Search can contain resultType, exprTypes and op. resultType can be an array of options
   # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: }

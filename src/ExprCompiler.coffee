@@ -257,6 +257,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
+        
       when "contains"
         # Null if either not present
         if not compiledExprs[0] or not compiledExprs[1]
