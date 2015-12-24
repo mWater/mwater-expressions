@@ -16,7 +16,6 @@ module.exports = class ExprCleaner
   #   enumValueIds: ids of enum values that are valid if type is enum
   #   idTable: table that type of id must be from
   cleanExpr: (expr, options={}) ->
-    debugger
     if not expr
       return null
 
