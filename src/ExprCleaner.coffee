@@ -16,6 +16,7 @@ module.exports = class ExprCleaner
   #   enumValueIds: ids of enum values that are valid if type is enum
   #   idTable: table that type of id must be from
   cleanExpr: (expr, options={}) ->
+    debugger
     if not expr
       return null
 
@@ -175,6 +176,14 @@ module.exports = class ExprCleaner
     if expr.joins.length == 0
       return @cleanExpr(expr.expr, options)
 
+    # Fix legacy entity joins (accidentally had entities.<tablename>. prepended)
+    joins = _.map(expr.joins, (j) =>
+      if j.match(/^entities\.[a-z_0-9]+\./)
+        return j.split(".")[2]
+      return j
+      )
+    expr = _.extend({}, expr, joins: joins)
+
     if not @exprUtils.areJoinsValid(expr.table, expr.joins)
       return null
 
@@ -203,7 +212,7 @@ module.exports = class ExprCleaner
     # Convert old types
     if expr.valueType in ['decimal', 'integer']
       expr = _.extend({}, expr, { valueType: "number"})
-      
+
     # TODO strip if no value?
 
     # Remove if enum type is wrong

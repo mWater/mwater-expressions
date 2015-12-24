@@ -317,6 +317,41 @@ describe "ExprCleaner", ->
         }
       )
 
+    it "upgrades legacy entity join references", ->
+      schema = @schema.addTable({
+        id: "entities.wwmc_visit"
+        contents: [
+          { id: "site", type: "join", join: { type: "n-1", toTable: "entities.surface_water" } }
+        ]
+        })
+
+      schema = schema.addTable({
+        id: "entities.surface_water"
+        contents: [
+          { id: "location", type: "geometry" }
+        ]
+        })
+
+      exprCleaner = new ExprCleaner(schema)
+
+      clean = (expr, expected, options) =>
+        compare(exprCleaner.cleanExpr(expr, options), expected)
+
+      clean(
+        { 
+          type: "scalar"
+          expr: { type: "field", table: "entities.surface_water", column: "location" }
+          joins: ["entities.wwmc_visit.site"]
+          table: "entities.wwmc_visit"
+        }
+        {
+          type: "scalar"
+          expr: { type: "field", table: "entities.surface_water", column: "location" }
+          joins: ["site"]
+          table: "entities.wwmc_visit"
+        }
+        )
+
     it "upgrades complex expression with legacy literals", ->
       expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
       expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
