@@ -5,6 +5,7 @@ canonical = require 'canonical-json'
 moment = require 'moment'
 
 ExprCompiler = require '../src/ExprCompiler'
+ColumnNotFoundException = require '../src/ColumnNotFoundException'
 
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\n" + canonical(actual) + "\n" + canonical(expected)
@@ -24,6 +25,11 @@ describe "ExprCompiler", ->
         tableAlias: "T1"
         column: "number"
       })
+
+  it "throws ColumnNotFoundException", ->
+    assert.throws () =>
+      @ec.compileExpr(expr: { type: "field", table: "t1", column: "XYZ" }, tableAlias: "T1")
+    , ColumnNotFoundException
 
   describe "case", ->
     before ->

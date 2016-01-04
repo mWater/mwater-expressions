@@ -3,6 +3,7 @@ injectTableAlias = require './injectTableAlias'
 injectTableAliases = require './injectTableAliases'
 ExprUtils = require './ExprUtils'
 moment = require 'moment'
+ColumnNotFoundException = require './ColumnNotFoundException'
 
 # Compiles expressions to JsonQL
 module.exports = class ExprCompiler 
@@ -46,7 +47,7 @@ module.exports = class ExprCompiler
     # Check if column has custom jsonql
     column = @schema.getColumn(expr.table, expr.column)
     if not column
-      throw new Error("Column #{expr.table}.#{expr.column} not found")
+      throw new ColumnNotFoundException("Column #{expr.table}.#{expr.column} not found")
 
     # If column has custom jsonql, use that instead of id
     return @compileColumnRef(column.jsonql or column.id, options.tableAlias)
@@ -67,7 +68,7 @@ module.exports = class ExprCompiler
     if expr.joins and expr.joins.length > 0
       joinColumn = @schema.getColumn(expr.table, expr.joins[0])
       if not joinColumn
-        throw new Error("Join column #{expr.table}:#{expr.joins[0]} not found")
+        throw new ColumnNotFoundException("Join column #{expr.table}:#{expr.joins[0]} not found")
       join = joinColumn.join
 
       if join.jsonql
@@ -91,7 +92,10 @@ module.exports = class ExprCompiler
     # Perform remaining joins
     if expr.joins.length > 1
       for i in [1...expr.joins.length]
-        join = @schema.getColumn(table, expr.joins[i]).join
+        joinColumn = @schema.getColumn(table, expr.joins[i])
+        if not joinColumn
+          throw new ColumnNotFoundException("Join column #{expr.table}:#{expr.joins[0]} not found")
+        join = joinColumn.join
 
         if join.jsonql
           onClause = injectTableAliases(join.jsonql, { "{from}": "j#{i}", "{to}": "j#{i+1}" })
