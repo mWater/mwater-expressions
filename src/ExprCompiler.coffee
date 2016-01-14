@@ -413,6 +413,7 @@ module.exports = class ExprCompiler
 
   compileComparisonExpr: (options) ->
     expr = options.expr
+    exprUtils = new ExprUtils(@schema)
 
     # Missing left-hand side type means null condition
     exprLhsType = exprUtils.getExprType(expr.lhs)
@@ -420,7 +421,6 @@ module.exports = class ExprCompiler
       return null
 
     # Missing right-hand side means null condition
-    exprUtils = new ExprUtils(@schema)
     if exprUtils.getComparisonRhsType(exprLhsType, expr.op) and not expr.rhs?
       return null
 
