@@ -414,13 +414,14 @@ module.exports = class ExprCompiler
   compileComparisonExpr: (options) ->
     expr = options.expr
 
-    # Missing left-hand side means null condition
-    if not expr.lhs?
+    # Missing left-hand side type means null condition
+    exprLhsType = exprUtils.getExprType(expr.lhs)
+    if not exprLhsType
       return null
 
     # Missing right-hand side means null condition
     exprUtils = new ExprUtils(@schema)
-    if exprUtils.getComparisonRhsType(exprUtils.getExprType(expr.lhs), expr.op) and not expr.rhs?
+    if exprUtils.getComparisonRhsType(exprLhsType, expr.op) and not expr.rhs?
       return null
 
     lhsExpr = @compileExpr(expr: expr.lhs, tableAlias: options.tableAlias) 
