@@ -12,7 +12,7 @@ module.exports = class Schema
     # Map of table.id to table
     @tableMap = {} 
 
-    # Map of "<tableid>::<columnid>" to column
+    # Map of "<tableid>" to map of { "<columnid>" to column }
     @columnMap = {}
 
     if json
@@ -21,33 +21,35 @@ module.exports = class Schema
       # Strip id type
       @tables = _.map(@tables, @stripIdColumns)
 
-      @_reindex()
+      # Setup maps
+      for table in @tables
+        @tableMap[table.id] = table
+        @columnMap[table.id] = @_indexTable(table)
 
-  # Reloads the table and column map after table added/changed
-  _reindex: ->
-    @tableMap = {}
-    @columnMap = {}
-
-    mapContent = (table, item) =>
+  _indexTable: (table) ->
+    mapContent = (t, map, item) =>
       # Recurse for sections
       if item.type == "section"
         for item2 in item.contents
-          mapContent(table, item2)
+          mapContent(t, map, item2)
       else
-        @columnMap["#{table.id}::#{item.id}"] = item
+        map[item.id] = item
 
-    for table in @tables
-      @tableMap[table.id] = table
+    map = {}
+    for item in table.contents
+      mapContent(table, map, item)
 
-      for item in table.contents
-        mapContent(table, item)
+    return map
 
   getTables: -> @tables
 
   getTable: (tableId) -> @tableMap[tableId]
 
   getColumn: (tableId, columnId) ->
-    return @columnMap["#{tableId}::#{columnId}"]
+    map = @columnMap[tableId]
+    if not map
+      return null
+    return map[columnId]
 
   # Gets the columns in order, flattened out from sections
   getColumns: (tableId) ->
@@ -67,12 +69,27 @@ module.exports = class Schema
     return columns
 
   # Add table with id, name, desc, primaryKey, ordering (column with natural order) and contents (array of columns/sections)
-  # Will replace table if already exists. S
+  # Will replace table if already exists. 
+  # schemas are immutable, so returns a fresh copy
   addTable: (table) ->
     # Remove existing and add new
     tables = _.filter(@tables, (t) -> t.id != table.id)
     tables.push(table)
-    return new Schema(tables: tables)
+
+    # Update table map
+    tableMap = _.clone(@tableMap)
+    tableMap[table.id] = table
+
+    # Update column map
+    columnMap = _.clone(@columnMap)
+    columnMap[table.id] = @_indexTable(table)
+
+    schema = new Schema()
+    schema.tables = tables
+    schema.tableMap = tableMap
+    schema.columnMap = columnMap
+
+    return schema
 
   # TODO readd someday
   getNamedExprs: (tableId) ->
