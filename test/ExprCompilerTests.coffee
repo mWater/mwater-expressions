@@ -65,6 +65,38 @@ describe "ExprCompiler", ->
           else: @number3JsonQL
         })
 
+    it "skips null whens", ->
+      @compile(
+        { 
+          type: "case"
+          table: "t1"
+          cases: [
+            { when: null, then: @number1 }
+            { when: @bool2, then: @number2 }
+          ]
+          else: @number3
+        }
+        {
+          type: "case"
+          cases: [
+            { when: @bool2JsonQL, then: @number2JsonQL }
+          ]
+          else: @number3JsonQL
+        })
+
+    it "skips if empty", ->
+      @compile(
+        { 
+          type: "case"
+          table: "t1"
+          cases: [
+            { when: null, then: @number1 }
+          ]
+          else: @number3
+        }
+        null
+      )
+
   describe "scalar", ->
     it "compiles scalar with no joins, simplifying", ->
       @compile(

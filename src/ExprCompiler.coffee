@@ -401,7 +401,7 @@ module.exports = class ExprCompiler
   compileCaseExpr: (options) ->
     expr = options.expr
 
-    return {
+    compiled = {
       type: "case"
       cases: _.map(expr.cases, (c) =>
         {
@@ -410,6 +410,15 @@ module.exports = class ExprCompiler
         })
       else: @compileExpr(expr: expr.else, tableAlias: options.tableAlias)
     }
+
+    # Remove null cases
+    compiled.cases = _.filter(compiled.cases, (c) -> c.when?)
+
+    # Return null if no cases
+    if compiled.cases.length == 0
+      return null
+
+    return compiled
 
   compileComparisonExpr: (options) ->
     expr = options.expr
