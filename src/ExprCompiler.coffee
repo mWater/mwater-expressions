@@ -267,6 +267,10 @@ module.exports = class ExprCompiler
         if not compiledExprs[0] or not compiledExprs[1]
           return null
 
+        # Null if no expressions in literal list
+        if compiledExprs[1].type == "literal" and compiledExprs[1].value.length == 0
+          return null
+
         # Cast both to jsonb and use @>
         return {
           type: "op"

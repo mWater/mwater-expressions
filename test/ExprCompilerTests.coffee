@@ -598,6 +598,19 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles empty contains", ->
+      @compile(
+        { 
+          type: "op"
+          op: "contains", 
+          exprs: [
+            { type: "field", table: "t1", column: "enumset" } 
+            { type: "literal", valueType: "enumset", value: [] }
+          ]
+        }
+        null
+      )
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(
