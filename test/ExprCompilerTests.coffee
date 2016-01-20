@@ -244,6 +244,7 @@ describe "ExprCompiler", ->
     @compile({ type: "literal", valueType: "number", value: 123 }, { type: "literal", value: 123 })
     @compile({ type: "literal", valueType: "enum", value: "id1" }, { type: "literal", value: "id1" })
     @compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
+    @compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
 
   describe "ops", ->
     before ->
@@ -592,8 +593,8 @@ describe "ExprCompiler", ->
           type: "op"
           op: "@>"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }]}
-            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["a", "b"] }]}
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: ["a", "b"] }] }]}
           ]
         }
       )

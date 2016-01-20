@@ -271,13 +271,13 @@ module.exports = class ExprCompiler
         if compiledExprs[1].type == "literal" and compiledExprs[1].value.length == 0
           return null
 
-        # Cast both to jsonb and use @>
+        # Cast both to jsonb and use @>. Also convert both to json first to handle literal arrays
         return {
           type: "op"
           op: "@>"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [compiledExprs[0]] }
-            { type: "op", op: "::jsonb", exprs: [compiledExprs[1]] }
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[1]] }] }
           ]
         }
 
