@@ -329,12 +329,25 @@ module.exports = class ExprUtils
     if not literal?
       return "None" # TODO localize
 
-    enumValues = @getExprEnumValues(expr)
-    if enumValues
-      item = _.findWhere(enumValues, id: literal)
-      if item
-        return @localizeString(item.name, locale)
-      return "???"
+    type = @getExprType(expr)
+    if type == 'enum'
+      enumValues = @getExprEnumValues(expr)
+      if enumValues
+        item = _.findWhere(enumValues, id: literal)
+        if item
+          return @localizeString(item.name, locale)
+        return "???"
+
+    # Map enumset to A,B...
+    if type == "enumset" and _.isArray(literal)
+      enumValues = @getExprEnumValues(expr)
+      if enumValues
+        return _.map(literal, (val) =>
+          item = _.findWhere(enumValues, id: val)
+          if item
+            return @localizeString(item.name, locale)
+          return "???"
+        ).join(',')
 
     if literal == true
       return "True"
