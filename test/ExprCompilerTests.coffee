@@ -3,12 +3,13 @@ fixtures = require './fixtures'
 _ = require 'lodash'
 canonical = require 'canonical-json'
 moment = require 'moment'
+sinon = require 'sinon'
 
 ExprCompiler = require '../src/ExprCompiler'
 ColumnNotFoundException = require '../src/ColumnNotFoundException'
 
 compare = (actual, expected) ->
-  assert.equal canonical(actual), canonical(expected), "\n" + canonical(actual) + "\n" + canonical(expected)
+  assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
 
 describe "ExprCompiler", ->
   before ->
@@ -269,6 +270,9 @@ describe "ExprCompiler", ->
       @date2JsonQL = { type: "literal", value: "2014-12-31" }
       @date3 = { type: "literal", valueType: "date", value: "2015-01-01" }
       @date3JsonQL = { type: "literal", value: "2015-01-01" }
+
+      @datetime1 = { type: "literal", valueType: "datetime", value: "2014-01-01T01:02:03Z" }
+      @datetime1JsonQL = { type: "literal", value: "2014-01-01T01:02:03Z" }
 
     it "compiles and", ->
       @compile(
@@ -766,6 +770,166 @@ describe "ExprCompiler", ->
           }
         )
 
+
+    describe "relative datetimes", ->
+      before ->
+        @clock = sinon.useFakeTimers(new Date().getTime())
+
+      after ->
+        @clock.restore()
+
+      it "thisyear", ->
+        @compile(
+          {
+            type: "op"
+            op: "thisyear"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf('year').toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf('year').add(1, "years").toISOString()]}
+            ]
+          }
+        )
+
+      it "lastyear", ->
+        @compile(
+          {
+            type: "op"
+            op: "lastyear"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf('year').subtract(1, "years").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf('year').toISOString()]}
+            ]
+          }
+        )
+
+      it "thismonth", ->
+        @compile(
+          {
+            type: "op"
+            op: "thismonth"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf('month').toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf('month').add(1, "months").toISOString()]}
+            ]
+          }
+        )
+
+      it "lastmonth", ->
+        @compile(
+          {
+            type: "op"
+            op: "lastmonth"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf('month').subtract(1, "months").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf('month').toISOString()]}
+            ]
+          }
+        )
+
+      it "today", ->
+        @compile(
+          {
+            type: "op"
+            op: "today"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "yesterday", ->
+        @compile(
+          {
+            type: "op"
+            op: "yesterday"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").subtract(1, "days").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").toISOString()]}
+            ]
+          }
+        )
+
+      it "last7days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last7days"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").subtract(7, "days").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "last30days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last30days"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").subtract(30, "days").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "last365days", ->
+        @compile(
+          {
+            type: "op"
+            op: "last365days"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").subtract(365, "days").toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
 
   describe "custom jsonql", ->
     describe "table", ->

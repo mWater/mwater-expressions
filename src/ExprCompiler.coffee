@@ -181,9 +181,14 @@ module.exports = class ExprCompiler
     return scalar
 
   compileOpExpr: (options) ->
+    exprUtils = new ExprUtils(@schema)
+
     expr = options.expr
 
     compiledExprs = _.map(expr.exprs, (e) => @compileExpr(expr: e, tableAlias: options.tableAlias))
+
+    # Get type of expr 0
+    expr0Type = exprUtils.getExprType(expr.exprs[0])
 
     # Handle multi
     switch expr.op
@@ -285,118 +290,235 @@ module.exports = class ExprCompiler
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").add(1, 'years').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").add(1, 'years').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").add(1, 'years').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'lastyear'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").subtract(1, 'years').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").subtract(1, 'years').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("year").subtract(1, 'years').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("year").toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'thismonth'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").add(1, 'months').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").add(1, 'months').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").add(1, 'months').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'lastmonth'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").subtract(1, 'months').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").subtract(1, 'months').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("month").subtract(1, 'months').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("month").toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'today'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+           return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("day").toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'yesterday'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(1, 'days').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(1, 'days').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("day").subtract(1, 'days').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'last7days'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(7, 'days').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(7, 'days').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("day").subtract(7, 'days').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'last30days'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(30, 'days').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(30, 'days').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("day").subtract(30, 'days').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       when 'last365days'
         if not compiledExprs[0]
           return null
 
-        return { 
-          type: "op"
-          op: "and"
-          exprs: [
-            { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(365, 'days').format("YYYY-MM-DD") ] }
-            { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
-          ]
-        }
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(365, 'days').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().startOf("day").subtract(365, 'days').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
 
       else
         throw new Error("Unknown op #{expr.op}")
