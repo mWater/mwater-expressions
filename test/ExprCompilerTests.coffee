@@ -12,8 +12,9 @@ compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
 
 describe "ExprCompiler", ->
-  before ->
+  beforeEach ->
     @ec = new ExprCompiler(fixtures.simpleSchema())
+    @ec.testResetAlias()
     @compile = (expr, expected) =>
       jsonql = @ec.compileExpr(expr: expr, tableAlias: "T1")
       compare(jsonql, expected)
