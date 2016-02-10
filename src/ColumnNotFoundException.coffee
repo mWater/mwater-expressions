@@ -4,7 +4,6 @@ module.exports = class ColumnNotFoundException extends Error
   constructor: (message) ->
     @name = @constructor.name
     @message = message
-    @stack = (new Error()).stack
+    @stack = (new Error(message)).stack
 
-  @:: = new Error
   @::constructor = @
