@@ -29,6 +29,7 @@
     "canonical-json": "0.0.4",
     "chai": "^3.4.0",
     "coffeeify": "^1.1.0",
+    "coffee-script": "^1.7.1",
     "gulp": "git://github.com/gulpjs/gulp.git#4.0",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.6.0",
