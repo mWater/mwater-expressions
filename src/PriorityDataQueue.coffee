@@ -24,3 +24,7 @@ module.exports = class PriorityDataQueue
   # Simply call the dataSource since this is not an async function
   getImageUrl: (imageId, height) ->
     @dataSource.getImageUrl(imageId, height)
+
+  kill: () ->
+    if @performQueryPriorityQueue?
+      @performQueryPriorityQueue.kill()
