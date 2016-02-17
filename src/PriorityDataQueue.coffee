@@ -1,20 +1,26 @@
 async = require 'async'
 
+PriorityDataSource = require './PriorityDataSource'
+
 # Creates PriorityDataSource from DataSource
 module.exports = class PriorityDataQueue
 
   constructor: (dataSource, concurrency) ->
     @dataSource = dataSource
-    worker = (task, callback) ->
-      console.log task
-      callback()
-    @priorityQueue = new async.priorityQueue(worker, concurrency)
+    # Creates a priorityQueue that calls performQuery
+    worker = (query, callback) ->
+      dataSource.performQuery(query, callback)
+    @performQueryPriorityQueue = new async.priorityQueue(worker, concurrency)
 
+  # Creates a PriorityDataSource that will then be used like a DataSource but with a priority
   createPriorityDataSource : (priority) ->
-    return new PriorityDataSource(@dataSource, priority)
+    return new PriorityDataSource(this, priority)
 
-  performQueries: (queries, cb, priority) ->
-    @priorityQueue.push queries, priority, cb
-
+  # Designed to be called by PriorityDataSource
   performQuery: (query, cb, priority) ->
-    @priorityQueue.push query, priority, cb
+    # Push to the priorityQueue
+    @performQueryPriorityQueue.push query, priority, cb
+
+  # Simply call the dataSource since this is not an async function
+  getImageUrl: (imageId, height) ->
+    @dataSource.getImageUrl(imageId, height)
