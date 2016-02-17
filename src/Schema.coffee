@@ -1,6 +1,4 @@
 _ = require 'lodash'
-React = require 'react'
-H = React.DOM
 
 # Schema for a database. Immutable.
 # Stores tables with columns (possibly in nested sections).
