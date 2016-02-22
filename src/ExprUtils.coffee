@@ -347,7 +347,11 @@ module.exports = class ExprUtils
           if item
             return @localizeString(item.name, locale)
           return "???"
-        ).join(',')
+        ).join(', ')
+
+    # Text array
+    if type == "text[]" and _.isArray(literal)
+      return literal.join(', ')
 
     if literal == true
       return "True"

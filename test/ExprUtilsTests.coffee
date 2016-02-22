@@ -212,7 +212,7 @@ describe "ExprUtils", ->
 
     it "looks up enumset", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, ["a", "b"])
-      assert.equal str, "A,B"
+      assert.equal str, "A, B"
 
     it "handles null enumset", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, null)
@@ -220,7 +220,11 @@ describe "ExprUtils", ->
 
     it "handles invalid enumset", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, ["xyz", "b"])
-      assert.equal str, "???,B"
+      assert.equal str, "???, B"
+
+    it "handles text[]", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "text[]" }, ["xyz", "b"])
+      assert.equal str, "xyz, b"
 
   describe "findMatchingOpItems", ->
     it "finds = any for text lhs with boolean result", ->
