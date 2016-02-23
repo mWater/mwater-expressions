@@ -14,8 +14,8 @@ compare = (actual, expected) ->
 describe "ExprCompiler", ->
   beforeEach ->
     @ec = new ExprCompiler(fixtures.simpleSchema())
-    @ec.testResetAlias()
     @compile = (expr, expected) =>
+      @ec.testResetAlias() 
       jsonql = @ec.compileExpr(expr: expr, tableAlias: "T1")
       compare(jsonql, expected)
 
@@ -617,6 +617,52 @@ describe "ExprCompiler", ->
         null
       )
 
+    it "compiles latitude", ->
+      @compile(
+        {
+          type: "op"
+          op: "latitude"
+          exprs: [{ type: "field", table: "t1", column: "geometry" }]
+        }
+        {
+          type: "op"
+          op: "ST_Y"
+          exprs: [
+            { 
+              type: "op"
+              op: "ST_Transform"
+              exprs: [
+                { type: "field", tableAlias: "T1", column: "geometry" }
+                4326
+              ]
+            }
+          ]
+        }
+      )
+
+    it "compiles longitude", ->
+      @compile(
+        {
+          type: "op"
+          op: "longitude"
+          exprs: [{ type: "field", table: "t1", column: "geometry" }]
+        }
+        {
+          type: "op"
+          op: "ST_X"
+          exprs: [
+            { 
+              type: "op"
+              op: "ST_Transform"
+              exprs: [
+                { type: "field", tableAlias: "T1", column: "geometry" }
+                4326
+              ]
+            }
+          ]
+        }
+      )
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(
@@ -770,7 +816,6 @@ describe "ExprCompiler", ->
             ]
           }
         )
-
 
     describe "relative datetimes", ->
       before ->

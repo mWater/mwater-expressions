@@ -10,6 +10,7 @@ exports.simpleSchema = ->
     { id: "date", name: { en: "Date" }, type: "date" }
     { id: "datetime", name: { en: "Datetime" }, type: "datetime" }
     { id: "boolean", name: { en: "Boolean" }, type: "boolean" }
+    { id: "geometry", name: { en: "Geometry" }, type: "geometry" }
     { id: "text[]", name: { en: "Text[]" }, type: "text[]" }
     { id: "1-2", name: { en: "T1->T2" }, type: "join", join: { type: "1-n", toTable: "t2", fromColumn: "primary", toColumn: "t1" }}
   ]})

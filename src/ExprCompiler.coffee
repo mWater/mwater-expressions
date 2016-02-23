@@ -302,6 +302,30 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "latitude"
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "ST_Y"
+          exprs: [
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+          ]
+        }
+
+      when "longitude"
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "ST_X"
+          exprs: [
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+          ]
+        }
+
       when 'thisyear'
         if not compiledExprs[0]
           return null

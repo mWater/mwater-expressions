@@ -8,8 +8,8 @@ module.exports = class ExprUtils
 
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
-    addOpItem = (op, name, resultType, exprTypes, moreExprType) =>
-      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType)
+    addOpItem = (op, name, resultType, exprTypes, moreExprType, prefix=false) =>
+      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType, prefix: prefix)
 
     # TODO n?
     addOpItem("= any", "is any of", "boolean", ["text", "text[]"])
@@ -59,6 +59,9 @@ module.exports = class ExprUtils
 
     addOpItem("between", "is between", "boolean", ["number", "number", "number"])
 
+    addOpItem("latitude", "latitude of", "number", ["geometry"])
+    addOpItem("longitude", "longitude of", "number", ["geometry"])
+
     # And/or is a list of booleans
     addOpItem("and", "and", "boolean", [], "boolean")
     addOpItem("or", "or", "boolean", [], "boolean")
@@ -75,7 +78,7 @@ module.exports = class ExprUtils
     addOpItem("is not null", "is not blank", "boolean", [null])
 
   # Search can contain resultType, exprTypes and op. resultType can be an array of options
-  # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: }
+  # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: exprType of further arguments, prefix: true to put op before expr }
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
       if search.resultType 
