@@ -59,8 +59,8 @@ module.exports = class ExprUtils
 
     addOpItem("between", "is between", "boolean", ["number", "number", "number"])
 
-    addOpItem("latitude", "latitude of", "number", ["geometry"])
-    addOpItem("longitude", "longitude of", "number", ["geometry"])
+    addOpItem("latitude", "latitude of", "number", ["geometry"], true)
+    addOpItem("longitude", "longitude of", "number", ["geometry"], true)
 
     # And/or is a list of booleans
     addOpItem("and", "and", "boolean", [], "boolean")
