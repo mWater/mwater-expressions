@@ -190,8 +190,11 @@ module.exports = class ExprCleaner
     if expr.aggr and (not @exprUtils.isMultipleJoins(expr.table, expr.joins) or not expr.expr)
       expr = _.omit(expr, "aggr")
 
+    # If aggr is required and there is one possible, use it
     if expr.expr and @exprUtils.isMultipleJoins(expr.table, expr.joins) and expr.aggr not in _.pluck(@exprUtils.getAggrs(expr.expr), "id")
-      expr = _.extend({}, expr, { aggr: @exprUtils.getAggrs(expr.expr)[0].id })
+      aggrs = @exprUtils.getAggrs(expr.expr)
+      if aggrs.length > 0
+        expr = _.extend({}, expr, { aggr: aggrs[0].id })
 
     # Clean where
     if expr.where

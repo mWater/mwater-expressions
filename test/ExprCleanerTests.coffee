@@ -217,6 +217,11 @@ describe "ExprCleaner", ->
       scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
       compare(fieldExpr, scalarExpr)
 
+    it "removes aggr from null expr", ->
+      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: null, aggr: "sum" }
+      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+      assert not scalarExpr.aggr
+
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
     it "count becomes id", ->
