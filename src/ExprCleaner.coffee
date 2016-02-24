@@ -186,10 +186,11 @@ module.exports = class ExprCleaner
     if not @exprUtils.areJoinsValid(expr.table, expr.joins)
       return null
 
-    if expr.aggr and not @exprUtils.isMultipleJoins(expr.table, expr.joins)
+    # If invalid aggr or no inner expression, remove aggr
+    if expr.aggr and (not @exprUtils.isMultipleJoins(expr.table, expr.joins) or not expr.expr)
       expr = _.omit(expr, "aggr")
 
-    if @exprUtils.isMultipleJoins(expr.table, expr.joins) and expr.aggr not in _.pluck(@exprUtils.getAggrs(expr.expr), "id")
+    if expr.expr and @exprUtils.isMultipleJoins(expr.table, expr.joins) and expr.aggr not in _.pluck(@exprUtils.getAggrs(expr.expr), "id")
       expr = _.extend({}, expr, { aggr: @exprUtils.getAggrs(expr.expr)[0].id })
 
     # Clean where
@@ -200,10 +201,11 @@ module.exports = class ExprCleaner
     innerTable = @exprUtils.followJoins(expr.table, expr.joins)
 
     # Get inner expression type (must match unless is count which can count anything)
-    innerTypes = if expr.aggr != "count" then options.types
-    expr = _.extend({}, expr, { 
-      expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, types: innerTypes }))
-    })    
+    if expr.expr
+      innerTypes = if expr.aggr != "count" then options.types
+      expr = _.extend({}, expr, { 
+        expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, types: innerTypes }))
+      })    
 
     return expr
 
