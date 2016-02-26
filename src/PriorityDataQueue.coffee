@@ -1,4 +1,5 @@
 async = require 'async'
+_ = require 'lodash'
 
 PriorityDataSource = require './PriorityDataSource'
 
@@ -9,7 +10,9 @@ module.exports = class PriorityDataQueue
     @dataSource = dataSource
     # Creates a priorityQueue that calls performQuery
     worker = (query, callback) ->
-      dataSource.performQuery(query, callback)
+      # Defer to prevent too-deep recursion
+      _.defer () =>
+        dataSource.performQuery(query, callback)
     @performQueryPriorityQueue = new async.priorityQueue(worker, concurrency)
 
   # Creates a PriorityDataSource that will then be used like a DataSource but with a priority
