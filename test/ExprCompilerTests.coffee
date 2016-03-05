@@ -241,6 +241,14 @@ describe "ExprCompiler", ->
           }
         })
 
+  it "simplifies scalar join to id where toColumn is primary key", ->
+    @compile({ 
+      type: "scalar", 
+      table: "t2",
+      expr: { type: "id", table: "t1" }, 
+      joins: ["2-1"],
+    }, { type: "field", tableAlias: "T1", column: "t1" })
+
   it "compiles literals", ->
     @compile({ type: "literal", valueType: "text", value: "abc" }, { type: "literal", value: "abc" })
     @compile({ type: "literal", valueType: "number", value: 123 }, { type: "literal", value: 123 })

@@ -84,8 +84,8 @@ Enum values are represented by an array of objects e.g. `{ id: some id, name: so
 
 `-or-`
 
-`fromColumn`: table column to start join from. 
-`toColumn`: table column to end join at. 
+`fromColumn`: table column to start join from or jsonql with alias {alias}
+`toColumn`: table column to end join at or jsonql with alias {alias}. 
 
 
 ## Example format

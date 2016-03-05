@@ -72,6 +72,10 @@ module.exports = class ExprCompiler
     orderBy = null
     limit = null
 
+    # Simplify if a join to an id field where the join uses the primary key of the to table
+    if not expr.aggr and not expr.where and expr.joins.length == 1 and expr.expr.type == "id" and @schema.getColumn(expr.table, expr.joins[0]).join.toColumn == @schema.getTable(expr.expr.table).primaryKey
+      return @compileColumnRef(@schema.getColumn(expr.table, expr.joins[0]).join.fromColumn, options.tableAlias)
+
     # Perform joins
     table = expr.table
     tableAlias = options.tableAlias
