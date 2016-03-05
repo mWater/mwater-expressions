@@ -26,6 +26,16 @@ describe "ExprUtils", ->
   it "getExprTable", ->
     assert.equal @exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz"
 
+  describe "getExprIdTable", ->
+    it "gets for literal", ->
+      assert.equal @exprUtils.getExprIdTable({ type: "literal", valueType: "id", idTable: "xyz", value: "123" }), "xyz"
+
+    it "gets for id field", ->
+      assert.equal @exprUtils.getExprIdTable({ table: "xyz", type: "id" }), "xyz"
+
+    it "gets for scalar", ->
+      assert.equal @exprUtils.getExprIdTable({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "t1"
+
   describe "findMatchingOpItems", ->
     it "finds = for number", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "number" })[0].op, "="

@@ -96,6 +96,14 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a", "x"] }]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}) # x is gone
 
+    it "removes invalid id table on rhs", ->
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t1", value: "123" }]}
+      compare(@exprCleaner.cleanExpr(expr), expr)
+
+      debugger
+      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t2", value: "123" }]}
+      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, null]})
+
   describe "case", ->
     it "cleans else", ->
       expr = { 

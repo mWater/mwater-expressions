@@ -663,6 +663,28 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles within", ->
+      @compile(
+        {
+          type: "op"
+          op: "within"
+          exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id", idTable: "thier", value: "123" }]
+        }
+        {
+          type: "op"
+          op: "@>"
+          exprs: [
+            { 
+              type: "scalar"
+              expr: { type: "field", tableAlias: "subwithin", column: "path" }
+              from: { type: "table", table: "thier", alias: "subwithin" }
+              where: { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "primary" }, { type: "field", tableAlias: "T1", column: "primary" }] }
+            }
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "json_build_array", exprs: [{ type: "literal", value: "123" }] }] }
+          ]
+        }
+      ) 
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(

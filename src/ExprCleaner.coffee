@@ -154,7 +154,7 @@ module.exports = class ExprCleaner
             enumValueIds = _.pluck(enumValues, "id")
 
         expr = _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-          @cleanExpr(e, table: expr.table, types: (if opItem.exprTypes[i] then [opItem.exprTypes[i]]), enumValueIds: enumValueIds)
+          @cleanExpr(e, table: expr.table, types: (if opItem.exprTypes[i] then [opItem.exprTypes[i]]), enumValueIds: enumValueIds, idTable: @exprUtils.getExprIdTable(expr.exprs[0]))
           )})
 
         return expr
@@ -227,6 +227,10 @@ module.exports = class ExprCleaner
     # Remove invalid enum types
     if expr.valueType == "enumset" and options.enumValueIds and expr.value
       expr = _.extend({}, expr, value: _.intersection(options.enumValueIds, expr.value))
+
+    # Null if wrong table
+    if expr.valueType == "id" and options.idTable and expr.idTable != options.idTable
+      return null
 
     return expr
 

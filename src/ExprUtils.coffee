@@ -80,7 +80,12 @@ module.exports = class ExprUtils
     addOpItem("-", "-", "number", ["number", "number"])
     addOpItem("/", "/", "number", ["number", "number"])
 
-    addOpItem("within", "is", "boolean", ["id", "id"], null, false, (lhsExpr) => @schema.getTable(lhsExpr.table).ancestry?)
+    addOpItem("within", "in", "boolean", ["id", "id"], null, false, (lhsExpr) => 
+      lhsIdTable = @getExprIdTable(lhsExpr)
+      if lhsIdTable
+        return @schema.getTable(lhsIdTable).ancestry?
+      return false
+    )
     addOpItem("=", "is", "boolean", ["id", "id"], null, false)
 
     addOpItem("~*", "matches", "boolean", ["text", "text"])
@@ -143,6 +148,20 @@ module.exports = class ExprUtils
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
+
+  # gets the id table of an expression of type id
+  getExprIdTable: (expr) ->
+    if not expr
+      return null
+
+    if expr.type == "literal" and expr.valueType == "id"
+      return expr.idTable
+
+    if expr.type == "id"
+      return expr.table
+
+    if expr.type == "scalar"
+      return @getExprIdTable(expr.expr)
 
   # Gets the type of an expression
   getExprType: (expr) ->
