@@ -23,6 +23,8 @@ _base is optional.
 
 `ancestry`: column with jsonb array of primary keys, including self. Makes table hierarchical.
 
+`label`: column with label when choosing a single row. Can be JsonQL expression with `{alias}` for table alias
+
 `contents`: array of content items (columns, sections and joins) of the table
 
 `jsonql`: Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server. 
