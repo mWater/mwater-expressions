@@ -115,14 +115,12 @@ module.exports = class ExprCleaner
 
         return expr
       else 
-        # Need LHS for a normal op. Placeholder ok
+        # Need LHS for a normal op.
         if not expr.exprs[0]
           return null
 
-        lhsType = @exprUtils.getExprType(expr.exprs[0])
-
         # Get opItem
-        opItems = @exprUtils.findMatchingOpItems(op: expr.op, exprTypes: [lhsType])
+        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: expr.exprs[0], resultTypes: options.types)
 
         # If ambiguous, just clean subexprs and return
         if opItems.length > 1
@@ -132,7 +130,10 @@ module.exports = class ExprCleaner
 
         # If not found, default opItem
         if not opItems[0]
-          opItem = @exprUtils.findMatchingOpItems(exprTypes: [lhsType])[0]
+          opItem = @exprUtils.findMatchingOpItems(lhsExpr: expr.exprs[0], resultTypes: options.types)[0]
+          if not opItem
+            return null
+
           expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr.exprs[0] or null] }  
         else
           opItem = opItems[0]

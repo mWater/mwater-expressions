@@ -4,12 +4,20 @@ module.exports = class ExprUtils
   constructor: (schema) ->
     @schema = schema
 
+    # opItems are a list of ops for various types:
+    # op: e.g. "="
+    # name: e.g. "is"
+    # resultType: resulting type from op. e.g. "boolean"
+    # exprTypes: array of types of expressions required for arguments
+    # moreExprType: type of n more expressions (like "and" that takes n arguments)
+    # prefix: true if name goes before LHS value
+    # lhsCond: optional condition function on LHS expr that tests if applicable (for "within" which only applies to hierarchical tables)
     @opItems = []
 
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
-    addOpItem = (op, name, resultType, exprTypes, moreExprType, prefix=false) =>
-      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType, prefix: prefix)
+    addOpItem = (op, name, resultType, exprTypes, moreExprType, prefix=false, lhsCond) =>
+      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType, prefix: prefix, lhsCond: lhsCond)
 
     # TODO n?
     addOpItem("= any", "is any of", "boolean", ["text", "text[]"])
@@ -72,34 +80,35 @@ module.exports = class ExprUtils
     addOpItem("-", "-", "number", ["number", "number"])
     addOpItem("/", "/", "number", ["number", "number"])
 
+    addOpItem("within", "is", "boolean", ["id", "id"], null, false, (lhsExpr) => @schema.getTable(lhsExpr.table).ancestry?)
+    addOpItem("=", "is", "boolean", ["id", "id"], null, false)
+
     addOpItem("~*", "matches", "boolean", ["text", "text"])
     addOpItem("not", "is false", "boolean", ["boolean"])
     addOpItem("is null", "is blank", "boolean", [null])
     addOpItem("is not null", "is not blank", "boolean", [null])
 
-  # Search can contain resultType, exprTypes and op. resultType can be an array of options
-  # Results are array of { name:, op:, resultType:, exprTypes: [array of exprTypes], moreExprType: exprType of further arguments, prefix: true to put op before expr }
+
+  # Search can contain resultTypes, lhsExpr, op. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
+  # Results are array of opItems.
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
-      if search.resultType 
-        if _.isArray(search.resultType)
-          if opItem.resultType not in search.resultType
-            return false
-        else if opItem.resultType != search.resultType
+      if search.resultTypes
+        if opItem.resultType not in search.resultTypes
           return false
 
       if search.op and opItem.op != search.op
         return false
 
       # Handle list of specified types
-      if search.exprTypes
-        for exprType, i in search.exprTypes
-          if i < opItem.exprTypes.length
-            if exprType and opItem.exprTypes[i] and exprType != opItem.exprTypes[i]
-              return false
-          else if opItem.moreExprType
-            if exprType and exprType != opItem.moreExprType
-              return false
+      if search.lhsExpr
+        lhsType = @getExprType(search.lhsExpr)
+        if opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType 
+          return false
+
+      # Check lhsCond
+      if search.lhsExpr and opItem.lhsCond and not opItem.lhsCond(search.lhsExpr)
+        return false
 
       return true
 

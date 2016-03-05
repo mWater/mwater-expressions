@@ -2,7 +2,7 @@ _ = require 'lodash'
 
 # Schema for a database. Immutable.
 # Stores tables with columns (possibly in nested sections).
-# See https://github.com/mWater/mwater-expressions/wiki/Schema-and-Types for details of format
+# See docs/Schema-and-Types for details of format
 module.exports = class Schema
   constructor: (json) ->
     @tables = []

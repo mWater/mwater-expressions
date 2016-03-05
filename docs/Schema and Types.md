@@ -21,6 +21,8 @@ _base is optional.
 
 `ordering`: column with natural ordering (optional). Can be JsonQL expression with `{alias}` for table alias
 
+`ancestry`: column with jsonb array of primary keys, including self. Makes table hierarchical.
+
 `contents`: array of content items (columns, sections and joins) of the table
 
 `jsonql`: Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server. 

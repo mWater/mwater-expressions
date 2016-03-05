@@ -26,6 +26,16 @@ describe "ExprUtils", ->
   it "getExprTable", ->
     assert.equal @exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz"
 
+  describe "findMatchingOpItems", ->
+    it "finds = for number", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "number" })[0].op, "="
+
+    it "first = for id type non-hierarchical", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "="
+
+    it "first within for id type non-hierarchical", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "thier" })[0].op, "within"
+
   describe "getAggrs", ->
     beforeEach ->
       @schema = new Schema()

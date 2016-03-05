@@ -88,7 +88,7 @@ describe "ExprCleaner", ->
       expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
 
-    it "allows null unary expressions", ->
+    it "allows null=wildcard unary expressions", ->
       expr = { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]}
       compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
 
@@ -361,7 +361,7 @@ describe "ExprCleaner", ->
       expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
       expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
       value = { type: "logical", table: "t1", op: "and", exprs: [expr1, expr2] }      
-
+      debugger
       @clean(
         value,
         { 
