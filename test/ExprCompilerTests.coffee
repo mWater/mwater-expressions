@@ -670,17 +670,24 @@ describe "ExprCompiler", ->
           op: "within"
           exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id", idTable: "thier", value: "123" }]
         }
-        {
+        { 
           type: "op"
-          op: "@>"
+          op: "in"
           exprs: [
-            { 
+            { type: "field", tableAlias: "T1", column: "primary" }
+            {
               type: "scalar"
-              expr: { type: "field", tableAlias: "subwithin", column: "path" }
+              expr: { type: "field", tableAlias: "subwithin", column: "primary" }
               from: { type: "table", table: "thier", alias: "subwithin" }
-              where: { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "primary" }, { type: "field", tableAlias: "T1", column: "primary" }] }
+              where: {
+                type: "op"
+                op: "@>"
+                exprs: [
+                  { type: "field", tableAlias: "subwithin", column: "path" }
+                  { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "json_build_array", exprs: [{ type: "literal", value: "123" }] }] }
+                ]
+              } 
             }
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "json_build_array", exprs: [{ type: "literal", value: "123" }] }] }
           ]
         }
       ) 
