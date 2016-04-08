@@ -10,7 +10,7 @@ ColumnNotFoundException = require '../src/ColumnNotFoundException'
 
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
-
+ 
 describe "ExprCompiler", ->
   beforeEach ->
     @ec = new ExprCompiler(fixtures.simpleSchema())
