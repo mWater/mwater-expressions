@@ -443,3 +443,27 @@ module.exports = class ExprUtils
         throw new Error("Invalid lhs type for op between")
 
     return lhsType
+
+  # Get a list of column ids of expression table that are referenced in a an expression
+  # Useful to know which fields and joins are used. Does not follow joins, beyond including 
+  # the first join (which is a column in the start table).
+  # Function does not require a schema, so schema can be null/undefined in constructor
+  getImmediateReferencedColumns: (expr) ->
+    cols = []
+
+    if not expr
+      return cols
+
+    switch expr.type
+      when "field"
+        cols.push(expr.column)
+      when "op"
+        for subexpr in expr.exprs
+          cols = cols.concat(@getImmediateReferencedColumns(subexpr))
+      when "case"
+        for subcase in expr.cases
+          cols = cols.concat(@getImmediateReferencedColumns(subcase.when))
+          cols = cols.concat(@getImmediateReferencedColumns(subcase.then))
+        cols = cols.concat(@getImmediateReferencedColumns(expr.else))
+
+    return _.uniq(cols)

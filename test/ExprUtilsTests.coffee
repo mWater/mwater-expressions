@@ -252,3 +252,33 @@ describe "ExprUtils", ->
       assert.equal opItem.op, "= any"
       assert.equal opItem.exprTypes[0], "text"
 
+  describe "getImmediateReferencedColumns", ->
+    it "gets field", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "xyz", column: "f1" })
+      assert.deepEqual(cols, ["f1"])
+
+    it "gets first join", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f1" }]})
+      assert.deepEqual(cols, ["f1"])
+
+    it "recurses into ops", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f2" }]})
+      assert.deepEqual(cols, ["f1", "f2"])
+
+    it "includes cases", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ 
+        type: "case"
+        cases: [
+          {
+            when: { type: "field", table: "xyz", column: "f1" }
+            then: { type: "field", table: "xyz", column: "f2" }
+          }
+        ]
+        else: { type: "field", table: "xyz", column: "f3" }
+      })
+
+      assert.deepEqual(cols, ["f1", "f2", "f3"])
+
+    it "de-duplicates", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f1" }]})
+      assert.deepEqual(cols, ["f1"])
