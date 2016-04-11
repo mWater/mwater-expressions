@@ -314,6 +314,8 @@ module.exports = class ExprUtils
         return @localizeString(@schema.getTable(expr.table).name, locale)
       when "op"
         return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + expr.op + " ")
+      when "case"
+        return @summarizeCaseExpr(expr, locale)
       when "literal"
         return expr.value + ""
       else
@@ -340,6 +342,17 @@ module.exports = class ExprUtils
       str = str.substring(0, str.length - 3)
     else
       str += @summarizeExpr(expr.expr, locale)
+
+    return str
+
+  summarizeCaseExpr: (expr, locale) ->
+    str = "If"
+    for c in expr.cases
+      str += " " + @summarizeExpr(c.when)
+      str += " Then " + @summarizeExpr(c.then)
+
+    if expr.else
+      str += " Else " + @summarizeExpr(expr.else)
 
     return str
 

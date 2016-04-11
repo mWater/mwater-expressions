@@ -179,6 +179,19 @@ describe "ExprUtils", ->
       opExpr = { type: "op", op: "+", exprs: [fieldExpr, literalExpr]}
       assert.equal @exprUtils.summarizeExpr(opExpr), "Number + 5"
 
+    it "summarizes case with else", ->
+      expr = { 
+        type: "case"
+        cases: [
+          {
+            when: { type: "field", table: "t1", column: "boolean" }
+            then: { type: "field", table: "t1", column: "text" }
+          }
+        ]
+        else: { type: "field", table: "t1", column: "text" }
+      }      
+      assert.equal @exprUtils.summarizeExpr(expr), "If Boolean Then Text Else Text"
+
     # TODO readd
     # it "uses named expression when matching one present", ->
     #   # Add named expression
