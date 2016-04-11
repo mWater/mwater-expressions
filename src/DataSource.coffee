@@ -3,7 +3,6 @@ async = require 'async'
 
 # Fetches data for queries
 module.exports = class DataSource
-
   # Performs a single query. Calls cb with rows
   performQuery: (query, cb) ->
     throw new Error("Not implemented")
