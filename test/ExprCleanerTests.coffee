@@ -16,219 +16,220 @@ describe "ExprCleaner", ->
     @clean = (expr, expected, options) =>
       compare(@exprCleaner.cleanExpr(expr, options), expected)
 
-  it "nulls if wrong table", ->
-    assert.isNull @exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, table: "t2")
-
-  it "nulls if wrong type", ->
-    field = { type: "field", table: "t1", column: "enum" }
-    assert.isNull @exprCleaner.cleanExpr(field, types: ["boolean"])
-
-  it "nulls if wrong idTable", ->
-    field = { type: "id", table: "t1" }
-    assert @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t1")
-    assert.isNull @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t2")
-
-  describe "op", ->
-    it "preserves 'and' by cleaning child expressions with boolean type", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
-
-      compare(@exprCleaner.cleanExpr(expr), {
-        type: "op"
-        op: "and"
-        table: "t1"
-        exprs: [
-          # Removed
-          null
-          # Untouched
-          { type: "field", table: "t1", column: "boolean" }
-        ]})
-
-    it "simplifies and", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "field", table: "t1", column: "boolean" })
-
-      expr = { type: "op", op: "and", table: "t1", exprs: []}
-      compare(@exprCleaner.cleanExpr(expr), null)
-
-    it "allows empty 'and' children", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
-      compare(@exprCleaner.cleanExpr(expr), expr)
-
-    it "allows empty '+' children", ->
-      expr = { type: "op", op: "+", table: "t1", exprs: [{}, {}]}
-      compare(@exprCleaner.cleanExpr(expr), expr)
+  describe "cleanExpr", ->
+    it "nulls if wrong table", ->
+      assert.isNull @exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, table: "t2")
 
     it "nulls if wrong type", ->
-      expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
-      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), null)
+      field = { type: "field", table: "t1", column: "enum" }
+      assert.isNull @exprCleaner.cleanExpr(field, types: ["boolean"])
 
-    it "nulls if missing lhs of non-+/*/and/or expr", ->
-      expr = { type: "op", op: "= any", table: "t1", exprs: [null, {}]}
-      compare(@exprCleaner.cleanExpr(expr), null)
+    it "nulls if wrong idTable", ->
+      field = { type: "id", table: "t1" }
+      assert @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t1")
+      assert.isNull @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t2")
 
-      expr = { type: "op", op: "=", table: "t1", exprs: [null, {}]}
-      compare(@exprCleaner.cleanExpr(expr), null)
+    describe "op", ->
+      it "preserves 'and' by cleaning child expressions with boolean type", ->
+        expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
 
-      expr = { type: "op", op: "=", table: "t1", exprs: [null, null]}
-      compare(@exprCleaner.cleanExpr(expr), null)
+        compare(@exprCleaner.cleanExpr(expr), {
+          type: "op"
+          op: "and"
+          table: "t1"
+          exprs: [
+            # Removed
+            null
+            # Untouched
+            { type: "field", table: "t1", column: "boolean" }
+          ]})
 
-    it "does not allow enum = enumset", ->
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
-      compare(@exprCleaner.cleanExpr(expr).exprs[1], null)
+      it "simplifies and", ->
+        expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "field", table: "t1", column: "boolean" })
 
-    it "defaults op if lhs changes", ->
-      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+        expr = { type: "op", op: "and", table: "t1", exprs: []}
+        compare(@exprCleaner.cleanExpr(expr), null)
 
-    it "removes extra exprs", ->
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null, null]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+      it "allows empty 'and' children", ->
+        expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
+        compare(@exprCleaner.cleanExpr(expr), expr)
 
-    it "adds missing exprs", ->
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+      it "allows empty '+' children", ->
+        expr = { type: "op", op: "+", table: "t1", exprs: [{}, {}]}
+        compare(@exprCleaner.cleanExpr(expr), expr)
 
-    it "allows null=wildcard unary expressions", ->
-      expr = { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
+      it "nulls if wrong type", ->
+        expr = { type: "op", op: "and", table: "t1", exprs: [{}, {}]}
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"]), null)
 
-    it "removes invalid enums on rhs", ->
-      expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a", "x"] }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}) # x is gone
+      it "nulls if missing lhs of non-+/*/and/or expr", ->
+        expr = { type: "op", op: "= any", table: "t1", exprs: [null, {}]}
+        compare(@exprCleaner.cleanExpr(expr), null)
 
-    it "removes invalid id table on rhs", ->
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t1", value: "123" }]}
-      compare(@exprCleaner.cleanExpr(expr), expr)
+        expr = { type: "op", op: "=", table: "t1", exprs: [null, {}]}
+        compare(@exprCleaner.cleanExpr(expr), null)
 
-      debugger
-      expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t2", value: "123" }]}
-      compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, null]})
+        expr = { type: "op", op: "=", table: "t1", exprs: [null, null]}
+        compare(@exprCleaner.cleanExpr(expr), null)
 
-  describe "case", ->
-    it "cleans else", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
-        else: { type: "literal", valueType: "text", value: "abc" }
-      }
-      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
-        {
+      it "does not allow enum = enumset", ->
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
+        compare(@exprCleaner.cleanExpr(expr).exprs[1], null)
+
+      it "defaults op if lhs changes", ->
+        expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+
+      it "removes extra exprs", ->
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null, null]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+
+      it "adds missing exprs", ->
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]})
+
+      it "allows null=wildcard unary expressions", ->
+        expr = { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }, null]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "is null", table: "t1", exprs: [{ type: "field", table: "t1", column: "number" }]})
+
+      it "removes invalid enums on rhs", ->
+        expr = { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a", "x"] }]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "= any", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}) # x is gone
+
+      it "removes invalid id table on rhs", ->
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t1", value: "123" }]}
+        compare(@exprCleaner.cleanExpr(expr), expr)
+
+        debugger
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t2", value: "123" }]}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, null]})
+
+    describe "case", ->
+      it "cleans else", ->
+        expr = { 
+          type: "case"
+          table: "t1"
+          cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
+          else: { type: "literal", valueType: "text", value: "abc" }
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
+          {
+            type: "case"
+            table: "t1"
+            cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
+            else: null
+          })
+
+      it "cleans whens as booleans", ->
+        expr = { 
+          type: "case"
+          table: "t1"
+          cases: [{ when: { type: "literal", valueType: "number", value: 123 }, then: { type: "literal", valueType: "number", value: 123 }}]
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
+          {
+            type: "case"
+            table: "t1"
+            cases: [{ when: null, then: { type: "literal", valueType: "number", value: 123 }}]
+            else: null
+          })
+
+      it "simplifies if no cases", ->
+        expr = { 
+          type: "case"
+          table: "t1"
+          cases: []
+          else: { type: "literal", valueType: "text", value: "abc" }
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
+          { type: "literal", valueType: "text", value: "abc" })
+
+      it "cleans thens as specified type", ->
+        expr = { 
           type: "case"
           table: "t1"
           cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
           else: null
-        })
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
+          {
+            type: "case"
+            table: "t1"
+            cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
+            else: null
+          })
 
-    it "cleans whens as booleans", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "number", value: 123 }, then: { type: "literal", valueType: "number", value: 123 }}]
-      }
-      compare(@exprCleaner.cleanExpr(expr, types: ["number"]), 
-        {
+      it "cleans thens as specified enumValueIds", ->
+        expr = { 
           type: "case"
           table: "t1"
-          cases: [{ when: null, then: { type: "literal", valueType: "number", value: 123 }}]
+          cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "enum", value: "x" }}]
           else: null
-        })
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["enum"], enumValueIds: ['a']), 
+          {
+            type: "case"
+            table: "t1"
+            cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
+            else: null
+          })
 
-    it "simplifies if no cases", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: []
-        else: { type: "literal", valueType: "text", value: "abc" }
-      }
-      compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
-        { type: "literal", valueType: "text", value: "abc" })
+    describe "literal", ->
+      it "cleans invalid literal enum valueIds", ->
+        expr = { type: "literal", valueType: "enum", value: "a" }
+        compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
+        compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
+        compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b", "c"]), expr)
 
-    it "cleans thens as specified type", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
-        else: null
-      }
-      compare(@exprCleaner.cleanExpr(expr, types: ["text"]), 
-        {
-          type: "case"
-          table: "t1"
-          cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
-          else: null
-        })
+      it "cleans invalid field enum valueIds", ->
+        expr = { type: "field", table: "t1", column: "enum" }
+        compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
+        compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
 
-    it "cleans thens as specified enumValueIds", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "enum", value: "x" }}]
-        else: null
-      }
-      compare(@exprCleaner.cleanExpr(expr, types: ["enum"], enumValueIds: ['a']), 
-        {
-          type: "case"
-          table: "t1"
-          cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: null }]
-          else: null
-        })
+    describe "scalar", ->
+      it "leaves valid one alone", ->
+        fieldExpr = { type: "field", table: "t2", column: "number" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
 
-  describe "literal", ->
-    it "cleans invalid literal enum valueIds", ->
-      expr = { type: "literal", valueType: "enum", value: "a" }
-      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
-      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b", "c"]), expr)
+        compare(scalarExpr, @exprCleaner.cleanExpr(scalarExpr))
 
-    it "cleans invalid field enum valueIds", ->
-      expr = { type: "field", table: "t1", column: "enum" }
-      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["a", "b"]), expr)
-      compare(@exprCleaner.cleanExpr(expr, enumValueIds: ["b"]), null)
+      it "strips aggr if not needed", ->
+        fieldExpr = { type: "field", table: "t2", column: "number" }
+        scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        assert not scalarExpr.aggr
 
-  describe "scalar", ->
-    it "leaves valid one alone", ->
-      fieldExpr = { type: "field", table: "t2", column: "number" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+      it "defaults aggr if needed and wrong", ->
+        fieldExpr = { type: "field", table: "t2", column: "text" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        assert.equal scalarExpr.aggr, "last"
 
-      compare(scalarExpr, @exprCleaner.cleanExpr(scalarExpr))
+      it "strips where if wrong table", ->
+        fieldExpr = { type: "field", table: "t2", column: "number" }
+        whereExpr = { type: "logical", table: "t1" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        assert.equal scalarExpr.aggr, "sum"
+        assert not scalarExpr.where
 
-    it "strips aggr if not needed", ->
-      fieldExpr = { type: "field", table: "t2", column: "number" }
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      assert not scalarExpr.aggr
+      it "strips if invalid join", ->
+        fieldExpr = { type: "field", table: "t2", column: "number" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        assert not scalarExpr
 
-    it "defaults aggr if needed and wrong", ->
-      fieldExpr = { type: "field", table: "t2", column: "text" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      assert.equal scalarExpr.aggr, "last"
+      it "simplifies if no joins", ->
+        fieldExpr = { type: "field", table: "t1", column: "number" }
+        scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        compare(fieldExpr, scalarExpr)
 
-    it "strips where if wrong table", ->
-      fieldExpr = { type: "field", table: "t2", column: "number" }
-      whereExpr = { type: "logical", table: "t1" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      assert.equal scalarExpr.aggr, "sum"
-      assert not scalarExpr.where
-
-    it "strips if invalid join", ->
-      fieldExpr = { type: "field", table: "t2", column: "number" }
-      scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      assert not scalarExpr
-
-    it "simplifies if no joins", ->
-      fieldExpr = { type: "field", table: "t1", column: "number" }
-      scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      compare(fieldExpr, scalarExpr)
-
-    it "removes aggr from null expr", ->
-      scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: null, aggr: "sum" }
-      scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      assert not scalarExpr.aggr
+      it "removes aggr from null expr", ->
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: null, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        assert not scalarExpr.aggr
 
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
