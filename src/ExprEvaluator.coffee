@@ -16,3 +16,8 @@ module.exports = class ExprEvaluator
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
+
+
+    # TODO distance
+    # TODO ops
+    # TODO case

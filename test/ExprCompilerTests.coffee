@@ -283,6 +283,9 @@ describe "ExprCompiler", ->
       @datetime1 = { type: "literal", valueType: "datetime", value: "2014-01-01T01:02:03Z" }
       @datetime1JsonQL = { type: "literal", value: "2014-01-01T01:02:03Z" }
 
+      @geometry = { type: "field", table: "t1", column: "geometry" }
+      @geometryJsonQL = { type: "field", tableAlias: "T1", column: "geometry" }
+
     it "compiles and", ->
       @compile(
         { 
@@ -1013,6 +1016,24 @@ describe "ExprCompiler", ->
             ]
           }
         )
+
+    it "distance", ->
+      @compile(
+        {
+          type: "op"
+          op: "distance"
+          exprs: [@geometry, @geometry]
+        }
+        # ST_Distance_Sphere(ST_Transform(x, 4326), ST_Transform(y, 4326))
+        {
+          type: "op"
+          op: "ST_Distance_Sphere"
+          exprs: [
+            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
+            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
+          ]
+        }
+      )
 
   describe "custom jsonql", ->
     describe "table", ->

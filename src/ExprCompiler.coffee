@@ -594,6 +594,19 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'distance'
+        if not compiledExprs[0] or not compiledExprs[1]
+          return null
+
+        return {
+          type: "op"
+          op: "ST_Distance_Sphere"
+          exprs: [
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[1], 4326] }
+          ]
+        }
+
       else
         throw new Error("Unknown op #{expr.op}")
 
