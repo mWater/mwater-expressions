@@ -69,6 +69,7 @@ module.exports = class ExprUtils
 
     addOpItem("latitude", "latitude of", "number", ["geometry"], null, true)
     addOpItem("longitude", "longitude of", "number", ["geometry"], null, true)
+    addOpItem("distance", "distance between", "number", ["geometry", "geometry"], null, true)
 
     # And/or is a list of booleans
     addOpItem("and", "and", "boolean", [], "boolean")
