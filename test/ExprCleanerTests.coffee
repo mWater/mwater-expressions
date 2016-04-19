@@ -101,9 +101,12 @@ describe "ExprCleaner", ->
         expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t1", value: "123" }]}
         compare(@exprCleaner.cleanExpr(expr), expr)
 
-        debugger
         expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, { type: "literal", valueType: "id", idTable: "t2", value: "123" }]}
         compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "=", table: "t1", exprs: [{ type: "id", table: "t1" }, null]})
+
+      it "allows empty lhs for prefix-type expressions", ->
+        expr = { type: "op", op: "distance", table: "t1", exprs: []}
+        compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "distance", table: "t1", exprs: [null, null]})
 
     describe "case", ->
       it "cleans else", ->

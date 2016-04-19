@@ -115,12 +115,12 @@ module.exports = class ExprCleaner
 
         return expr
       else 
-        # Need LHS for a normal op.
-        if not expr.exprs[0]
-          return null
-
         # Get opItem
         opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: expr.exprs[0], resultTypes: options.types)
+
+        # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
+        if not expr.exprs[0] and not opItems[0]?.prefix
+          return null
 
         # If ambiguous, just clean subexprs and return
         if opItems.length > 1

@@ -12,18 +12,20 @@ module.exports = class ExprUtils
     # moreExprType: type of n more expressions (like "and" that takes n arguments)
     # prefix: true if name goes before LHS value
     # lhsCond: optional condition function on LHS expr that tests if applicable (for "within" which only applies to hierarchical tables)
+    # rhsLiteral: prefer rhs literal
+    # joiner: string to put between exprs when prefix type
     @opItems = []
 
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
-    addOpItem = (op, name, resultType, exprTypes, moreExprType, prefix=false, lhsCond) =>
-      @opItems.push(op: op, name: name, resultType: resultType, exprTypes: exprTypes, moreExprType: moreExprType, prefix: prefix, lhsCond: lhsCond)
+    addOpItem = (item) =>
+      @opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true }))
 
     # TODO n?
-    addOpItem("= any", "is any of", "boolean", ["text", "text[]"])
-    addOpItem("= any", "is any of", "boolean", ["enum", "enumset"])
+    addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["text", "text[]"])
+    addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["enum", "enumset"])
 
-    addOpItem("contains", "includes all of", "boolean", ["enumset", "enumset"])
+    addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["enumset", "enumset"])
     # addOpItem("intersects", "includes any of", "boolean", ["enumset", "enumset"]) Painful to implement...
 
     # Add relative dates
@@ -39,60 +41,60 @@ module.exports = class ExprUtils
       ['last365days', 'is in last 365 days']
     ]
     for relativeDateOp in relativeDateOps
-      addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['date'])
-      addOpItem(relativeDateOp[0], relativeDateOp[1], "boolean", ['datetime'])
+      addOpItem(op: relativeDateOp[0], name: relativeDateOp[1], resultType: "boolean", exprTypes: ['date'])
+      addOpItem(op: relativeDateOp[0], name: relativeDateOp[1], resultType: "boolean", exprTypes: ['datetime'])
 
     # Add in ranges
-    addOpItem("between", "is between", "boolean", ["date", "date", "date"])
-    addOpItem("between", "is between", "boolean", ["datetime", "datetime", "datetime"])
+    addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["date", "date", "date"])
+    addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["datetime", "datetime", "datetime"])
 
-    addOpItem("=", "is", "boolean", ["number", "number"])
-    addOpItem("=", "is", "boolean", ["text", "text"])
-    addOpItem("=", "is", "boolean", ["enum", "enum"])
-    addOpItem("=", "is", "boolean", ["date", "date"])
-    addOpItem("=", "is", "boolean", ["datetime", "datetime"])
-    addOpItem("=", "is", "boolean", ["boolean", "boolean"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["number", "number"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["text", "text"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["enum", "enum"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["date", "date"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["datetime", "datetime"])
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["boolean", "boolean"])
 
-    addOpItem("<>", "is not", "boolean", ["text", "text"])
-    addOpItem("<>", "is not", "boolean", ["enum", "enum"])
-    addOpItem("<>", "is not", "boolean", ["date", "date"])
-    addOpItem("<>", "is not", "boolean", ["datetime", "datetime"])
-    addOpItem("<>", "is not", "boolean", ["boolean", "boolean"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["text", "text"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["enum", "enum"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["date", "date"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["datetime", "datetime"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["boolean", "boolean"])
 
-    addOpItem("<>", "is not", "boolean", ["number", "number"])
-    addOpItem(">", "is greater than", "boolean", ["number", "number"])
-    addOpItem("<", "is less than", "boolean", ["number", "number"])
-    addOpItem(">=", "is greater or equal to", "boolean", ["number", "number"])
-    addOpItem("<=", "is less or equal to", "boolean", ["number", "number"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["number", "number"])
+    addOpItem(op: ">", name: "is greater than", resultType: "boolean", exprTypes: ["number", "number"])
+    addOpItem(op: "<", name: "is less than", resultType: "boolean", exprTypes: ["number", "number"])
+    addOpItem(op: ">=", name: "is greater or equal to", resultType: "boolean", exprTypes: ["number", "number"])
+    addOpItem(op: "<=", name: "is less or equal to", resultType: "boolean", exprTypes: ["number", "number"])
 
-    addOpItem("between", "is between", "boolean", ["number", "number", "number"])
+    addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["number", "number", "number"])
 
-    addOpItem("latitude", "latitude of", "number", ["geometry"], null, true)
-    addOpItem("longitude", "longitude of", "number", ["geometry"], null, true)
-    addOpItem("distance", "distance between", "number", ["geometry", "geometry"], null, true)
+    addOpItem(op: "latitude", name: "latitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
+    addOpItem(op: "longitude", name: "longitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
+    addOpItem(op: "distance", name: "distance between", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")
 
     # And/or is a list of booleans
-    addOpItem("and", "and", "boolean", [], "boolean")
-    addOpItem("or", "or", "boolean", [], "boolean")
+    addOpItem(op: "and", name: "and", resultType: "boolean", exprTypes: [], moreExprType: "boolean")
+    addOpItem(op: "or", name: "or", resultType: "boolean", exprTypes: [], moreExprType: "boolean")
 
     for op in ['+', '*']
-      addOpItem(op, op, "number", [], "number")
+      addOpItem(op: op, name: op, resultType: "number", exprTypes: [], moreExprType: "number")
 
-    addOpItem("-", "-", "number", ["number", "number"])
-    addOpItem("/", "/", "number", ["number", "number"])
+    addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "number"])
+    addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
-    addOpItem("within", "in", "boolean", ["id", "id"], null, false, (lhsExpr) => 
+    addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
       if lhsIdTable
         return @schema.getTable(lhsIdTable).ancestry?
       return false
     )
-    addOpItem("=", "is", "boolean", ["id", "id"], null, false)
+    addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
 
-    addOpItem("~*", "matches", "boolean", ["text", "text"])
-    addOpItem("not", "is false", "boolean", ["boolean"])
-    addOpItem("is null", "is blank", "boolean", [null])
-    addOpItem("is not null", "is not blank", "boolean", [null])
+    addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
+    addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
+    addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [null])
+    addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [null])
 
 
   # Search can contain resultTypes, lhsExpr, op. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
