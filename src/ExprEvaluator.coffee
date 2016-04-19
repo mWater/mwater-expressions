@@ -22,6 +22,8 @@ module.exports = class ExprEvaluator
         return row.getPrimaryKey()
       when "case"
         return @evaluateCase(expr, row)
+      when "scalar"
+        return @evaluateScalar(expr, row)
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
@@ -132,6 +134,15 @@ module.exports = class ExprEvaluator
         return @evaluate(acase.then, row)
 
     return @evaluate(expr.else, row)        
+
+  evaluateScalar: (expr, row) ->
+    if expr.aggr
+      throw new Error("Aggr not supported")
+
+    if expr.joins.length > 1
+      throw new Error("Multi-joins not supported")
+
+    return @evaluate(expr.expr, row.getField(expr.joins[0]))
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->
