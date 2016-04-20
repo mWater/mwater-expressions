@@ -142,7 +142,12 @@ module.exports = class ExprEvaluator
     if expr.joins.length > 1
       throw new Error("Multi-joins not supported")
 
-    return @evaluate(expr.expr, row.getField(expr.joins[0]))
+    # Get inner row
+    innerRow = row.getField(expr.joins[0])
+    if innerRow
+      return @evaluate(expr.expr, innerRow)
+    else 
+      return null
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->

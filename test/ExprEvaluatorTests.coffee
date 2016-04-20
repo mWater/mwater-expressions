@@ -223,3 +223,6 @@ describe "ExprEvaluator", ->
   describe "scalar", ->
     it "n-1 scalar", ->
       @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: { getField: (col) -> (if col == "y" then 4) }}, 4)
+
+    it "n-1 null scalar", ->
+      @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: null }, null)
