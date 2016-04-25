@@ -241,6 +241,95 @@ describe "ExprCompiler", ->
           }
         })
 
+  describe "score", ->
+    it "scores enum", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enum" }
+          scores: { a: 4 }
+        }
+        # case T1.enum when 'a' then 4 else 0 end
+        {
+          type: "case"
+          input: { type: "field", tableAlias: "T1", column: "enum" }
+          cases: [
+            { when: { type: "literal", value: "a" }, then: { type: "literal", value: 4 } }
+          ]
+          else: { type: "literal", value: 0 }
+        }
+      )
+
+    it "scores empty enum", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enum" }
+          scores: { }
+        }
+        { type: "literal", value: 0 }
+      )
+
+    it "scores enumset", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enumset" }
+          scores: { a: 3, b: 4 }
+        }
+        # case when T1.enum  then 4 else 0 end
+        {
+          type: "op"
+          op: "+"
+          exprs: [
+            {
+              type: "case"
+              cases: [
+                { 
+                  when: {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: ["a"] }] }]}
+                    ]
+                  }
+                  then: { type: "literal", value: 3 } 
+                }
+              ]
+              else: { type: "literal", value: 0 }
+            }
+            {
+              type: "case"
+              cases: [
+                { 
+                  when: {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: ["b"] }] }]}
+                    ]
+                  }
+                  then: { type: "literal", value: 4 } 
+                }
+              ]
+              else: { type: "literal", value: 0 }
+            }
+          ]
+        }
+      )
+
+    it "scores empty enumset", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enumset" }
+          scores: { }
+        }
+        { type: "literal", value: 0 }
+      )
+
   it "simplifies scalar join to id where toColumn is primary key", ->
     @compile({ 
       type: "scalar", 

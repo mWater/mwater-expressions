@@ -213,8 +213,9 @@ module.exports = class ExprUtils
         if expr.cases[0]
           return @getExprType(expr.cases[0].then)
         return @getExprType(expr.else)
-
-      when "count"
+      when "score"
+        return "number"
+      when "count" # Deprecated
         return "count"
       else
         throw new Error("Not implemented for #{expr.type}")

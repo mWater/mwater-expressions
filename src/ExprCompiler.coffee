@@ -43,6 +43,8 @@ module.exports = class ExprCompiler
         compiledExpr = @compileOpExpr(options)
       when "case"
         compiledExpr = @compileCaseExpr(options)
+      when "score"
+        compiledExpr = @compileScoreExpr(options)
       when "count" # DEPRECATED
         compiledExpr = null
       when "comparison" # DEPRECATED
@@ -632,6 +634,58 @@ module.exports = class ExprCompiler
       return null
 
     return compiled
+
+  compileScoreExpr: (options) ->
+    expr = options.expr
+    exprUtils = new ExprUtils(@schema)
+
+    # If empty, literal 0
+    if _.isEmpty(expr.scores)
+      return { type: "literal", value: 0 }
+
+    # Get type of input
+    inputType = exprUtils.getExprType(expr.input)
+
+    switch inputType
+      when "enum"
+        return {
+          type: "case"
+          input: { type: "field", tableAlias: "T1", column: "enum" }
+          cases: _.map(_.pairs(expr.scores), (pair) =>
+            { when: { type: "literal", value: pair[0] }, then: { type: "literal", value: pair[1] } }
+          )
+          else: { type: "literal", value: 0 }
+        }
+      when "enumset"
+        return {
+          type: "op"
+          op: "+"
+          exprs: _.map(_.pairs(expr.scores), (pair) =>
+            {
+              type: "case"
+              cases: [
+                { 
+                  when: {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [@compileExpr(expr: expr.input, tableAlias: options.tableAlias)] }] }
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: [pair[0]] }] }]}
+                    ]
+                  }
+                  then: { type: "literal", value: pair[1] } 
+                }
+              ]
+              else: { type: "literal", value: 0 }
+            }
+          )
+        }
+
+      # Null if no expression
+      else
+        return null
+
+
 
   compileComparisonExpr: (options) ->
     expr = options.expr
