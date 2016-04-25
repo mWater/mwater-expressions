@@ -178,6 +178,22 @@ describe "ExprCleaner", ->
             else: null
           })
 
+    describe "score", ->
+      it "cleans input", ->
+        expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "text" }, scores: {} }
+        @clean(expr, { type: "score", table: "t1", input: null, scores: {} })
+
+        expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {} }
+        @clean(expr, expr)
+
+      it "removes invalid scores", ->
+        expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: { a: 3, nonsuch: 4 } }
+        @clean(expr, { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: { a: 3 } })
+
+      it "removes all scores if no input", ->
+        expr = { type: "score", table: "t1", input: null, scores: { a: 3, nonsuch: 4 } }
+        @clean(expr, { type: "score", table: "t1", input: null, scores: { } })
+
     describe "literal", ->
       it "cleans invalid literal enum valueIds", ->
         expr = { type: "literal", valueType: "enum", value: "a" }

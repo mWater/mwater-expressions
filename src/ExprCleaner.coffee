@@ -67,6 +67,8 @@ module.exports = class ExprCleaner
         return @cleanCaseExpr(expr, options)
       when "id"
         return @cleanIdExpr(expr, options)
+      when "score"
+        return @cleanScoreExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -256,6 +258,23 @@ module.exports = class ExprCleaner
     # Null if wrong table
     if options.idTable and expr.table != options.idTable
       return null
+    return expr
+
+  cleanScoreExpr: (expr, options) ->
+    # Clean input
+    expr = _.extend({}, expr, input: @cleanExpr(expr.input, { types: ['enum', 'enumset' ] }))
+
+    # Remove scores if no input
+    if not expr.input
+      expr = _.extend({}, expr, scores: {})
+
+    # Remove unknown enum values
+    if expr.input
+      enumValues = @exprUtils.getExprEnumValues(expr.input)
+      expr = _.extend({}, expr, scores: _.pick(expr.scores, (value, key) =>
+        return _.findWhere(enumValues, id: key)
+      ))
+
     return expr
 
   cleanComparisonExpr: (expr, options) =>
