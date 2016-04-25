@@ -322,6 +322,8 @@ module.exports = class ExprUtils
         return @summarizeCaseExpr(expr, locale)
       when "literal"
         return expr.value + ""
+      when "score"
+        return "Score of " + @summarizeExpr(expr.input, locale)
       else
         throw new Error("Unsupported type #{expr.type}")
 
