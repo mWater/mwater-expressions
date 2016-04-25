@@ -186,13 +186,28 @@ describe "ExprCleaner", ->
         expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {} }
         @clean(expr, expr)
 
-      it "removes invalid scores", ->
+      it "removes invalid scores keys", ->
         expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: { a: 3, nonsuch: 4 } }
         @clean(expr, { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: { a: 3 } })
+
+      it "cleans score values", ->
+        expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+            a: { type: "field", table: "t1", column: "number" }
+          } 
+        }
+        # Untouched since was number
+        @clean(expr, expr)
+
+        expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+            a: { type: "field", table: "t1", column: "text" }
+          } 
+        }
+        @clean(expr, { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: { } })
 
       it "removes all scores if no input", ->
         expr = { type: "score", table: "t1", input: null, scores: { a: 3, nonsuch: 4 } }
         @clean(expr, { type: "score", table: "t1", input: null, scores: { } })
+
 
     describe "literal", ->
       it "cleans invalid literal enum valueIds", ->

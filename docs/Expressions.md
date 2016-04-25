@@ -76,4 +76,4 @@ Scores an enum or enumset by assigning and summing the scores for each value.
 - `type`: "score"
 - `table`: Table id of table
 - `input`: enum or enumset expression
-- `scores`: map of enum/enumset id to score
+- `scores`: map of enum/enumset id to score expression

@@ -268,11 +268,14 @@ module.exports = class ExprCleaner
     if not expr.input
       expr = _.extend({}, expr, scores: {})
 
-    # Remove unknown enum values
+    # Clean score values
+    expr = _.extend({}, expr, scores: _.mapValues(expr.scores, (scoreExpr) => @cleanExpr(scoreExpr, { table: expr.table, types: ['number']})))
+
+    # Remove unknown enum values 
     if expr.input
       enumValues = @exprUtils.getExprEnumValues(expr.input)
       expr = _.extend({}, expr, scores: _.pick(expr.scores, (value, key) =>
-        return _.findWhere(enumValues, id: key)
+        return _.findWhere(enumValues, id: key) and value?
       ))
 
     return expr

@@ -247,7 +247,9 @@ describe "ExprCompiler", ->
         { 
           type: "score"
           input: { type: "field", table: "t1", column: "enum" }
-          scores: { a: 4 }
+          scores: { 
+            a: { type: "literal", valueType: "number", value: 4 }
+          }
         }
         # case T1.enum when 'a' then 4 else 0 end
         {
@@ -275,7 +277,10 @@ describe "ExprCompiler", ->
         { 
           type: "score"
           input: { type: "field", table: "t1", column: "enumset" }
-          scores: { a: 3, b: 4 }
+          scores: { 
+            a: { type: "literal", valueType: "number", value: 3 }
+            b: { type: "literal", valueType: "number", value: 4 } 
+          }
         }
         # case when T1.enum  then 4 else 0 end
         {

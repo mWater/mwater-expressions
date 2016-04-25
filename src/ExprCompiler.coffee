@@ -652,7 +652,10 @@ module.exports = class ExprCompiler
           type: "case"
           input: { type: "field", tableAlias: "T1", column: "enum" }
           cases: _.map(_.pairs(expr.scores), (pair) =>
-            { when: { type: "literal", value: pair[0] }, then: { type: "literal", value: pair[1] } }
+            { 
+              when: { type: "literal", value: pair[0] }
+              then: @compileExpr(expr: pair[1], tableAlias: options.tableAlias) 
+            }
           )
           else: { type: "literal", value: 0 }
         }
@@ -673,7 +676,7 @@ module.exports = class ExprCompiler
                       { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: [pair[0]] }] }]}
                     ]
                   }
-                  then: { type: "literal", value: pair[1] } 
+                  then: @compileExpr(expr: pair[1], tableAlias: options.tableAlias) 
                 }
               ]
               else: { type: "literal", value: 0 }
@@ -684,8 +687,6 @@ module.exports = class ExprCompiler
       # Null if no expression
       else
         return null
-
-
 
   compileComparisonExpr: (options) ->
     expr = options.expr
