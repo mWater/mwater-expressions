@@ -69,6 +69,9 @@ module.exports = class ExprUtils
 
     addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["number", "number", "number"])
 
+    addOpItem(op: "round", name: "round", resultType: "number", exprTypes: ["number"], prefix: true)
+    addOpItem(op: "floor", name: "floor", resultType: "number", exprTypes: ["number"], prefix: true)
+    addOpItem(op: "ceiling", name: "ceiling", resultType: "number", exprTypes: ["number"], prefix: true)
     addOpItem(op: "latitude", name: "latitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
     addOpItem(op: "longitude", name: "longitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
     addOpItem(op: "distance", name: "distance between", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")

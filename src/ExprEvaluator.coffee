@@ -59,6 +59,12 @@ module.exports = class ExprEvaluator
         return _.contains(@evaluate(exprs[1], row), @evaluate(exprs[0], row))
       when "between"
         return @evaluate(exprs[0], row) >= @evaluate(exprs[1], row) and @evaluate(exprs[0], row) <= @evaluate(exprs[2], row)
+      when "round"
+        return Math.round(@evaluate(exprs[0], row))
+      when "floor"
+        return Math.floor(@evaluate(exprs[0], row))
+      when "ceiling"
+        return Math.ceil(@evaluate(exprs[0], row))
 
       when "today"
         date = @evaluate(exprs[0], row)
@@ -167,7 +173,7 @@ module.exports = class ExprEvaluator
         sum += @evaluate(expr.scores[input], row)
 
     return sum
-    
+
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->
   R = 6370986 # Radius of the earth in m

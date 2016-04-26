@@ -100,6 +100,16 @@ describe "ExprEvaluator", ->
     it "between", ->
       @testOp("between", [3, 2, 4], true)
 
+    it "round", ->
+      @testOp("round", [3.4], 3)
+      @testOp("round", [3.6], 4)
+
+    it "floor", ->
+      @testOp("floor", [3.6], 3)
+      
+    it "ceiling", ->
+      @testOp("ceiling", [3.6], 4)
+
     # it "contains", ->
     # Not supported
 

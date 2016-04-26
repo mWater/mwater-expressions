@@ -225,7 +225,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
-      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*"
+      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
