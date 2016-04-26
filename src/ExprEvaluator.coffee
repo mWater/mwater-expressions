@@ -24,6 +24,8 @@ module.exports = class ExprEvaluator
         return @evaluateCase(expr, row)
       when "scalar"
         return @evaluateScalar(expr, row)
+      when "score"
+        return @evaluateScore(expr, row)
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
@@ -149,6 +151,23 @@ module.exports = class ExprEvaluator
     else 
       return null
 
+  evaluateScore: (expr, row) ->
+    # Get input value
+    if not expr.input
+      return null
+
+    sum = 0
+    input = @evaluate(expr.input, row)
+    if _.isArray(input)
+      for val in input
+        if expr.scores[val]
+          sum += @evaluate(expr.scores[val], row)
+    else if input
+      if expr.scores[input]
+        sum += @evaluate(expr.scores[input], row)
+
+    return sum
+    
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->
   R = 6370986 # Radius of the earth in m

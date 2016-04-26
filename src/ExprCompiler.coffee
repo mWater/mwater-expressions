@@ -650,7 +650,7 @@ module.exports = class ExprCompiler
       when "enum"
         return {
           type: "case"
-          input: { type: "field", tableAlias: "T1", column: "enum" }
+          input: @compileExpr(expr: expr.input, tableAlias: options.tableAlias)
           cases: _.map(_.pairs(expr.scores), (pair) =>
             { 
               when: { type: "literal", value: pair[0] }

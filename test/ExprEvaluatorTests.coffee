@@ -220,6 +220,32 @@ describe "ExprEvaluator", ->
       @check(expr, { y: true }, 2)
       @check(expr, { }, 3)
 
+  describe "score", ->
+    it "does enum", ->
+      expr = {
+        type: "score"
+        input: { type: "field", table: "t1", column: "x" }
+        scores: {
+          a: { type: "literal", valueType: "number", value: 3 }
+          b: { type: "literal", valueType: "number", value: 4 }
+        }
+      }
+      @check(expr, { x: "a" }, 3)
+      @check(expr, { x: "c" }, 0)
+
+    it "does enumset", ->
+      expr = {
+        type: "score"
+        input: { type: "field", table: "t1", column: "x" }
+        scores: {
+          a: { type: "literal", valueType: "number", value: 3 }
+          b: { type: "literal", valueType: "number", value: 4 }
+        }
+      }
+      @check(expr, { x: ["a", "b"] }, 7)
+      @check(expr, { x: ["a", "c"] }, 3)
+      @check(expr, { x: null }, 0)
+
   describe "scalar", ->
     it "n-1 scalar", ->
       @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: { getField: (col) -> (if col == "y" then 4) }}, 4)
