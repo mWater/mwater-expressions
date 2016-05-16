@@ -173,8 +173,8 @@ describe "ExprCompiler", ->
             right: { type: "table", table: "t1", alias: "j2" }
             kind: "left"
             on: { type: "op", op: "=", exprs: [
-              { type: "field", tableAlias: "j1", column: "t1" }
               { type: "field", tableAlias: "j2", column: "primary" }
+              { type: "field", tableAlias: "j1", column: "t1" }
               ]}
             } 
           where: { type: "op", op: "=", exprs: [

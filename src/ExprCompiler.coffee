@@ -91,17 +91,7 @@ module.exports = class ExprCompiler
 
       alias = generateAlias()
 
-      if join.jsonql
-        where = injectTableAliases(join.jsonql, { "{from}": tableAlias, "{to}": alias })
-      else
-        # Use manual columns
-        where = { 
-          type: "op", op: "="
-          exprs: [
-            @compileColumnRef(join.toColumn, alias)
-            @compileColumnRef(join.fromColumn, tableAlias)
-          ]
-         }
+      where = @compileJoin(join, tableAlias, alias)
 
       from = @compileTable(join.toTable, alias)
 
@@ -119,17 +109,7 @@ module.exports = class ExprCompiler
 
         nextAlias = generateAlias()
 
-        if join.jsonql
-          onClause = injectTableAliases(join.jsonql, { "{from}": tableAlias, "{to}": nextAlias })
-        else
-          # Use manual columns
-          onClause = { 
-            type: "op", op: "="
-            exprs: [
-              @compileColumnRef(join.fromColumn, tableAlias)
-              @compileColumnRef(join.toColumn, nextAlias)
-            ]
-           }
+        onClause = @compileJoin(join, tableAlias, nextAlias)
 
         from = {
           type: "join"
@@ -201,6 +181,23 @@ module.exports = class ExprCompiler
       scalar.limit = limit
 
     return scalar
+
+  # Compile a join into an on or where clause
+  #  join: join part of column definition
+  #  fromAlias: alias of from table
+  #  toAlias: alias of to table
+  compileJoin: (join, fromAlias, toAlias) ->
+    if join.jsonql
+      return injectTableAliases(join.jsonql, { "{from}": fromAlias, "{to}": toAlias })
+    else
+      # Use manual columns
+      return { 
+        type: "op", op: "="
+        exprs: [
+          @compileColumnRef(join.toColumn, toAlias)
+          @compileColumnRef(join.fromColumn, fromAlias)
+        ]
+      }
 
   compileOpExpr: (options) ->
     exprUtils = new ExprUtils(@schema)
