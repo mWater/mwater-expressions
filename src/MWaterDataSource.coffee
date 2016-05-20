@@ -43,6 +43,10 @@ module.exports = class MWaterDataSource extends DataSource
       .fail (xhr) =>
         cb(new Error(xhr.responseText))
 
+  # Clears the local cache 
+  clearCache: ->
+    @cache?.reset()
+
   # Get the url to download an image (by id from an image or imagelist column)
   # Height, if specified, is minimum height needed. May return larger image
   getImageUrl: (imageId, height) ->
