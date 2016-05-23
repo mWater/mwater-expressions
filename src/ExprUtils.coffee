@@ -327,6 +327,8 @@ module.exports = class ExprUtils
         return expr.value + ""
       when "score"
         return "Score of " + @summarizeExpr(expr.input, locale)
+      when "count"
+        return "Count" # Deprecated
       else
         throw new Error("Unsupported type #{expr.type}")
 

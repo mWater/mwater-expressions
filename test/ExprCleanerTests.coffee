@@ -108,6 +108,10 @@ describe "ExprCleaner", ->
         expr = { type: "op", op: "distance", table: "t1", exprs: []}
         compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "distance", table: "t1", exprs: [null, null]})
 
+      it "removes invalid lhs", ->
+          expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "NONSUCH" }, null]}
+          compare(@exprCleaner.cleanExpr(expr), null)
+
     describe "case", ->
       it "cleans else", ->
         expr = { 

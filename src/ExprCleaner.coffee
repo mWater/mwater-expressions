@@ -120,8 +120,11 @@ module.exports = class ExprCleaner
         # Get opItem
         opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: expr.exprs[0], resultTypes: options.types)
 
+        # First expr is handled specially
+        lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table)
+
         # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
-        if not expr.exprs[0] and not opItems[0]?.prefix
+        if not lhsExpr and not opItems[0]?.prefix
           return null
 
         # If ambiguous, just clean subexprs and return
@@ -132,11 +135,11 @@ module.exports = class ExprCleaner
 
         # If not found, default opItem
         if not opItems[0]
-          opItem = @exprUtils.findMatchingOpItems(lhsExpr: expr.exprs[0], resultTypes: options.types)[0]
+          opItem = @exprUtils.findMatchingOpItems(lhsExpr: lhsExpr, resultTypes: options.types)[0]
           if not opItem
             return null
 
-          expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr.exprs[0] or null] }  
+          expr = { type: "op", table: expr.table, op: opItem.op, exprs: [lhsExpr or null] }  
         else
           opItem = opItems[0]
 
@@ -150,8 +153,8 @@ module.exports = class ExprCleaner
           expr = _.extend({}, expr, { exprs: _.take(expr.exprs, opItem.exprTypes.length) })          
 
         # Clean all sub expressions
-        if expr.exprs[0]
-          enumValues = @exprUtils.getExprEnumValues(expr.exprs[0])
+        if lhsExpr
+          enumValues = @exprUtils.getExprEnumValues(lhsExpr)
           if enumValues
             enumValueIds = _.pluck(enumValues, "id")
 
