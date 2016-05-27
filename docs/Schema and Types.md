@@ -41,9 +41,11 @@ Either a section, join or column.
 
 `desc`: localized description of item
 
+`code`: optional non-localized code of item
+
 `type`: type of content item. `id`, `text`, `integer`, `decimal`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `image`, `imagelist`, `join`, `section`. See fundamental types above.
 
-`enumValues`: Values for enum. Array of { id, name }. For type `enum` or `enumset` only. `id` is the string value of the enum.
+`enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
 `join`: Details of the join. See below. For type `join` only.
 
