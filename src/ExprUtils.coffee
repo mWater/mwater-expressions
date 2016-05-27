@@ -383,8 +383,8 @@ module.exports = class ExprUtils
     else
       return @summarizeExpr(expr, locale)
 
-  # Converts all literals to string, using name of enums
-  stringifyExprLiteral: (expr, literal, locale) ->
+  # Converts all literals to string, using name of enums. preferEnumCodes tries to use code over name
+  stringifyExprLiteral: (expr, literal, locale, preferEnumCodes = false) ->
     if not literal?
       return "None" # TODO localize
 
