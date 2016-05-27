@@ -394,6 +394,8 @@ module.exports = class ExprUtils
       if enumValues
         item = _.findWhere(enumValues, id: literal)
         if item
+          if preferEnumCodes and item.code
+            return item.code
           return @localizeString(item.name, locale)
         return "???"
 
@@ -404,6 +406,8 @@ module.exports = class ExprUtils
         return _.map(literal, (val) =>
           item = _.findWhere(enumValues, id: val)
           if item
+            if preferEnumCodes and item.code
+              return item.code
             return @localizeString(item.name, locale)
           return "???"
         ).join(', ')
