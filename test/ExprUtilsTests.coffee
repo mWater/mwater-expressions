@@ -22,6 +22,8 @@ describe "ExprUtils", ->
     assert.equal @exprUtils.localizeString({ en: "apple", fr: "pomme" }, "fr"), "pomme"
     assert.equal @exprUtils.localizeString({ en: "apple", fr: "pomme" }, null), "apple"
     assert.equal @exprUtils.localizeString({ _base: "fr", fr: "pomme" }, null), "pomme"
+    assert.equal @exprUtils.localizeString({ _base: "fr", en: "apple", fr: "pomme" }, null), "pomme", "_base wins if no locale"
+    assert.equal @exprUtils.localizeString({ _base: "fr", en: "apple", fr: "pomme" }, "en"), "apple", "_base wins if no locale"
 
   it "getExprTable", ->
     assert.equal @exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz"

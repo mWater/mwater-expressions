@@ -291,11 +291,15 @@ module.exports = class ExprUtils
     if typeof(name) == "string"
       return name
 
-    if name[locale or "en"]
-      return name[locale or "en"]
+    if locale and name[locale]
+      return name[locale]
 
     if name._base and name[name._base]
       return name[name._base]
+
+    # Fall back to English
+    if name.en
+      return name.en
 
     return null
 
