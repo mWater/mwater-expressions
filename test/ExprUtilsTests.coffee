@@ -194,6 +194,13 @@ describe "ExprUtils", ->
       }      
       assert.equal @exprUtils.summarizeExpr(expr), "If Boolean Then Text Else Text"
 
+    it "summarizes contains with enumset literal", ->
+      fieldExpr = { type: "field", table: "t1", column: "enumset" }
+      literalExpr = { type: "literal", valueType: "enumset", value: ["a"] }
+      opExpr = { type: "op", op: "contains", exprs: [fieldExpr, literalExpr]}
+      assert.equal @exprUtils.summarizeExpr(opExpr), "EnumSet contains A"
+
+
     # TODO readd
     # it "uses named expression when matching one present", ->
     #   # Add named expression

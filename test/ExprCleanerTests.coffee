@@ -408,7 +408,7 @@ describe "ExprCleaner", ->
       expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
       expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
       value = { type: "logical", table: "t1", op: "and", exprs: [expr1, expr2] }      
-      debugger
+
       @clean(
         value,
         { 

@@ -308,14 +308,6 @@ module.exports = class ExprUtils
     if not expr
       return "None" # TODO localize
 
-    # # Check named expresions
-    # namedExpr = _.find(@schema.getNamedExprs(expr.table), (ne) =>
-    #   return @areExprsEqual(@simplifyExpr(ne.expr), @simplifyExpr(expr))
-    # )
-
-    # if namedExpr
-    #   return namedExpr.name
-
     switch expr.type
       when "scalar"
         return @summarizeScalarExpr(expr, locale)
@@ -324,6 +316,10 @@ module.exports = class ExprUtils
       when "id"
         return @localizeString(@schema.getTable(expr.table).name, locale)
       when "op"
+        # Special case for contains with literal RHS
+        if expr.op == "contains" and expr.exprs[1]?.type == "literal"
+          return @summarizeExpr(expr.exprs[0], locale) + " contains " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
+
         return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + expr.op + " ")
       when "case"
         return @summarizeCaseExpr(expr, locale)
