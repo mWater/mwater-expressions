@@ -93,6 +93,7 @@ module.exports = class ExprUtils
       return false
     )
     addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
+    addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
     addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
     addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
