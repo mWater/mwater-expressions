@@ -110,10 +110,10 @@ describe "ExprCompiler", ->
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"] }
         {
           type: "scalar"
-          expr: { type: "field", tableAlias: "t1_1_2", column: "number" }
-          from: { type: "table", table: "t2", alias: "t1_1_2" }
+          expr: { type: "field", tableAlias: "1_2", column: "number" }
+          from: { type: "table", table: "t2", alias: "1_2" }
           where: { type: "op", op: "=", exprs: [
-            { type: "field", tableAlias: "t1_1_2", column: "t1" }
+            { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
         })
@@ -123,10 +123,10 @@ describe "ExprCompiler", ->
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"], aggr: "count" }
         {
           type: "scalar"
-          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "t1_1_2", column: "number" }] }
-          from: { type: "table", table: "t2", alias: "t1_1_2" }
+          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "1_2", column: "number" }] }
+          from: { type: "table", table: "t2", alias: "1_2" }
           where: { type: "op", op: "=", exprs: [
-            { type: "field", tableAlias: "t1_1_2", column: "t1" }
+            { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
         })
@@ -136,10 +136,10 @@ describe "ExprCompiler", ->
         { type: "scalar", table: "t1", expr: { type: "id", table: "t2" }, joins: ["1-2"], aggr: "count" }
         {
           type: "scalar"
-          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "t1_1_2", column: "primary" }] }
-          from: { type: "table", table: "t2", alias: "t1_1_2" }
+          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "1_2", column: "primary" }] }
+          from: { type: "table", table: "t2", alias: "1_2" }
           where: { type: "op", op: "=", exprs: [
-            { type: "field", tableAlias: "t1_1_2", column: "t1" }
+            { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
         })
@@ -149,13 +149,13 @@ describe "ExprCompiler", ->
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"], aggr: "last" }
         {
           type: "scalar"
-          expr: { type: "field", tableAlias: "t1_1_2", column: "number" }
-          from: { type: "table", table: "t2", alias: "t1_1_2" }
+          expr: { type: "field", tableAlias: "1_2", column: "number" }
+          from: { type: "table", table: "t2", alias: "1_2" }
           where: { type: "op", op: "=", exprs: [
-            { type: "field", tableAlias: "t1_1_2", column: "t1" }
+            { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
-          orderBy: [{ expr: { type: "field", tableAlias: "t1_1_2", column: "number" }, direction: "desc" }]
+          orderBy: [{ expr: { type: "field", tableAlias: "1_2", column: "number" }, direction: "desc" }]
           limit: 1
         }
       )
@@ -165,19 +165,19 @@ describe "ExprCompiler", ->
         { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "number" }, joins: ["1-2", "2-1"], aggr: "count" }
         {
           type: "scalar"
-          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "t1_1_2_2_1", column: "number" }] }
+          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "2_1", column: "number" }] }
           from: { 
             type: "join" 
-            left: { type: "table", table: "t2", alias: "t1_1_2" }
-            right: { type: "table", table: "t1", alias: "t1_1_2_2_1" }
+            left: { type: "table", table: "t2", alias: "1_2" }
+            right: { type: "table", table: "t1", alias: "2_1" }
             kind: "left"
             on: { type: "op", op: "=", exprs: [
-              { type: "field", tableAlias: "t1_1_2_2_1", column: "primary" }
-              { type: "field", tableAlias: "t1_1_2", column: "t1" }
+              { type: "field", tableAlias: "2_1", column: "primary" }
+              { type: "field", tableAlias: "1_2", column: "t1" }
               ]}
             } 
           where: { type: "op", op: "=", exprs: [
-            { type: "field", tableAlias: "t1_1_2", column: "t1" }
+            { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
         })
@@ -219,20 +219,20 @@ describe "ExprCompiler", ->
         }
         {
           type: "scalar"
-          expr: { type: "field", tableAlias: "t1_1_2", column: "number" }
-          from: { type: "table", table: "t2", alias: "t1_1_2" }
+          expr: { type: "field", tableAlias: "1_2", column: "number" }
+          from: { type: "table", table: "t2", alias: "1_2" }
           where: {
             type: "op"
             op: "and"
             exprs: [
               { type: "op", op: "=", exprs: [
-                { type: "field", tableAlias: "t1_1_2", column: "t1" }
+                { type: "field", tableAlias: "1_2", column: "t1" }
                 { type: "field", tableAlias: "T1", column: "primary" }
                 ]
               }
               {
                 type: "op", op: "=", exprs: [
-                  { type: "field", tableAlias: "t1_1_2", column: "number" }
+                  { type: "field", tableAlias: "1_2", column: "number" }
                   { type: "literal", value: 3 }
                 ]
               }
@@ -1168,7 +1168,7 @@ describe "ExprCompiler", ->
               alias: "abc"
             }
           },
-          alias: "t1_1_2"
+          alias: "1_2"
         }
 
         assert _.isEqual(jql.from, from), JSON.stringify(jql, null, 2)

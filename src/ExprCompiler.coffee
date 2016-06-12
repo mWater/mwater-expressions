@@ -69,7 +69,7 @@ module.exports = class ExprCompiler
     # Generate a consistent, semi-unique alias
     generateAlias = (expr, joinIndex) ->
       # Make alias-friendly (replace all symbols with _)
-      return "#{expr.table}_#{_.take(expr.joins, joinIndex + 1).join("_")}".replace(/[^a-zA-Z0-9]/g, "_")
+      return expr.joins[joinIndex].replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()
 
     # Perform joins
     table = expr.table
