@@ -38,6 +38,28 @@ describe "ExprUtils", ->
     it "gets for scalar", ->
       assert.equal @exprUtils.getExprIdTable({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "t1"
 
+  describe "getExprAggrStatus", ->
+    it "gets for literal", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "literal", valueType: "id", idTable: "xyz", value: "123" }), "literal"
+
+    it "gets for id", ->
+      assert.equal @exprUtils.getExprAggrStatus({ table: "xyz", type: "id" }), "individual"
+
+    it "gets for field", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "field", table: "xyz", column: "abc" }), "individual"
+
+    it "gets for aggregate", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "op", op: "sum", exprs: [{ type: "field", table: "xyz", column: "abc" }]}), "aggregate"
+
+    it "gets for aggregate + literal", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "op", op: "+", exprs: [
+        { type: "op", op: "sum", exprs: [{ type: "field", table: "xyz", column: "abc" }]}
+        { type: "literal", valueType: "number", value: 123 }
+        ]}), "aggregate"
+
+    it "gets for scalar", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "individual"
+
   describe "findMatchingOpItems", ->
     it "finds = for number", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "number" })[0].op, "="

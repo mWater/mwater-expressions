@@ -595,6 +595,41 @@ describe "ExprCompiler", ->
         null
       )
 
+    it "compiles sum()", ->
+      @compile(
+        {
+          type: "op"
+          op: "sum"
+          exprs: [@number1]
+        }
+        {
+          type: "op"
+          op: "sum"
+          exprs: [@number1JsonQL]
+        }
+      )
+
+    it "compiles last()", ->
+      text = { type: "field", table: "t2", column: "text" }
+      textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+
+      @compile(
+        {
+          type: "op"
+          op: "last"
+          table: "t2"
+          exprs: [text]
+        }
+        {
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: [textJsonQL], orderBy: [{ expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "desc"}]}
+            1
+          ]
+        }
+      )
+
     it "compiles = any", ->
       @compile(
         { 

@@ -6,6 +6,8 @@ Expressions are always of the form `{ type: <type of expression>, ... }`
 
 `null` mean no expression. `{}` is a placeholder for a mandatory expression to be filled in.
 
+Expressions can be aggregate (e.g. sum(...)) or individual. Aggregation status is the term for one of "literal", "individual" or "aggregate".
+
 The types are:
 
 - `field`: References a column in the current row
@@ -31,7 +33,7 @@ Gets a single value given a row of a table.
 - `table`: Table id of start table
 - `joins`: Array of join columns to follow to get to table of expr. All must be `join` type
 - `expr`: Expression from final table to get value
-- `aggr`: Aggregation function to use if any join is multiple, null/undefined if not needed
+- `aggr`: Aggregation function to use if any join is multiple, null/undefined if not needed (DEPRECATED: use aggr expressions in `expr`)
 - `where`: optional logical expression to filter aggregation
 
 #### Aggr values
@@ -42,7 +44,7 @@ aggr: "last", "sum", "count", "max", "min", "stdev", "stdevp"
 
 - `type`: "op"
 - `table`: Table id of table
-- `op`: "and", "or", "=", ">", ">=", "<", "<=", "<>", "~*", ">", "<", "= false", "is null", "is not null", "= any", "between", "contains", 'thisyear', 'lastyear', 'thismonth', 'lastmonth', 'today', 'yesterday', 'last7days', 'last30days', 'last365days', 'distance' (distance between two geometries in meters), 'round', 'floor', 'ceiling'
+- `op`: "and", "or", "=", ">", ">=", "<", "<=", "<>", "~*", ">", "<", "= false", "is null", "is not null", "= any", "between", "contains", 'thisyear', 'lastyear', 'thismonth', 'lastmonth', 'today', 'yesterday', 'last7days', 'last30days', 'last365days', 'distance' (distance between two geometries in meters), 'round', 'floor', 'ceiling', "last", "sum", "count", "max", "min", "stdev", "stdevp"
 
 - `exprs`: array of expressions to use for the op. Second and third, etc. are usually literal for all but "and" and "or"
 

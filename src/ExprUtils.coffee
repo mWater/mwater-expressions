@@ -14,12 +14,14 @@ module.exports = class ExprUtils
     # lhsCond: optional condition function on LHS expr that tests if applicable (for "within" which only applies to hierarchical tables)
     # rhsLiteral: prefer rhs literal
     # joiner: string to put between exprs when prefix type
+    # aggr: true if aggregating (e.g. sum)
+    # ordered: for aggr = true if table must be have ordering
     @opItems = []
 
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
     addOpItem = (item) =>
-      @opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true }))
+      @opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true, aggr: false }))
 
     # TODO n?
     addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["text", "text[]"])
@@ -86,6 +88,17 @@ module.exports = class ExprUtils
     addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "number"])
     addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
+    addOpItem(op: "sum", name: "sum", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    addOpItem(op: "avg", name: "avg", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    for type in ['number', 'date', 'datetime']
+      addOpItem(op: "min", name: "min", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+      addOpItem(op: "max", name: "max", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+
+    addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
+
+    for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
+      addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
       if lhsIdTable
@@ -100,8 +113,7 @@ module.exports = class ExprUtils
     addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [null])
     addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [null])
 
-
-  # Search can contain resultTypes, lhsExpr, op. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
+  # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # Results are array of opItems.
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
@@ -110,6 +122,9 @@ module.exports = class ExprUtils
           return false
 
       if search.op and opItem.op != search.op
+        return false
+
+      if search.aggr? and opItem.aggr != search.aggr
         return false
 
       # Handle list of specified types
@@ -221,6 +236,54 @@ module.exports = class ExprUtils
         return "number"
       when "count" # Deprecated
         return "count"
+      else
+        throw new Error("Not implemented for #{expr.type}")
+
+  # Determines the aggregation status of an expression. This is whether the expression is
+  # aggregate (like sum, avg, etc) or individual (a regular field-containing expression) or 
+  # literal (which is neither, just a number or text). 
+  getExprAggrStatus: (expr) ->
+    if not expr? or not expr.type
+      return null
+
+    # Gets the aggregation status of a series of expressions (takes highest always)
+    getListAggrStatus = (exprs) =>
+      # Get highest type
+      for subExpr in exprs
+        if @getExprAggrStatus(subExpr) == "aggregate"
+          return "aggregate"
+
+      for subExpr in expr.exprs
+        if @getExprAggrStatus(subExpr) == "individual"
+          return "individual"
+
+      for subExpr in expr.exprs
+        if @getExprAggrStatus(subExpr) == "literal"
+          return "literal"
+
+      return null
+
+    switch expr.type
+      when "field", "id", "scalar"
+        return "individual"
+      when "op"
+        # If aggregate op
+        if expr.op in aggregateOps
+          return "aggregate"
+
+        return getListAggrStatus(expr.exprs)
+      when "literal"
+        return "literal"
+      when "case"
+        # Gather all exprs
+        exprs = [expr.input, expr.else]
+        exprs = exprs.concat(_.map(expr.cases, (cs) -> cs.when))
+        exprs = exprs.concat(_.map(expr.cases, (cs) -> cs.then))
+        return getListAggrStatus(exprs)
+      when "score"
+        return @getExprAggrStatus(expr.input)
+      when "count" # Deprecated
+        return "individual"
       else
         throw new Error("Not implemented for #{expr.type}")
 
@@ -496,3 +559,6 @@ module.exports = class ExprUtils
         cols = cols.concat(@getImmediateReferencedColumns(expr.else))
 
     return _.uniq(cols)
+
+
+aggregateOps = ["last", "avg", "min", "max", "sum", "count", "stdev", "stdevp", "var", "varp"]

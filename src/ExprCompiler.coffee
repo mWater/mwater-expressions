@@ -194,6 +194,7 @@ module.exports = class ExprCompiler
         ]
       }
 
+  # Compile an expression. Pass expr and tableAlias.
   compileOpExpr: (options) ->
     exprUtils = new ExprUtils(@schema)
 
@@ -217,7 +218,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
-      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling"
+      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
@@ -227,6 +228,26 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
+      when "last"
+        # Null if not present
+        if not compiledExprs[0]
+          return null
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table)?.ordering
+        if not ordering
+          throw new Error("Table #{expr.table} must be ordered to use last()")
+
+        # (array_agg(xyz order by theordering desc))[1]
+        return { 
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: compiledExprs, orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc" }] }
+            1
+          ]
+        }
+
       when '= any'
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
