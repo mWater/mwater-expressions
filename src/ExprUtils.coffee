@@ -94,8 +94,6 @@ module.exports = class ExprUtils
       addOpItem(op: "min", name: "min", resultType: type, exprTypes: [type], prefix: true, aggr: true)
       addOpItem(op: "max", name: "max", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
-    addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
-
     for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
       addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
@@ -107,6 +105,8 @@ module.exports = class ExprUtils
     )
     addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
     addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
+
+    addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
 
     addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
     addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
@@ -253,11 +253,11 @@ module.exports = class ExprUtils
         if @getExprAggrStatus(subExpr) == "aggregate"
           return "aggregate"
 
-      for subExpr in expr.exprs
+      for subExpr in exprs
         if @getExprAggrStatus(subExpr) == "individual"
           return "individual"
 
-      for subExpr in expr.exprs
+      for subExpr in exprs
         if @getExprAggrStatus(subExpr) == "literal"
           return "literal"
 
@@ -282,7 +282,7 @@ module.exports = class ExprUtils
         return getListAggrStatus(exprs)
       when "score"
         return @getExprAggrStatus(expr.input)
-      when "count" # Deprecated
+      when "count", "comparison", "logical" # Deprecated
         return "individual"
       else
         throw new Error("Not implemented for #{expr.type}")

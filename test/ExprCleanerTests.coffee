@@ -29,6 +29,47 @@ describe "ExprCleaner", ->
       assert @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t1")
       assert.isNull @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t2")
 
+    describe "aggregation", ->
+      it "aggregates if required", ->
+        field = { type: "field", table: "t1", column: "number" }
+        compare(@exprCleaner.cleanExpr(field, aggrStatuses: ['aggregate']), {
+          type: "op"
+          op: "sum"
+          table: "t1"
+          exprs: [field]
+          })
+
+      it "nulls if aggregate and should not be", ->
+        field = { type: "field", table: "t1", column: "number" }
+        assert @exprCleaner.cleanExpr(field, aggrStatuses: ['individual']), "is individual"
+        assert.isNull @exprCleaner.cleanExpr(field, aggrStatuses: ['literal'])
+        
+        aggr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+        assert.isNull @exprCleaner.cleanExpr(aggr), 'is aggregate'
+        assert.isNull @exprCleaner.cleanExpr(aggr, aggrStatuses: ['literal'])
+        assert @exprCleaner.cleanExpr(aggr, aggrStatuses: ['aggregate']), 'should allow aggregate'
+
+      it "nulls inner expr if wrong aggregation status", ->
+        field = { type: "field", table: "t1", column: "number" }
+        expr = { type: "op", table: "t1", op: "sum", exprs: [{ type: "op", op: "sum", exprs: [field] }] }
+
+        compare(@exprCleaner.cleanExpr(expr, aggrStatuses: ["aggregate"]), { type: "op", op: "sum", table: "t1", exprs: [null] })
+
+      it "passes types through aggregation", ->
+        field = { type: "field", table: "t1", column: "number" }
+        expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), expr)
+        compare(@exprCleaner.cleanExpr(expr, types: ["text"], aggrStatuses: ["aggregate"]), null)
+
+      it "allows only id for count", ->
+        field = { type: "field", table: "t1", column: "number" }
+        expr = { type: "op", table: "t1", op: "count", exprs: [field] }
+
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), { type: "op", table: "t1", op: "sum", exprs: [field] })
+        compare(@exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["text"], aggrStatuses: ["aggregate"]), null)
+        assert @exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["number"], aggrStatuses: ["aggregate"])
+
     describe "op", ->
       it "preserves 'and' by cleaning child expressions with boolean type", ->
         expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
@@ -227,34 +268,34 @@ describe "ExprCleaner", ->
 
     describe "scalar", ->
       it "leaves valid one alone", ->
-        fieldExpr = { type: "field", table: "t2", column: "number" }
-        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+        fieldExpr = { type: "op", table: "t2", op: "sum", exprs: [{ type: "field", table: "t2", column: "number" }] }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr }
 
         compare(scalarExpr, @exprCleaner.cleanExpr(scalarExpr))
 
-      it "strips aggr if not needed", ->
+      it "moves aggr to expr", ->
         fieldExpr = { type: "field", table: "t2", column: "number" }
-        scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr, aggr: "sum" }
-        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-        assert not scalarExpr.aggr
-
-      it "defaults aggr if needed and wrong", ->
-        fieldExpr = { type: "field", table: "t2", column: "text" }
         scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
         scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-        assert.equal scalarExpr.aggr, "last"
+        compare(scalarExpr, { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "op", op: "sum", table: "t2", exprs: [fieldExpr] }})
+
+      it "defaults aggr if needed", ->
+        fieldExpr = { type: "field", table: "t2", column: "text" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        compare(scalarExpr, { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "op", op: "last", table: "t2", exprs: [fieldExpr] }})
 
       it "strips where if wrong table", ->
-        fieldExpr = { type: "field", table: "t2", column: "number" }
+        fieldExpr = { type: "op", op: "sum", table: "t2", exprs: [{ type: "field", table: "t2", column: "number" }] }
         whereExpr = { type: "logical", table: "t1" }
-        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr }
         scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-        assert.equal scalarExpr.aggr, "sum"
-        assert not scalarExpr.where
+        assert scalarExpr.expr, "Should keep expr"
+        assert not scalarExpr.where, "Should remove where"
 
       it "strips if invalid join", ->
-        fieldExpr = { type: "field", table: "t2", column: "number" }
-        scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr, aggr: "sum" }
+        fieldExpr = { type: "op", op: "sum", exprs: [{ type: "field", table: "t2", column: "number" }] }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['xyz'], expr: fieldExpr }
         scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
         assert not scalarExpr
 
@@ -264,17 +305,12 @@ describe "ExprCleaner", ->
         scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
         compare(fieldExpr, scalarExpr)
 
-      it "removes aggr from null expr", ->
-        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: null, aggr: "sum" }
-        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-        assert not scalarExpr.aggr
-
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
     it "count becomes id", ->
       @clean(
         { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
-        { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "id", table: "t2" } }
+        { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", op: "count", table: "t2", exprs: [{ type: "id", table: "t2" }] } }
       )
 
     it "scalar count becomes id", ->

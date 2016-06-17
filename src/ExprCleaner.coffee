@@ -15,7 +15,12 @@ module.exports = class ExprCleaner
   #   types: optional types to limit to
   #   enumValueIds: ids of enum values that are valid if type is enum
   #   idTable: table that type of id must be from
+  #   aggrStatuses: statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"]
   cleanExpr: (expr, options={}) ->
+    _.defaults(options, {
+      aggrStatuses: ["individual", "literal"]
+      })
+
     if not expr
       return null
 
@@ -43,6 +48,17 @@ module.exports = class ExprCleaner
 
     # Strip if non-existent table
     if expr.table and not @schema.getTable(expr.table)
+      return null
+
+    # Default aggregation if needed and not
+    if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
+      # If aggr is required and there is one possible, use it
+      aggrs = @exprUtils.getAggrs(expr)
+      if aggrs.length > 0
+        expr = { type: "op", op: aggrs[0].id, table: expr.table, exprs: [expr] }
+
+    # Strip if wrong aggregation status
+    if @exprUtils.getExprAggrStatus(expr) and @exprUtils.getExprAggrStatus(expr) not in options.aggrStatuses
       return null
 
     # Get type
@@ -117,11 +133,24 @@ module.exports = class ExprCleaner
 
         return expr
       else 
-        # Get opItem
-        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: expr.exprs[0], resultTypes: options.types)
+        # Determine aggr setting. Prevent non-aggr for aggr and vice-versa
+        aggr = null
+        if "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
+          aggr = true
+        if "aggregate" not in options.aggrStatuses and "individual" in options.aggrStatuses
+          aggr = false
+
+        # Determine innerAggrStatuses (same as outer, unless aggregate expression, in which case always aggregate)
+        if @exprUtils.findMatchingOpItems(op: expr.op)[0]?.aggr
+          innerAggrStatuses = ["literal", "individual"]
+        else
+          innerAggrStatuses = options.aggrStatuses
 
         # First expr is handled specially
-        lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table)
+        lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
+
+        # Get opItem
+        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr)
 
         # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
         if not lhsExpr and not opItems[0]?.prefix
@@ -130,12 +159,12 @@ module.exports = class ExprCleaner
         # If ambiguous, just clean subexprs and return
         if opItems.length > 1
           return _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-            @cleanExpr(e, table: expr.table)
+            @cleanExpr(e, table: expr.table, aggrStatuses: innerAggrStatuses)
           )})
 
         # If not found, default opItem
         if not opItems[0]
-          opItem = @exprUtils.findMatchingOpItems(lhsExpr: lhsExpr, resultTypes: options.types)[0]
+          opItem = @exprUtils.findMatchingOpItems(lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr)[0]
           if not opItem
             return null
 
@@ -159,7 +188,7 @@ module.exports = class ExprCleaner
             enumValueIds = _.pluck(enumValues, "id")
 
         expr = _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-          @cleanExpr(e, table: expr.table, types: (if opItem.exprTypes[i] then [opItem.exprTypes[i]]), enumValueIds: enumValueIds, idTable: @exprUtils.getExprIdTable(expr.exprs[0]))
+          @cleanExpr(e, table: expr.table, types: (if opItem.exprTypes[i] then [opItem.exprTypes[i]]), enumValueIds: enumValueIds, idTable: @exprUtils.getExprIdTable(expr.exprs[0]), aggrStatuses: innerAggrStatuses)
           )})
 
         return expr
@@ -192,28 +221,23 @@ module.exports = class ExprCleaner
     if not @exprUtils.areJoinsValid(expr.table, expr.joins)
       return null
 
-    # If invalid aggr or no inner expression, remove aggr
-    if expr.aggr and (not @exprUtils.isMultipleJoins(expr.table, expr.joins) or not expr.expr)
-      expr = _.omit(expr, "aggr")
+    innerTable = @exprUtils.followJoins(expr.table, expr.joins)
 
-    # If aggr is required and there is one possible, use it
-    if expr.expr and @exprUtils.isMultipleJoins(expr.table, expr.joins) and expr.aggr not in _.pluck(@exprUtils.getAggrs(expr.expr), "id")
-      aggrs = @exprUtils.getAggrs(expr.expr)
-      if aggrs.length > 0
-        expr = _.extend({}, expr, { aggr: aggrs[0].id })
+    # Move aggr to inner expression
+    if expr.aggr
+      expr = _.extend({}, _.omit(expr, "aggr"), expr: { type: "op", table: innerTable, op: expr.aggr, exprs: [expr.expr] })
 
     # Clean where
     if expr.where
-      expr.where = @cleanExpr(expr.where)
-
-    # Clean inner expr
-    innerTable = @exprUtils.followJoins(expr.table, expr.joins)
+      expr.where = @cleanExpr(expr.where, table: innerTable)
 
     # Get inner expression type (must match unless is count which can count anything)
     if expr.expr
-      innerTypes = if expr.aggr != "count" then options.types
+      isMultiple = @exprUtils.isMultipleJoins(expr.table, expr.joins)
+      aggrStatuses = if isMultiple then ["literal", "aggregate"] else ["literal", "individual"]
+
       expr = _.extend({}, expr, { 
-        expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, types: innerTypes }))
+        expr: @cleanExpr(expr.expr, _.extend({}, options, { table: innerTable, aggrStatuses: aggrStatuses }))
       })    
 
     return expr
