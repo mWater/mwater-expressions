@@ -150,7 +150,7 @@ module.exports = class ExprCleaner
         lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
 
         # Get opItem
-        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr)
+        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr, ordered: @schema.getTable(expr.table).ordering?)
 
         # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
         if not lhsExpr and not opItems[0]?.prefix

@@ -21,7 +21,7 @@ module.exports = class ExprUtils
     # Adds an op item (particular combination of operands types with an operator)
     # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
     addOpItem = (item) =>
-      @opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true, aggr: false }))
+      @opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true, aggr: false, ordered: false }))
 
     # TODO n?
     addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["text", "text[]"])
@@ -88,14 +88,14 @@ module.exports = class ExprUtils
     addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "number"])
     addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
-    addOpItem(op: "sum", name: "sum", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
-    addOpItem(op: "avg", name: "avg", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    addOpItem(op: "sum", name: "total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    addOpItem(op: "avg", name: "average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
     for type in ['number', 'date', 'datetime']
-      addOpItem(op: "min", name: "min", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-      addOpItem(op: "max", name: "max", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+      addOpItem(op: "min", name: "minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+      addOpItem(op: "max", name: "maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
     for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
-      addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+      addOpItem(op: "last", name: "latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
@@ -106,7 +106,7 @@ module.exports = class ExprUtils
     addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
     addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
-    addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
+    addOpItem(op: "count", name: "number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
 
     addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
     addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
@@ -114,6 +114,7 @@ module.exports = class ExprUtils
     addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [null])
 
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
+  # If search ordered is not true, excludes ordered ones
   # Results are array of opItems.
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
@@ -125,6 +126,9 @@ module.exports = class ExprUtils
         return false
 
       if search.aggr? and opItem.aggr != search.aggr
+        return false
+
+      if search.ordered == false and opItem.ordered
         return false
 
       # Handle list of specified types
