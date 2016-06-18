@@ -62,13 +62,11 @@ describe "ExprCleaner", ->
         compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), expr)
         compare(@exprCleaner.cleanExpr(expr, types: ["text"], aggrStatuses: ["aggregate"]), null)
 
-      it "allows only id for count", ->
+      it "allows no args for count", ->
         field = { type: "field", table: "t1", column: "number" }
         expr = { type: "op", table: "t1", op: "count", exprs: [field] }
 
-        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), { type: "op", table: "t1", op: "sum", exprs: [field] })
-        compare(@exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["text"], aggrStatuses: ["aggregate"]), null)
-        assert @exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["number"], aggrStatuses: ["aggregate"])
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), { type: "op", table: "t1", op: "count", exprs: [] })
 
     describe "default boolean-ization", ->
       it "creates boolean from enum", ->
@@ -315,7 +313,7 @@ describe "ExprCleaner", ->
     it "count becomes id", ->
       @clean(
         { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
-        { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", op: "count", table: "t2", exprs: [{ type: "id", table: "t2" }] } }
+        { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", op: "count", table: "t2", exprs: [] } }
       )
 
     it "scalar count becomes id", ->

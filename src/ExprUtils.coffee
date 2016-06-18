@@ -71,12 +71,12 @@ module.exports = class ExprUtils
 
     addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["number", "number", "number"])
 
-    addOpItem(op: "round", name: "round", resultType: "number", exprTypes: ["number"], prefix: true)
-    addOpItem(op: "floor", name: "floor", resultType: "number", exprTypes: ["number"], prefix: true)
-    addOpItem(op: "ceiling", name: "ceiling", resultType: "number", exprTypes: ["number"], prefix: true)
-    addOpItem(op: "latitude", name: "latitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
-    addOpItem(op: "longitude", name: "longitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
-    addOpItem(op: "distance", name: "distance between", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")
+    addOpItem(op: "round", name: "Round", resultType: "number", exprTypes: ["number"], prefix: true)
+    addOpItem(op: "floor", name: "Floor", resultType: "number", exprTypes: ["number"], prefix: true)
+    addOpItem(op: "ceiling", name: "Ceiling", resultType: "number", exprTypes: ["number"], prefix: true)
+    addOpItem(op: "latitude", name: "Latitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
+    addOpItem(op: "longitude", name: "Longitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
+    addOpItem(op: "distance", name: "Distance between", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")
 
     # And/or is a list of booleans
     addOpItem(op: "and", name: "and", resultType: "boolean", exprTypes: [], moreExprType: "boolean")
@@ -88,14 +88,14 @@ module.exports = class ExprUtils
     addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "number"])
     addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
-    addOpItem(op: "sum", name: "total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
-    addOpItem(op: "avg", name: "average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    addOpItem(op: "sum", name: "Total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+    addOpItem(op: "avg", name: "Average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
     for type in ['number', 'date', 'datetime']
-      addOpItem(op: "min", name: "minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-      addOpItem(op: "max", name: "maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+      addOpItem(op: "min", name: "Minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+      addOpItem(op: "max", name: "Maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
     for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
-      addOpItem(op: "last", name: "latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+      addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
@@ -106,7 +106,7 @@ module.exports = class ExprUtils
     addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
     addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
-    addOpItem(op: "count", name: "number of", resultType: "number", exprTypes: ["id"], prefix: true, aggr: true)
+    addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: [], prefix: true, aggr: true)
 
     addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
     addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
@@ -207,12 +207,10 @@ module.exports = class ExprUtils
       when "id"
         return "id"
       when "scalar"
+        # Legacy support:
         if expr.aggr
-          aggr = _.findWhere(@getAggrs(expr.expr), id: expr.aggr)
-          if not aggr
-            # Type is unknown as a result
-            return null
-          return aggr.type
+          return @getExprType({ type: "op", op: expr.aggr, table: expr.table, exprs: [expr.expr] })
+
         return @getExprType(expr.expr)
       when "op"
         # Check for single-type ops
@@ -343,9 +341,10 @@ module.exports = class ExprUtils
     if table.ordering and type not in ["id", "count"] # count is legacy. TODO remove
       aggrs.push({ id: "last", name: "Latest", type: type })
 
-    switch type
-      when "id", "count" # count is legacy. TODO remove
-        aggrs.push({ id: "count", name: "Number of", type: "number" })
+    # Don't include count as that can only be created directly, not switched to.
+    # switch type
+    #   when "id", "count" # count is legacy. TODO remove
+    #     aggrs.push({ id: "count", name: "Number of", type: "number" })
 
     return aggrs
 
@@ -390,7 +389,20 @@ module.exports = class ExprUtils
         if expr.op == "contains" and expr.exprs[1]?.type == "literal"
           return @summarizeExpr(expr.exprs[0], locale) + " contains " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
 
-        return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + expr.op + " ")
+        # Special case for count
+        if expr.op == "count"
+          return "Number of " + @localizeString(@schema.getTable(expr.table).name, locale)
+
+        # TODO handle prefix ops
+        opItem = @findMatchingOpItems(op: expr.op)[0]
+        if opItem
+          if opItem.prefix
+            return opItem.name + " " + _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(", ")
+
+          return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + opItem.name + " ")
+        else
+          return ""
+
       when "case"
         return @summarizeCaseExpr(expr, locale)
       when "literal"
@@ -405,11 +417,7 @@ module.exports = class ExprUtils
   summarizeScalarExpr: (expr, locale) ->
     exprType = @getExprType(expr.expr)
 
-    # Add aggr
-    if expr.aggr 
-      str = _.findWhere(@getAggrs(expr.expr), { id: expr.aggr }).name + " " # TODO localize
-    else
-      str = ""
+    str = ""
 
     # Add joins
     t = expr.table
@@ -419,10 +427,16 @@ module.exports = class ExprUtils
       t = joinCol.join.toTable
 
     # Special case for id type to be rendered as {last join name}
-    if exprType == "id"
+    if exprType == "id" and not expr.aggr
       str = str.substring(0, str.length - 3)
     else
-      str += @summarizeExpr(expr.expr, locale)
+      innerExpr = expr.expr
+
+      # Handle legacy
+      if expr.aggr    
+        innerExpr = { type: "op", op: expr.aggr, table: expr.expr?.table, exprs: [expr.expr] }
+    
+      str += @summarizeExpr(innerExpr, locale)
 
     return str
 
@@ -436,18 +450,6 @@ module.exports = class ExprUtils
       str += " Else " + @summarizeExpr(expr.else)
 
     return str
-
-  # Summarize an expression with optional aggregation
-  # TODO Remove to AxisBuilder
-  summarizeAggrExpr: (expr, aggr, locale) ->
-    exprType = @getExprType(expr)
-
-    # Add aggr
-    if aggr 
-      aggrName = _.findWhere(@getAggrs(expr), { id: aggr }).name
-      return aggrName + " " + @summarizeExpr(expr, locale)
-    else
-      return @summarizeExpr(expr, locale)
 
   # Converts all literals to string, using name of enums. preferEnumCodes tries to use code over name
   stringifyExprLiteral: (expr, literal, locale, preferEnumCodes = false) ->

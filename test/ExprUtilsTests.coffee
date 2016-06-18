@@ -109,14 +109,7 @@ describe "ExprUtils", ->
     it "includes nothing for null", ->
       aggrs = @exprUtils.getAggrs(null)
       assert.equal aggrs.length, 0
-
-    it "includes only count for count type", ->
-      count = { type: "count", table: "a" }
-      aggrs = @exprUtils.getAggrs(count)
-
-      assert.equal _.findWhere(aggrs, id: "count").type, "number"
-      assert.equal aggrs.length, 1
-  
+ 
   describe "getExprType", ->
     it 'gets field type', ->
       assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text"
@@ -187,11 +180,11 @@ describe "ExprUtils", ->
     it "summarizes joined aggr scalar expr", ->
       fieldExpr = { type: "field", table: "t2", column: "number" }
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
-      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Total T1->T2 > Number"
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Total Number"
 
     it "simplifies when count id", ->
       scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "id", table: "t2" }, aggr: "count" }
-      assert.equal @exprUtils.summarizeExpr(scalarExpr), "Number of T1->T2"
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number of T2" 
 
     it "simplifies when id", ->
       scalarExpr = { type: "scalar", table: "t2", joins: ['2-1'], expr: { type: "id", table: "t1" } }
@@ -222,6 +215,13 @@ describe "ExprUtils", ->
       opExpr = { type: "op", op: "contains", exprs: [fieldExpr, literalExpr]}
       assert.equal @exprUtils.summarizeExpr(opExpr), "EnumSet contains A"
 
+    it "summarizes sum(field) expr", ->
+      expr = { type: "op", op: "sum", table: "t2", exprs: [{ type: "field", table: "t2", column: "number" }] }
+      assert.equal @exprUtils.summarizeExpr(expr), "Total Number"
+
+    it "summarizes count", ->
+      expr = { type: "op", op: "count", table: "t1", exprs: [] }
+      assert.equal @exprUtils.summarizeExpr(expr), "Number of T1"
 
     # TODO readd
     # it "uses named expression when matching one present", ->
@@ -236,22 +236,6 @@ describe "ExprUtils", ->
     #     joins: []
     #   }
     #   assert.equal @exprUtils.summarizeExpr(expr), "NE Column 1"
-
-  describe "summarizeAggrExpr", ->
-    it "summarizes null", ->
-      assert.equal @exprUtils.summarizeAggrExpr(null), "None"
-
-    it "summarizes field expr", ->
-      expr = { type: "field", table: "t1", column: "number" }
-      assert.equal @exprUtils.summarizeAggrExpr(expr), "Number"
-
-    it "summarizes field expr", ->
-      expr = { type: "field", table: "t2", column: "number" }
-      assert.equal @exprUtils.summarizeAggrExpr(expr, "sum"), "Total Number"
-
-    it "summarizes id", ->
-      expr = { type: "id", table: "t1" }
-      assert.equal @exprUtils.summarizeAggrExpr(expr, "count"), "Number of T1"
 
   describe "stringifyExprLiteral", ->
     it "stringifies number", ->

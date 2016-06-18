@@ -76,7 +76,7 @@ module.exports = class ExprCleaner
       if opItem
         # Wrap in op to make it boolean
         expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr] }
-
+        
         # Determine number of arguments to append
         args = opItem.exprTypes.length - 1
 
@@ -156,6 +156,10 @@ module.exports = class ExprCleaner
 
         return expr
       else 
+        # Count always takes zero parameters and is valid if number type is valid
+        if expr.op == "count" and (not options.types or "number" in options.types) and "aggregate" in options.aggrStatuses
+          return { type: "op", op: "count", table: expr.table, exprs: [] }
+
         # Determine aggr setting. Prevent non-aggr for aggr and vice-versa
         aggr = null
         if "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
