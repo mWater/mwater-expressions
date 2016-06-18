@@ -50,7 +50,7 @@ module.exports = class ExprCleaner
     if expr.table and not @schema.getTable(expr.table)
       return null
 
-    # Default aggregation if needed and not
+    # Default aggregation if needed and not aggregated
     if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
       # If aggr is required and there is one possible, use it
       aggrs = @exprUtils.getAggrs(expr)
@@ -63,6 +63,29 @@ module.exports = class ExprCleaner
 
     # Get type
     type = @exprUtils.getExprType(expr)
+
+    # Boolean-ize for easy building of filters
+    # True if a boolean expression is required
+    booleanOnly = options.types and options.types.length == 1 and options.types[0] == "boolean" 
+
+    # If boolean and expr is not boolean, wrap with appropriate expression
+    if booleanOnly and type and type != "boolean"
+      # Find op item that matches
+      opItem = @exprUtils.findMatchingOpItems(resultTypes: ["boolean"], lhsExpr: expr)[0]
+
+      if opItem
+        # Wrap in op to make it boolean
+        expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr] }
+
+        # Determine number of arguments to append
+        args = opItem.exprTypes.length - 1
+
+        # Add extra nulls for other arguments
+        for i in [1..args]
+          expr.exprs.push(null)
+  
+        # type has now changed  
+        type = @exprUtils.getExprType(expr)
 
     # Strip if wrong type
     if type and options.types and type not in options.types
@@ -150,7 +173,7 @@ module.exports = class ExprCleaner
         lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
 
         # Get opItem
-        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr, ordered: @schema.getTable(expr.table).ordering?)
+        opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr, ordered: @schema.getTable(expr.table)?.ordering?)
 
         # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
         if not lhsExpr and not opItems[0]?.prefix

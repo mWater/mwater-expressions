@@ -130,7 +130,7 @@ module.exports = class ExprCompiler
 
     scalarExpr = @compileExpr(expr: expr.expr, tableAlias: tableAlias)
     
-    # Aggregate
+    # Aggregate DEPRECATED
     if expr.aggr
       switch expr.aggr
         when "last"

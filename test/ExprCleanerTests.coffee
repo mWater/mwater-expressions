@@ -22,7 +22,7 @@ describe "ExprCleaner", ->
 
     it "nulls if wrong type", ->
       field = { type: "field", table: "t1", column: "enum" }
-      assert.isNull @exprCleaner.cleanExpr(field, types: ["boolean"])
+      assert.isNull @exprCleaner.cleanExpr(field, types: ["text"])
 
     it "nulls if wrong idTable", ->
       field = { type: "id", table: "t1" }
@@ -70,17 +70,22 @@ describe "ExprCleaner", ->
         compare(@exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["text"], aggrStatuses: ["aggregate"]), null)
         assert @exprCleaner.cleanExpr({ type: "op", table: "t1", op: "count", exprs: [{ type: "id", table: "t1" }] }, types: ["number"], aggrStatuses: ["aggregate"])
 
+    describe "default boolean-ization", ->
+      it "creates boolean from enum", ->
+        expr = { type: "field", table: "t1", column: "enum" }
+        compare(@exprCleaner.cleanExpr(expr, types: ["boolean"]), { type: "op", table: "t1", op: "= any", exprs: [expr, null] })
+
     describe "op", ->
       it "preserves 'and' by cleaning child expressions with boolean type", ->
-        expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "field", table: "t1", column: "boolean" }]}
+        expr = { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "field", table: "t1", column: "boolean" }]}
 
         compare(@exprCleaner.cleanExpr(expr), {
           type: "op"
           op: "and"
           table: "t1"
           exprs: [
-            # Removed
-            null
+            # Booleanized
+            { type: "op", table: "t1", op: "= any", exprs: [{ type: "field", table: "t1", column: "enum" }, null]}
             # Untouched
             { type: "field", table: "t1", column: "boolean" }
           ]})
@@ -179,7 +184,7 @@ describe "ExprCleaner", ->
           {
             type: "case"
             table: "t1"
-            cases: [{ when: null, then: { type: "literal", valueType: "number", value: 123 }}]
+            cases: [{ when: { type: "op", op: "=", exprs: [{ type: "literal", valueType: "number", value: 123 }, null] }, then: { type: "literal", valueType: "number", value: 123 }}]
             else: null
           })
 

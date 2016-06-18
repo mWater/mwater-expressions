@@ -115,6 +115,7 @@ module.exports = class ExprUtils
 
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # If search ordered is not true, excludes ordered ones
+  # If prefix, only prefix
   # Results are array of opItems.
   findMatchingOpItems: (search) ->
     return _.filter @opItems, (opItem) =>
@@ -129,6 +130,9 @@ module.exports = class ExprUtils
         return false
 
       if search.ordered == false and opItem.ordered
+        return false
+
+      if search.prefix? and opItem.prefix != search.prefix
         return false
 
       # Handle list of specified types
@@ -217,11 +221,8 @@ module.exports = class ExprUtils
         if resultTypes.length == 1
           return resultTypes[0]
 
-        # Get types of operand expressions
-        exprTypes = _.map(expr.exprs, (e) => @getExprType(e))
-
         # Get possible ops
-        opItems = @findMatchingOpItems(op: expr.op, exprTypes: exprTypes)
+        opItems = @findMatchingOpItems(op: expr.op, lhsExpr: expr.exprs[0])
 
         # Get unique resultTypes
         resultTypes = _.uniq(_.compact(_.pluck(opItems, "resultType")))
@@ -328,9 +329,6 @@ module.exports = class ExprUtils
       return []
     
     table = @schema.getTable(expr.table)
-    if table.ordering and type not in ["id", "count"] # count is legacy. TODO remove
-      aggrs.push({ id: "last", name: "Latest", type: type })
-
     switch type
       when "date", "datetime"
         aggrs.push({ id: "max", name: "Maximum", type: type })
@@ -342,6 +340,10 @@ module.exports = class ExprUtils
         aggrs.push({ id: "max", name: "Maximum", type: type })
         aggrs.push({ id: "min", name: "Minimum", type: type })
 
+    if table.ordering and type not in ["id", "count"] # count is legacy. TODO remove
+      aggrs.push({ id: "last", name: "Latest", type: type })
+
+    switch type
       when "id", "count" # count is legacy. TODO remove
         aggrs.push({ id: "count", name: "Number of", type: "number" })
 
