@@ -97,6 +97,9 @@ module.exports = class ExprUtils
     for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
       addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
+    addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
+    addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
+
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
       if lhsIdTable
@@ -271,7 +274,7 @@ module.exports = class ExprUtils
         return "individual"
       when "op"
         # If aggregate op
-        if expr.op in aggregateOps
+        if @findMatchingOpItems(op: expr.op, aggr: true)[0]
           return "aggregate"
 
         return getListAggrStatus(expr.exprs)
@@ -567,6 +570,3 @@ module.exports = class ExprUtils
         cols = cols.concat(@getImmediateReferencedColumns(expr.else))
 
     return _.uniq(cols)
-
-
-aggregateOps = ["last", "avg", "min", "max", "sum", "count", "stdev", "stdevp", "var", "varp"]

@@ -7,7 +7,7 @@ fixtures = require './fixtures'
 canonical = require 'canonical-json'
 
 compare = (actual, expected) ->
-  assert.equal canonical(actual), canonical(expected), "\n" + canonical(actual) + "\n" + canonical(expected) + "\n"
+  assert.equal canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
 
 describe "ExprCleaner", ->
   beforeEach ->
@@ -68,10 +68,38 @@ describe "ExprCleaner", ->
 
         compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), { type: "op", table: "t1", op: "count", exprs: [] })
 
-    describe "default boolean-ization", ->
+    describe "fixing expression types", ->
       it "creates boolean from enum", ->
         expr = { type: "field", table: "t1", column: "enum" }
         compare(@exprCleaner.cleanExpr(expr, types: ["boolean"]), { type: "op", table: "t1", op: "= any", exprs: [expr, null] })
+
+      it "creates count where from enum", ->
+        expr = { type: "field", table: "t1", column: "enum" }
+        compare(
+          @exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate", "literal"]) 
+          {
+            type: "op"
+            op: "count where"
+            table: "t1"
+            exprs: [
+              { type: "op", table: "t1", op: "= any", exprs: [expr, null] }
+            ]
+          }
+        )
+
+      it "creates boolean inside percent where from enum", ->
+        expr = { type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "enum" }] }
+        compare(
+          @exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate", "literal"]) 
+          {
+            type: "op"
+            op: "percent where"
+            table: "t1"
+            exprs: [
+              { type: "op", table: "t1", op: "= any", exprs: [{ type: "field", table: "t1", column: "enum" }, null] }
+            ]
+          }
+        )
 
     describe "op", ->
       it "preserves 'and' by cleaning child expressions with boolean type", ->
@@ -153,8 +181,8 @@ describe "ExprCleaner", ->
         compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "distance", table: "t1", exprs: [null, null]})
 
       it "removes invalid lhs", ->
-          expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "NONSUCH" }, null]}
-          compare(@exprCleaner.cleanExpr(expr), null)
+        expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "NONSUCH" }, null]}
+        compare(@exprCleaner.cleanExpr(expr), null)
 
     describe "case", ->
       it "cleans else", ->

@@ -52,10 +52,31 @@ module.exports = class ExprCleaner
 
     # Default aggregation if needed and not aggregated
     if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
-      # If aggr is required and there is one possible, use it
-      aggrs = @exprUtils.getAggrs(expr)
-      if aggrs.length > 0
-        expr = { type: "op", op: aggrs[0].id, table: expr.table, exprs: [expr] }
+      aggrOpItems = @exprUtils.findMatchingOpItems(resultTypes: options.types, lhsExpr: expr, aggr: true, ordered: @schema.getTable(expr.table)?.ordering?)
+
+      # If aggr is required and there is at least one possible, use it
+      if aggrOpItems.length > 0
+        expr = { type: "op", op: aggrOpItems[0].op, table: expr.table, exprs: [expr] }
+
+    # Default count where + booleanization 
+    if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
+      # Only if result types include number
+      if not options.types or "number" in options.types
+        # Find op item that matches
+        opItem = @exprUtils.findMatchingOpItems(resultTypes: ["boolean"], lhsExpr: expr)[0]
+
+        if opItem
+          # Wrap in op to make it boolean
+          expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr] }
+
+          # Determine number of arguments to append
+          args = opItem.exprTypes.length - 1
+
+          # Add extra nulls for other arguments
+          for i in [1..args]
+            expr.exprs.push(null)
+
+          expr = { type: "op", op: "count where", table: expr.table, exprs: [expr] }
 
     # Strip if wrong aggregation status
     if @exprUtils.getExprAggrStatus(expr) and @exprUtils.getExprAggrStatus(expr) not in options.aggrStatuses
@@ -76,16 +97,16 @@ module.exports = class ExprCleaner
       if opItem
         # Wrap in op to make it boolean
         expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr] }
-        
+
         # Determine number of arguments to append
         args = opItem.exprTypes.length - 1
 
         # Add extra nulls for other arguments
         for i in [1..args]
           expr.exprs.push(null)
-  
-        # type has now changed  
-        type = @exprUtils.getExprType(expr)
+
+    # Get type again in case changed  
+    type = @exprUtils.getExprType(expr)
 
     # Strip if wrong type
     if type and options.types and type not in options.types
@@ -173,8 +194,17 @@ module.exports = class ExprCleaner
         else
           innerAggrStatuses = options.aggrStatuses
 
-        # First expr is handled specially
+        # First do a loose cleaning of LHS to remove obviously invalid values
         lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
+
+        # Now attempt to clean it restricting to the types the op allows as lhs
+        if lhsExpr
+          lhsTypes = _.uniq(_.compact(_.map(@exprUtils.findMatchingOpItems(op: expr.op), (opItem) -> opItem.exprTypes[0])))
+          lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses, types: lhsTypes)
+
+          # If this nulls it, don't keep as we can switch ops to preseve it
+          if not lhsExpr?
+            lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
 
         # Get opItem
         opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr, ordered: @schema.getTable(expr.table)?.ordering?)

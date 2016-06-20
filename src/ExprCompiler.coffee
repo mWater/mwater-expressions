@@ -321,6 +321,61 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "count where"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        return {
+          type: "op"
+          op: "sum"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: compiledExprs[0]
+                then: 1
+              ]
+              else: 0
+            }
+          ]
+        }
+
+      when "percent where"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        # Compiles as sum(case when cond then 1 else 0 end) * 100/sum(1) (prevent div by zero)        
+        return {
+          type: "op"
+          op: "/"
+          exprs: [
+            {
+              type: "op"
+              op: "*"
+              exprs: [
+                { 
+                  type: "op"
+                  op: "sum"
+                  exprs: [
+                    { 
+                      type: "case"
+                      cases: [
+                        when: compiledExprs[0]
+                        then: 1
+                      ]
+                      else: 0
+                    }
+                  ]
+                }
+                100
+              ]
+            }
+            { type: "op", op: "sum", exprs: [1] }
+          ]
+        }
+
       # Hierarchical test that uses ancestry column
       when "within"
         # Null if either not present
