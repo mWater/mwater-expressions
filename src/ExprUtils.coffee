@@ -113,8 +113,9 @@ module.exports = class ExprUtils
 
     addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
     addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
-    addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [null])
-    addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [null])
+    for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'image', 'imagelist', 'id']
+      addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
+      addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # If search ordered is not true, excludes ordered ones
@@ -181,6 +182,9 @@ module.exports = class ExprUtils
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
+    # "last" is only op to pass through enum values
+    if expr.type == "op" and expr.op == "last" and expr.exprs[0]
+      return @getExprEnumValues(expr.exprs[0])  
 
   # gets the id table of an expression of type id
   getExprIdTable: (expr) ->
