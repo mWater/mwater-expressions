@@ -27,6 +27,8 @@ _base is optional.
 
 `contents`: array of content items (columns, sections and joins) of the table
 
+`deprecated`: true if table is deprecated. Do not show unless already selected
+
 `jsonql`: Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server. 
 
 `sql`: sql expression that gets the table. Usually just name of the table. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
@@ -48,6 +50,8 @@ Either a section, join or column.
 `enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
 `join`: Details of the join. See below. For type `join` only.
+
+`deprecated`: true if column is deprecated. Do not show unless already selected
 
 `jsonql`: Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join` and `section`
 
