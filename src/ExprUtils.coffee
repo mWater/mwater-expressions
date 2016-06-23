@@ -88,6 +88,10 @@ module.exports = class ExprUtils
     addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "number"])
     addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
+    # Date subtraction
+    addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
+    addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
+
     addOpItem(op: "sum", name: "Total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
     addOpItem(op: "avg", name: "Average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
     for type in ['number', 'date', 'datetime']

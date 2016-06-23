@@ -66,6 +66,9 @@ module.exports = class ExprEvaluator
       when "ceiling"
         return Math.ceil(@evaluate(exprs[0], row))
 
+      when "days difference"
+        return moment(@evaluate(exprs[0], row), moment.ISO_8601).diff(moment(@evaluate(exprs[1], row), moment.ISO_8601))/24/3600/1000
+
       when "today"
         date = @evaluate(exprs[0], row)
         if not date

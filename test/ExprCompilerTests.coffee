@@ -376,6 +376,9 @@ describe "ExprCompiler", ->
       @datetime1 = { type: "literal", valueType: "datetime", value: "2014-01-01T01:02:03Z" }
       @datetime1JsonQL = { type: "literal", value: "2014-01-01T01:02:03Z" }
 
+      @datetime2 = { type: "literal", valueType: "datetime", value: "2015-01-01T01:02:03Z" }
+      @datetime2JsonQL = { type: "literal", value: "2015-01-01T01:02:03Z" }
+
       @geometry = { type: "field", table: "t1", column: "geometry" }
       @geometryJsonQL = { type: "field", tableAlias: "T1", column: "geometry" }
 
@@ -900,6 +903,41 @@ describe "ExprCompiler", ->
           ]
         }
       ) 
+
+    it "compiles days difference (date)", ->
+      @compile(
+        {
+          type: "op"
+          op: "days difference"
+          exprs: [@date1, @date2]
+        }
+        {
+          type: "op"
+          op: "-"
+          exprs: [
+            { type: "op", op: "::date", exprs: [@date1JsonQL]}
+            { type: "op", op: "::date", exprs: [@date2JsonQL]}
+          ]
+        }
+      )
+
+    it "compiles days difference (datetime)", ->
+      @compile(
+        {
+          type: "op"
+          op: "days difference"
+          exprs: [@datetime1, @datetime2]
+        }
+        {
+          type: "op"
+          op: "-"
+          exprs: [
+            { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
+            { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime2JsonQL] }]}
+          ]
+        }
+      )
+
 
     describe "relative dates", ->
       it "thisyear", ->

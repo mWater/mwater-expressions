@@ -110,6 +110,11 @@ describe "ExprEvaluator", ->
     it "ceiling", ->
       @testOp("ceiling", [3.6], 4)
 
+    it "days difference", ->
+      @testOp("days difference", ["2015-12-31", "2015-12-01"], 30)
+      @testOp("days difference", ['2016-06-23T17:36:51.412Z', '2016-06-22T05:36:51.412Z'], 1.5)
+      @testOp("days difference", ['2016-06-23T17:36:51.412Z', null], null)
+
     # it "contains", ->
     # Not supported
 
