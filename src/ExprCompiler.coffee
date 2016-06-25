@@ -218,7 +218,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
-      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
+      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "stdev", "stdevp", "var", "varp"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
@@ -227,6 +227,12 @@ module.exports = class ExprCompiler
           type: "op"
           op: expr.op
           exprs: compiledExprs
+        }
+      when "count" # Handle count specially for legacy count(null) support
+        return {
+          type: "op"
+          op: "count"
+          exprs: []
         }
       when "last"
         # Null if not present

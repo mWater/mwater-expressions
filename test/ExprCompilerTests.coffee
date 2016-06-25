@@ -612,6 +612,22 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles count(null) for legacy count expressions", ->
+      @compile(
+        {
+          type: "op"
+          op: "count"
+          exprs: [null]
+        }
+        {
+          type: "op"
+          op: "count"
+          exprs: []
+        }
+      )
+
+
+
     it "compiles last()", ->
       text = { type: "field", table: "t2", column: "text" }
       textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
