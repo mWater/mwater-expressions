@@ -321,6 +321,26 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "to text"
+        # Null if not present
+        if not compiledExprs[0]
+          return null
+
+        # Null if no enum values
+        enumValues = exprUtils.getExprEnumValues(expr.exprs[0])
+        if not enumValues
+          return null
+
+        return {
+          type: "case"
+          input: compiledExprs[0]
+          cases: _.map(enumValues, (ev) =>
+            {
+              when: { type: "literal", value: ev.id }
+              then: { type: "literal", value: exprUtils.localizeString(ev.name, expr.locale) }
+            })
+        }
+
       when "count where"
         # Null if not present
         if not compiledExprs[0] 

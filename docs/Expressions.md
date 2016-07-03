@@ -44,9 +44,21 @@ aggr: "last", "sum", "count", "max", "min", "stdev", "stdevp"
 
 - `type`: "op"
 - `table`: Table id of table
-- `op`: "and", "or", "=", ">", ">=", "<", "<=", "<>", "~*", ">", "<", "= false", "is null", "is not null", "= any", "between", "contains", 'thisyear', 'lastyear', 'thismonth', 'lastmonth', 'today', 'yesterday', 'last7days', 'last30days', 'last365days', 'distance' (distance between two geometries in meters), 'round', 'floor', 'ceiling', "last", "sum", "count", "max", "min", "stdev", "stdevp", "count where", "percent where"
-
+- `op`: See below
 - `exprs`: array of expressions to use for the op. Second and third, etc. are usually literal for all but "and" and "or"
+
+#### ops: 
+
+`and`, `or`, `=`, `>`, `>=`, `<`, `<=`, `<>`, `~*`, `>`, `<`, `= false`, `is null`, `is not null`, `= any`, `between`, `contains`, `thisyear`, `lastyear`, `thismonth`, `lastmonth`, `today`, `yesterday`, `last7days`, `last30days`, `last365days`, `distance` (distance between two geometries in meters), `round`, `floor`, `ceiling`, 
+
+`to text`: Convert enum to text. Extra property `locale` is optional
+
+Aggregate ones: 
+
+`last`, `sum`, `count`, `max`, `min`, `stdev`, `stdevp`
+
+`count where`, `percent where`: aggregate that takes a boolean condition
+
 
 ### literal expressions
 

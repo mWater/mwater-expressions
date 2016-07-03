@@ -366,6 +366,9 @@ describe "ExprCompiler", ->
       @text2 = { type: "literal", valueType: "text", value: "b" }
       @text2JsonQL = { type: "literal", value: "b" }
 
+      @enum1 = { type: "literal", valueType: "text", value: "a" }
+      @enum1JsonQL = { type: "literal", value: "a" }
+
       @date1 = { type: "literal", valueType: "date", value: "2014-01-01" }
       @date1JsonQL = { type: "literal", value: "2014-01-01" }
       @date2 = { type: "literal", valueType: "date", value: "2014-12-31" }
@@ -938,6 +941,22 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles to text", ->
+      @compile(
+        {
+          type: "op"
+          op: "to text"
+          exprs: [{ type: "field", table: "t1", column: "enum" }]
+        }
+        {
+          type: "case"
+          input: { type: "field", tableAlias: "T1", column: "enum" }
+          cases: [
+            { when: { type: "literal", value: "a" }, then: { type: "literal", value: "A" } }
+            { when: { type: "literal", value: "b" }, then: { type: "literal", value: "B" } }
+          ]
+        }
+      )
 
     describe "relative dates", ->
       it "thisyear", ->

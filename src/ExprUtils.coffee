@@ -121,6 +121,8 @@ module.exports = class ExprUtils
       addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
       addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 
+    addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
+
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # If search ordered is not true, excludes ordered ones
   # If prefix, only prefix
