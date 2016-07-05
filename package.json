@@ -1,6 +1,6 @@
 {
   "name": "mwater-expressions",
-  "version": "2.15.8",
+  "version": "2.15.9",
   "description": "Expression library",
   "repository": "git@github.com:mWater/mwater-expressions.git",
   "main": "lib/index.js",
