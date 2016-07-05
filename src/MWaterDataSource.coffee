@@ -50,6 +50,7 @@ module.exports = class MWaterDataSource extends DataSource
       method: method
       url: url
       headers: headers
+      contentType: if method == "POST" then 'application/json'
       data: if method == "POST" then jsonqlStr
     }).done (rows) =>
       if @options.localCaching
