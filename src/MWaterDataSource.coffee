@@ -32,7 +32,7 @@ module.exports = class MWaterDataSource extends DataSource
     jsonqlStr = JSON.stringify(jsonql)
 
     # Add as GET if short, POST otherwise
-    if queryStr.length < 10000
+    if jsonqlStr.length < 10000
       queryParams.jsonql = jsonqlStr
       method = "GET"
     else
