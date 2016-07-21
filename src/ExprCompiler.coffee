@@ -153,6 +153,10 @@ module.exports = class ExprCompiler
         else
           throw new Error("Unknown aggregation #{expr.aggr}")
 
+    # If no expr, return null
+    if not scalarExpr
+      return null
+
     # If no where, from, orderBy or limit, just return expr for simplicity
     if not from and not where and not orderBy and not limit
       return scalarExpr
