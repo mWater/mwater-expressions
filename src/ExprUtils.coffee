@@ -69,6 +69,12 @@ module.exports = class ExprUtils
     addOpItem(op: ">=", name: "is greater or equal to", resultType: "boolean", exprTypes: ["number", "number"])
     addOpItem(op: "<=", name: "is less or equal to", resultType: "boolean", exprTypes: ["number", "number"])
 
+    for type in ['date', 'datetime']
+      addOpItem(op: ">", name: "is after", resultType: "boolean", exprTypes: [type, type])
+      addOpItem(op: "<", name: "is before", resultType: "boolean", exprTypes: [type, type])
+      addOpItem(op: ">=", name: "is after or same as", resultType: "boolean", exprTypes: [type, type])
+      addOpItem(op: "<=", name: "is before or same as", resultType: "boolean", exprTypes: [type, type])
+
     addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["number", "number", "number"])
 
     addOpItem(op: "round", name: "Round", resultType: "number", exprTypes: ["number"], prefix: true)
