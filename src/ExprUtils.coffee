@@ -205,7 +205,7 @@ module.exports = class ExprUtils
     if not expr
       return null
 
-    if expr.type == "literal" and expr.valueType == "id"
+    if expr.type == "literal" and expr.valueType in ["id", "id[]"]
       return expr.idTable
 
     if expr.type == "id"
