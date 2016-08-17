@@ -214,6 +214,14 @@ module.exports = class ExprUtils
     if expr.type == "scalar"
       return @getExprIdTable(expr.expr)
 
+    # Handle fields
+    if expr.type == "field"
+      column = @schema.getColumn(expr.table, expr.column)
+      if column?.type == "join"
+        return column.join.toTable
+
+      return null
+
   # Gets the type of an expression
   getExprType: (expr) ->
     if not expr? or not expr.type
