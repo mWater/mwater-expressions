@@ -46,10 +46,35 @@ module.exports = class ExprCompiler
   compileFieldExpr: (options) ->
     expr = options.expr
 
-    # Check if column has custom jsonql
     column = @schema.getColumn(expr.table, expr.column)
     if not column
       throw new ColumnNotFoundException("Column #{expr.table}.#{expr.column} not found")
+
+    # Handle joins specially
+    if column.type == "join"
+      # If id is result
+      if column.join.type in ['1-1', 'n-1']
+        # Use scalar to create
+        return @compileScalarExpr(expr: { type: "scalar", table: expr.table, joins: [column.id], expr: { type: "id", table: column.join.toTable }}, tableAlias: options.tableAlias)
+      else
+        return {
+          type: "scalar"
+          expr: { 
+            type: "op"
+            op: "::jsonb"
+            exprs: [
+              { 
+                type: "op"
+                op: "array_agg"
+                exprs: [
+                  { type: "field", tableAlias: "inner", column: @schema.getTable(column.join.toTable).primaryKey }
+                ]
+              }
+            ]
+          }
+          from: @compileTable(column.join.toTable, "inner")
+          where: @compileJoin(column.join, options.tableAlias, "inner")
+        }
 
     # If column has custom jsonql, use that instead of id
     return @compileColumnRef(column.jsonql or column.id, options.tableAlias)

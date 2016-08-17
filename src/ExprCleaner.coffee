@@ -288,6 +288,10 @@ module.exports = class ExprCleaner
     if expr.where
       expr.where = @cleanExpr(expr.where, table: innerTable)
 
+    # Simplify to join column
+    if not expr.where and expr.joins.length == 1 and expr.expr?.type == "id"
+      return { type: "field", table: expr.table, column: expr.joins[0] }
+
     # Get inner expression type (must match unless is count which can count anything)
     if expr.expr
       isMultiple = @exprUtils.isMultipleJoins(expr.table, expr.joins)

@@ -64,10 +64,10 @@ describe "ExprUtils", ->
     it "finds = for number", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "number" })[0].op, "="
 
-    it "first = for id type non-hierarchical", ->
-      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "="
+    it "first = any for id type non-hierarchical", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "= any"
 
-    it "first within for id type non-hierarchical", ->
+    it "first within for id type hierarchical", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "thier" })[0].op, "within"
 
   describe "getAggrs", ->
@@ -113,6 +113,9 @@ describe "ExprUtils", ->
   describe "getExprType", ->
     it 'gets field type', ->
       assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text"
+
+    it 'gets join field type', ->
+      assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "1-2" }), "id[]"
 
     it 'gets scalar type', ->
       expr = {

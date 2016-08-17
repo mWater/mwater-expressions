@@ -27,6 +27,27 @@ describe "ExprCompiler", ->
         column: "number"
       })
 
+  it "compiles join (id[]) field", ->
+    @compile(
+      { type: "field", table: "t1", column: "1-2" }
+      {
+        type: "scalar"
+        # Wrap in jsonb array for easier handling
+        expr: { type: "op", op: "::jsonb", exprs:[{ type: "op", op: "array_agg", exprs: [{ type: "field", tableAlias: "inner", column: "primary" }] }] }
+        from: { type: "table", table: "t2", alias: "inner" }
+        where: { type: "op", op: "=", exprs: [
+          { type: "field", tableAlias: "inner", column: "t1" }
+          { type: "field", tableAlias: "T1", column: "primary" }
+          ]}
+      })
+
+  it "compiles join (id) field", ->
+    @compile({ 
+      type: "field", 
+      table: "t2",
+      column: ["2-1"]
+    }, { type: "field", tableAlias: "T1", column: "t1" })
+
   it "throws ColumnNotFoundException", ->
     assert.throws () =>
       @ec.compileExpr(expr: { type: "field", table: "t1", column: "XYZ" }, tableAlias: "T1")

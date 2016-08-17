@@ -336,6 +336,13 @@ describe "ExprCleaner", ->
         scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
         compare(fieldExpr, scalarExpr)
 
+      it "simplifies if id and single join", ->
+        fieldExpr = { type: "id", table: "t2" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr }
+        expr = @exprCleaner.cleanExpr(scalarExpr)
+        compare(expr, { type: "field", table: "t1", column: "1-2" })
+
+
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->
     it "count becomes id", ->

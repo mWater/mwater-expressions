@@ -116,6 +116,8 @@ module.exports = class ExprUtils
         return @schema.getTable(lhsIdTable).ancestry?
       return false
     )
+    addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
+    addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"])
     addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
     addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
@@ -221,6 +223,11 @@ module.exports = class ExprUtils
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
         if column
+          if column.type == "join"
+            if column.join.type in ['1-1', 'n-1']
+              return "id"
+            else
+              return "id[]"
           return column.type
         return null
       when "id"
