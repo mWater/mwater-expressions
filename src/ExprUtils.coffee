@@ -108,7 +108,7 @@ module.exports = class ExprUtils
       addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
     addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-    addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, joiner: "of")
+    addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of")
 
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
