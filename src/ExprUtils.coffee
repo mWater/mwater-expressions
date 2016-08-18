@@ -1,4 +1,5 @@
 _ = require 'lodash'
+moment = require 'moment'
 
 module.exports = class ExprUtils
   constructor: (schema) ->
@@ -519,6 +520,12 @@ module.exports = class ExprUtils
     # Text array
     if type == "text[]" and _.isArray(literal)
       return literal.join(', ')
+
+    if type == "date"
+      return moment(literal, moment.ISO_8601).format("ll")
+
+    if type == "datetime"
+      return moment(literal, moment.ISO_8601).format("lll")
 
     if literal == true
       return "True"
