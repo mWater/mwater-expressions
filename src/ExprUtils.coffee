@@ -16,6 +16,8 @@ module.exports = class ExprUtils
     # joiner: string to put between exprs when prefix type
     # aggr: true if aggregating (e.g. sum)
     # ordered: for aggr = true if table must be have ordering
+    # lhsPlaceholder: placeholder for lhs expression
+    # rhsPlaceholder: placeholder for rhs expression
     @opItems = []
 
     # Adds an op item (particular combination of operands types with an operator)
@@ -108,7 +110,7 @@ module.exports = class ExprUtils
       addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
     addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-    addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of")
+    addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
     addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
       lhsIdTable = @getExprIdTable(lhsExpr)
