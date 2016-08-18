@@ -395,7 +395,7 @@ module.exports = class ExprCompiler
         if not compiledExprs[0] 
           return null
 
-        # Compiles as sum(case when cond then 1 else 0 end) * 100/sum(1) (prevent div by zero)        
+        # Compiles as sum(case when cond [and basis (if present)] then 1 else 0 end) * 100/sum(1 [or case when basis then 1 else 0 (if present)]) (prevent div by zero)        
         return {
           type: "op"
           op: "/"
@@ -411,7 +411,7 @@ module.exports = class ExprCompiler
                     { 
                       type: "case"
                       cases: [
-                        when: compiledExprs[0]
+                        when: if compiledExprs[1] then { type: "op", op: "and", exprs: [compiledExprs[0], compiledExprs[1]] } else compiledExprs[0]
                         then: 1
                       ]
                       else: 0
@@ -421,7 +421,23 @@ module.exports = class ExprCompiler
                 100
               ]
             }
-            { type: "op", op: "sum", exprs: [1] }
+            if compiledExprs[1]
+              { 
+                type: "op"
+                op: "sum"
+                exprs: [
+                  { 
+                    type: "case"
+                    cases: [
+                      when: compiledExprs[1]
+                      then: 1
+                    ]
+                    else: 0
+                  }
+                ]
+              }
+            else
+              { type: "op", op: "sum", exprs: [1] }
           ]
         }
 

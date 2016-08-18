@@ -57,7 +57,8 @@ Aggregate ones:
 
 `last`, `sum`, `count`, `max`, `min`, `stdev`, `stdevp`
 
-`count where`, `percent where`: aggregate that takes a boolean condition
+`count where`: aggregate that takes a boolean condition
+`percent where`: aggregate that takes two boolean condition (filter and basis. resolves to percentage where [filter] of [basis])
 
 
 ### literal expressions

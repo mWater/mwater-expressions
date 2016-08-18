@@ -97,6 +97,7 @@ describe "ExprCleaner", ->
             table: "t1"
             exprs: [
               { type: "op", table: "t1", op: "= any", exprs: [{ type: "field", table: "t1", column: "enum" }, null] }
+              null
             ]
           }
         )
