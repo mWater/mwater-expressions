@@ -66,9 +66,16 @@ module.exports = class MWaterDataSource extends DataSource
 
   # Get the url to download an image (by id from an image or imagelist column)
   # Height, if specified, is minimum height needed. May return larger image
+  # Can be used to upload by posting to this url
   getImageUrl: (imageId, height) ->
     url = @apiUrl + "images/#{imageId}"
+    query = {}
     if height
-      url += "?h=#{height}"
+      query.h = height
+    if @client
+      query.client = @client
+
+    if not _.isEmpty(query)
+      url += "?" + querystring.stringify(query)
 
     return url

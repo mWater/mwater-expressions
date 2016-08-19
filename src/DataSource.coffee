@@ -9,6 +9,7 @@ module.exports = class DataSource
 
   # Get the url to download an image (by id from an image or imagelist column)
   # Height, if specified, is minimum height needed. May return larger image
+  # Can be used to upload by posting to this url
   getImageUrl: (imageId, height) ->
     throw new Error("Not implemented")
 
