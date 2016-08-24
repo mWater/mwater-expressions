@@ -771,6 +771,7 @@ describe "ExprCompiler", ->
                     }
                   ]
                 }
+                0
               ]
             }
           ]

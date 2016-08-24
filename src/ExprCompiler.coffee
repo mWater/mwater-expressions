@@ -437,6 +437,7 @@ module.exports = class ExprCompiler
                       }
                     ]
                   }
+                  0
                 ]
               }
             else
