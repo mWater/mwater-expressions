@@ -34,7 +34,7 @@ module.exports = class ExprUtils
           return false
 
       # Check lhsCond
-      if search.lhsExpr and opItem.lhsCond and not opItem.lhsCond(search.lhsExpr)
+      if search.lhsExpr and opItem.lhsCond and not opItem.lhsCond(search.lhsExpr, this)
         return false
 
       return true
@@ -592,10 +592,10 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
 addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
 addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
-addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr) => 
-  lhsIdTable = @getExprIdTable(lhsExpr)
+addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
+  lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
   if lhsIdTable
-    return @schema.getTable(lhsIdTable).ancestry?
+    return exprUtils.schema.getTable(lhsIdTable).ancestry?
   return false
 )
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
