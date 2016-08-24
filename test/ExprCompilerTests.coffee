@@ -689,7 +689,7 @@ describe "ExprCompiler", ->
       cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
       condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
 
-      # Compiles as sum(case when cond then 1 else 0 end) * 100/sum(1) (prevent div by zero)
+      # Compiles as sum(case when cond then 100 else 0 end) * 100/sum(1) (prevent div by zero)
       @compile(
         {
           type: "op"
@@ -703,23 +703,16 @@ describe "ExprCompiler", ->
           exprs: [
             {
               type: "op"
-              op: "*"
+              op: "sum"
               exprs: [
-                {
-                  type: "op"
-                  op: "sum"
-                  exprs: [
-                    { 
-                      type: "case"
-                      cases: [
-                        when: condJsonQL
-                        then: 1
-                      ]
-                      else: 0
-                    }
+                { 
+                  type: "case"
+                  cases: [
+                    when: condJsonQL
+                    then: 100
                   ]
+                  else: 0
                 }
-                100
               ]
             }
             { type: "op", op: "sum", exprs: [1] }
@@ -734,7 +727,7 @@ describe "ExprCompiler", ->
       cond2 = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 2 }] }
       cond2JsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 2 }] }
 
-      # Compiles as sum(case when cond then 1 else 0 end) * 100/sum(1) (prevent div by zero)
+      # Compiles as sum(case when cond then 100 else 0 end)/nullif(sum(case when cond and cond2 then 1 else 0), 0) (prevent div by zero)
       @compile(
         {
           type: "op"
@@ -748,7 +741,21 @@ describe "ExprCompiler", ->
           exprs: [
             {
               type: "op"
-              op: "*"
+              op: "sum"
+              exprs: [
+                { 
+                  type: "case"
+                  cases: [
+                    when: { type: "op", op: "and", exprs: [condJsonQL, cond2JsonQL] }
+                    then: 100
+                  ]
+                  else: 0
+                }
+              ]
+            }
+            { 
+              type: "op"
+              op: "nullif"
               exprs: [
                 {
                   type: "op"
@@ -757,27 +764,12 @@ describe "ExprCompiler", ->
                     { 
                       type: "case"
                       cases: [
-                        when: { type: "op", op: "and", exprs: [condJsonQL, cond2JsonQL] }
+                        when: cond2JsonQL
                         then: 1
                       ]
                       else: 0
                     }
                   ]
-                }
-                100
-              ]
-            }
-            {
-              type: "op"
-              op: "sum"
-              exprs: [
-                { 
-                  type: "case"
-                  cases: [
-                    when: cond2JsonQL
-                    then: 1
-                  ]
-                  else: 0
                 }
               ]
             }
