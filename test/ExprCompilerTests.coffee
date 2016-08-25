@@ -33,7 +33,7 @@ describe "ExprCompiler", ->
       {
         type: "scalar"
         # Wrap in jsonb array for easier handling
-        expr: { type: "op", op: "::jsonb", exprs:[{ type: "op", op: "array_agg", exprs: [{ type: "field", tableAlias: "inner", column: "primary" }] }] }
+        expr: { type: "op", op: "to_jsonb", exprs:[{ type: "op", op: "array_agg", exprs: [{ type: "field", tableAlias: "inner", column: "primary" }] }] }
         from: { type: "table", table: "t2", alias: "inner" }
         where: { type: "op", op: "=", exprs: [
           { type: "field", tableAlias: "inner", column: "t1" }

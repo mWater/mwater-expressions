@@ -61,7 +61,7 @@ module.exports = class ExprCompiler
           type: "scalar"
           expr: { 
             type: "op"
-            op: "::jsonb"
+            op: "to_jsonb"
             exprs: [
               { 
                 type: "op"
