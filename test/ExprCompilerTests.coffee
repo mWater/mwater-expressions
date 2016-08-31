@@ -191,7 +191,7 @@ describe "ExprCompiler", ->
             type: "join" 
             left: { type: "table", table: "t2", alias: "1_2" }
             right: { type: "table", table: "t1", alias: "2_1" }
-            kind: "left"
+            kind: "inner"
             on: { type: "op", op: "=", exprs: [
               { type: "field", tableAlias: "2_1", column: "primary" }
               { type: "field", tableAlias: "1_2", column: "t1" }

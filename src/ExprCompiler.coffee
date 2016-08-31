@@ -139,7 +139,7 @@ module.exports = class ExprCompiler
           type: "join"
           left: from
           right: @compileTable(join.toTable, nextAlias)
-          kind: "left"
+          kind: "inner"
           on: onClause
         }
 
