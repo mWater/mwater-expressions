@@ -483,11 +483,7 @@ module.exports = class ExprUtils
 
     switch expr.type
       when "field"
-        column = @schema.getColumn(expr.table, expr.column)
-        if column?.type == "expr"
-          cols = cols.concat(@getImmediateReferencedColumns(column.expr))
-        else
-          cols.push(expr.column)
+        cols.push(expr.column)
       when "op"
         for subexpr in expr.exprs
           cols = cols.concat(@getImmediateReferencedColumns(subexpr))
