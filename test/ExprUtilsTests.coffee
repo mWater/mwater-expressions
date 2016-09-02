@@ -35,6 +35,9 @@ describe "ExprUtils", ->
     it "gets for id field", ->
       assert.equal @exprUtils.getExprIdTable({ table: "xyz", type: "id" }), "xyz"
 
+    it "gets for id expr field", ->
+      assert.equal @exprUtils.getExprIdTable({ type: "field", table: "t1", column: "expr_id" }), "t1"
+
     it "gets for scalar", ->
       assert.equal @exprUtils.getExprIdTable({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "t1"
 
@@ -46,7 +49,10 @@ describe "ExprUtils", ->
       assert.equal @exprUtils.getExprAggrStatus({ table: "xyz", type: "id" }), "individual"
 
     it "gets for field", ->
-      assert.equal @exprUtils.getExprAggrStatus({ type: "field", table: "xyz", column: "abc" }), "individual"
+      assert.equal @exprUtils.getExprAggrStatus({ type: "field", table: "t1", column: "number" }), "individual"
+
+    it "gets for expr field", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "field", table: "t1", column: "expr_sum" }), "aggregate"
 
     it "gets for aggregate", ->
       assert.equal @exprUtils.getExprAggrStatus({ type: "op", op: "sum", exprs: [{ type: "field", table: "xyz", column: "abc" }]}), "aggregate"
@@ -63,6 +69,9 @@ describe "ExprUtils", ->
   describe "findMatchingOpItems", ->
     it "finds = for number", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "number" })[0].op, "="
+
+    it "finds = for expr number", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "expr_number" })[0].op, "="
 
     it "first = any for id type non-hierarchical", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "= any"
@@ -113,6 +122,9 @@ describe "ExprUtils", ->
   describe "getExprType", ->
     it 'gets field type', ->
       assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text"
+
+    it 'gets expr field type', ->
+      assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "expr_number" }), "number"
 
     it 'gets join field type', ->
       assert.equal @exprUtils.getExprType({ type: "field", table: "t1", column: "1-2" }), "id[]"
@@ -245,6 +257,10 @@ describe "ExprUtils", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
       assert.equal str, "2.34"
 
+    it "stringifies expr number", ->
+      str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "expr_number" }, 2.34)
+      assert.equal str, "2.34"
+
     it "stringifies null", ->
       str = @exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
       assert.equal str, "None"
@@ -285,8 +301,12 @@ describe "ExprUtils", ->
 
   describe "getImmediateReferencedColumns", ->
     it "gets field", ->
-      cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "xyz", column: "f1" })
-      assert.deepEqual(cols, ["f1"])
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "t1", column: "number" })
+      assert.deepEqual(cols, ["number"])
+
+    it "gets expr field", ->
+      cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "t1", column: "expr_number" })
+      assert.deepEqual(cols, ["number"])
 
     it "gets first join", ->
       cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f1" }]})

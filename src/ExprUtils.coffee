@@ -66,7 +66,9 @@ module.exports = class ExprUtils
       return
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
-      return column.enumValues
+      if column.type == "expr"
+        return @getExprEnumValues(column.expr)
+      return column?.enumValues
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
@@ -91,8 +93,12 @@ module.exports = class ExprUtils
     # Handle fields
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
+
       if column?.type == "join"
         return column.join.toTable
+
+      if column?.type == "expr"
+        return @getExprIdTable(column.expr)
 
       return null
 
@@ -110,6 +116,8 @@ module.exports = class ExprUtils
               return "id"
             else
               return "id[]"
+          else if column.type == "expr"
+            return @getExprType(column.expr)
           return column.type
         return null
       when "id"
@@ -175,7 +183,12 @@ module.exports = class ExprUtils
       return null
 
     switch expr.type
-      when "field", "id", "scalar"
+      when "id", "scalar"
+        return "individual"
+      when "field"
+        column = @schema.getColumn(expr.table, expr.column)
+        if column?.type == "expr"
+          return @getExprAggrStatus(column.expr)
         return "individual"
       when "op"
         # If aggregate op
@@ -470,7 +483,11 @@ module.exports = class ExprUtils
 
     switch expr.type
       when "field"
-        cols.push(expr.column)
+        column = @schema.getColumn(expr.table, expr.column)
+        if column?.type == "expr"
+          cols = cols.concat(@getImmediateReferencedColumns(column.expr))
+        else
+          cols.push(expr.column)
       when "op"
         for subexpr in expr.exprs
           cols = cols.concat(@getImmediateReferencedColumns(subexpr))

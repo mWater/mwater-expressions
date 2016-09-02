@@ -45,7 +45,7 @@ Either a section, join or column.
 
 `code`: optional non-localized code of item
 
-`type`: type of content item. `id`, `text`, `integer`, `decimal`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `image`, `imagelist`, `join`, `section`. See fundamental types above.
+`type`: type of content item. `id`, `text`, `integer`, `decimal`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `image`, `imagelist`, `join`, `section`, `expr`. See fundamental types above.
 
 `enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
@@ -53,7 +53,7 @@ Either a section, join or column.
 
 `deprecated`: true if column is deprecated. Do not show unless already selected
 
-`jsonql`: Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join` and `section`
+`jsonql`: Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr`
 
 `sql`: sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
 
@@ -76,6 +76,8 @@ joins and columns can be nested within sections for organizational purposes.
 
 Special column types:
 * `join`: not a columns per se, but link to one or N rows in another table
+* `section`: has contents which is list of other columns/sections
+* `expr`: has `expr` field which is an expression to be evaluated. Can be aggregate or individual expression
 
 ### enumValues
 

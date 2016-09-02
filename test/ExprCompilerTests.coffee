@@ -27,6 +27,15 @@ describe "ExprCompiler", ->
         column: "number"
       })
 
+  it "compiles expression field", ->
+    @compile(
+      { type: "field", table: "t1", column: "expr_enum" }
+      {
+        type: "field"
+        tableAlias: "T1"
+        column: "enum"
+      })
+
   it "compiles join (id[]) field", ->
     @compile(
       { type: "field", table: "t1", column: "1-2" }

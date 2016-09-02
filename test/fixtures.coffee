@@ -13,6 +13,12 @@ exports.simpleSchema = ->
     { id: "geometry", name: { en: "Geometry" }, type: "geometry" }
     { id: "text[]", name: { en: "Text[]" }, type: "text[]" }
     { id: "1-2", name: { en: "T1->T2" }, type: "join", join: { type: "1-n", toTable: "t2", fromColumn: "primary", toColumn: "t1" }}
+
+    # Expressions
+    { id: "expr_enum", name: { en: "Expr Enum"}, type: "expr", expr: { type: "field", table: "t1", column: "enum" } }
+    { id: "expr_number", name: { en: "Expr Number"}, type: "expr", expr: { type: "field", table: "t1", column: "number" } }
+    { id: "expr_id", name: { en: "Expr Id"}, type: "expr", expr: { type: "id", table: "t1" } }
+    { id: "expr_sum", name: { en: "Expr Sum"}, type: "expr", expr: { type: "op", op: "sum", exprs: [{ type: "field", table: "t1", column: "number" }] }}
   ]})
 
   schema = schema.addTable({ id: "t2", name: { en: "T2" }, primaryKey: "primary", ordering: "number", contents: [

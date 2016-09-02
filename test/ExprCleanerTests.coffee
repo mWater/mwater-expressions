@@ -29,6 +29,16 @@ describe "ExprCleaner", ->
       assert @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t1")
       assert.isNull @exprCleaner.cleanExpr(field, types: ["id"], idTable: "t2")
 
+    it "nulls if wrong enums", ->
+      field = { type: "field", table: "t1", column: "enum" }
+      assert.isNotNull @exprCleaner.cleanExpr(field, enumValueIds: ["a", "b", "c"])
+      assert.isNull @exprCleaner.cleanExpr(field, enumValueIds: ["a"])
+
+    it "nulls if wrong enums expression", ->
+      field = { type: "field", table: "t1", column: "expr_enum" }
+      assert.isNotNull @exprCleaner.cleanExpr(field, enumValueIds: ["a", "b", "c"])
+      assert.isNull @exprCleaner.cleanExpr(field, enumValueIds: ["a"])
+
     describe "aggregation", ->
       it "aggregates if required", ->
         field = { type: "field", table: "t1", column: "number" }

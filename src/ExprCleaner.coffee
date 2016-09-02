@@ -152,6 +152,11 @@ module.exports = class ExprCleaner
       if _.difference(_.pluck(column.enumValues, "id"), options.enumValueIds).length > 0
         return null
 
+    if options.enumValueIds and column.type == "expr"
+      if @exprUtils.getExprType(column.expr) == "enum"
+        if _.difference(_.pluck(@exprUtils.getExprEnumValues(column.expr), "id"), options.enumValueIds).length > 0
+          return null
+
     return expr
 
   cleanOpExpr: (expr, options) ->

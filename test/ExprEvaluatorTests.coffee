@@ -25,11 +25,18 @@ describe "ExprEvaluator", ->
       else
         compare(result, expected)
 
-  it "compiles field", ->
+  it "handles field", ->
     @check(
       { type: "field", table: "t1", column: "number" }
       { number: 4 }
     4)
+
+  # Not supported
+  # it "handles expr field", ->
+  #   @check(
+  #     { type: "field", table: "t1", column: "expr_enum" }
+  #     { enum: "a" }
+  #   "a")
 
   it "literal", ->
     @check(
