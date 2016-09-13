@@ -520,10 +520,17 @@ module.exports = class ExprCompiler
         if exprUtils.getExprType(expr.exprs[0]) == "datetime"
           return {
             type: "op"
-            op: "-"
+            op: "/"
             exprs: [
-              { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }] }
-              { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[1]] }] }
+              {
+                type: "op"
+                op: "-"
+                exprs: [
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }] }
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[1]] }] }
+                ]
+              }
+              86400
             ]
           }
 

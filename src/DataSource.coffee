@@ -1,5 +1,4 @@
 _ = require 'lodash'
-async = require 'async'
 
 # Fetches data for queries
 module.exports = class DataSource

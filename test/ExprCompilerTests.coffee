@@ -1014,10 +1014,17 @@ describe "ExprCompiler", ->
         }
         {
           type: "op"
-          op: "-"
+          op: "/"
           exprs: [
-            { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
-            { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime2JsonQL] }]}
+            {
+              type: "op"
+              op: "-"
+              exprs: [
+                { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
+                { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime2JsonQL] }]}
+              ]
+            }
+            86400
           ]
         }
       )
