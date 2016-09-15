@@ -787,6 +787,37 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles sum where", ->
+      value = { type: "field", table: "t1", column: "number" }
+      valueJsonQL = { type: "field", tableAlias: "T1", column: "number" }
+
+      cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
+      condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
+
+      # Compiles as sum(case when cond then 1 else 0 end)
+      @compile(
+        {
+          type: "op"
+          op: "sum where"
+          table: "t2"
+          exprs: [value, cond]
+        }
+        {
+          type: "op"
+          op: "sum"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: condJsonQL
+                then: valueJsonQL
+              ]
+              else: 0
+            }
+          ]
+        }
+      )
+
     it "compiles = any", ->
       @compile(
         { 

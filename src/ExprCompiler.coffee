@@ -449,6 +449,34 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "sum where"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        # Simple sum if not specified where
+        if not compiledExprs[1]
+          return {
+            type: "op"
+            op: "sum"
+            exprs: [compiledExprs[0]]
+          }
+
+        return {
+          type: "op"
+          op: "sum"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: compiledExprs[1]
+                then: compiledExprs[0]
+              ]
+              else: 0
+            }
+          ]
+        }
+
       # Hierarchical test that uses ancestry column
       when "within"
         # Null if either not present
