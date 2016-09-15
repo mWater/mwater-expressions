@@ -504,6 +504,7 @@ module.exports = class ExprUtils
 # exprTypes: array of types of expressions required for arguments
 # moreExprType: type of n more expressions (like "and" that takes n arguments)
 # prefix: true if name goes before LHS value
+# prefixLabel: overrides name when displayed as prefix
 # lhsCond: optional condition function on LHS expr that tests if applicable (for "within" which only applies to hierarchical tables)
 # rhsLiteral: prefer rhs literal
 # joiner: string to put between exprs when prefix type
@@ -604,6 +605,7 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
 
 addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
 addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+addOpItem(op: "sum where", name: "Total where", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
