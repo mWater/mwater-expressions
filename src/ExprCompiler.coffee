@@ -564,6 +564,40 @@ module.exports = class ExprCompiler
 
         return null
 
+      when 'days since'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "-"
+              exprs: [
+                { type: "op", op: "::date", exprs: [moment().format("YYYY-MM-DD")] }
+                { type: "op", op: "::date", exprs: [compiledExprs[0]] }
+              ]
+            }
+          when "datetime"
+            return {
+              type: "op"
+              op: "/"
+              exprs: [
+                { 
+                  type: "op"
+                  op: "-"
+                  exprs: [
+                    { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [moment().toISOString()] }] }
+                    { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }] }
+                  ]
+                }
+                86400
+              ]
+            }
+          else
+            return null
+
+
       when 'thisyear'
         if not compiledExprs[0]
           return null

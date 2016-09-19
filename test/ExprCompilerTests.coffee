@@ -1231,6 +1231,24 @@ describe "ExprCompiler", ->
           }
         )
 
+      it "compiles days since (date)", ->
+        @compile(
+          {
+            type: "op"
+            op: "days since"
+            exprs: [@date1]
+          }
+          {
+            type: "op"
+            op: "-"
+            exprs: [
+              { type: "op", op: "::date", exprs: [moment().format("YYYY-MM-DD")]}
+              { type: "op", op: "::date", exprs: [@date1JsonQL]}
+            ]
+          }
+        )
+
+
     describe "relative datetimes", ->
       before ->
         @clock = sinon.useFakeTimers(new Date().getTime())
@@ -1387,6 +1405,30 @@ describe "ExprCompiler", ->
             exprs: [
               { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().startOf("day").subtract(365, "days").toISOString()]}
               { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "compiles days since (datetime)", ->
+        @compile(
+          {
+            type: "op"
+            op: "days since"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "/"
+            exprs: [
+              {
+                type: "op"
+                op: "-"
+                exprs: [
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [moment().toISOString()] }]}
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
+                ]
+              }
+              86400
             ]
           }
         )
