@@ -100,6 +100,9 @@ module.exports = class ExprUtils
       if column?.type == "expr"
         return @getExprIdTable(column.expr)
 
+      if column?.type == "id[]"
+        return column.idTable
+
       return null
 
   # Gets the type of an expression

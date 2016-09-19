@@ -49,6 +49,8 @@ Either a section, join or column.
 
 `enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
+`idTable`: table for id[] fields
+
 `join`: Details of the join. See below. For type `join` only.
 
 `deprecated`: true if column is deprecated. Do not show unless already selected
@@ -73,6 +75,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `text[]`: ordered array of text values
 * `image`: TODO
 * `imagelist`: TODO
+* `id[]`: array of primary keys of another table. Include `idTable` field
 
 Special column types:
 * `join`: not a columns per se, but link to one or N rows in another table
