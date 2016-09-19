@@ -594,7 +594,8 @@ addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "numbe
 addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
 addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
 
-addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes: ["date", "datetime"], prefix: true, rhsLiteral: false)
+addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
