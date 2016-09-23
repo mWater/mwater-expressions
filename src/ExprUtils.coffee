@@ -609,8 +609,8 @@ for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
   addOpItem(op: "max", name: "Maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
-addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
 addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
 addOpItem(op: "sum where", name: "Total where", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
