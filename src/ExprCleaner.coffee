@@ -58,7 +58,7 @@ module.exports = class ExprCleaner
       if aggrOpItems.length > 0
         expr = { type: "op", op: aggrOpItems[0].op, table: expr.table, exprs: [expr] }
 
-    # Default count where + booleanization 
+    # Default percent where + booleanization 
     if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
       # Only if result types include number
       if not options.types or "number" in options.types
@@ -76,7 +76,7 @@ module.exports = class ExprCleaner
           for i in [1..args]
             expr.exprs.push(null)
 
-          expr = { type: "op", op: "count where", table: expr.table, exprs: [expr] }
+          expr = { type: "op", op: "percent where", table: expr.table, exprs: [expr] }
 
     # Strip if wrong aggregation status
     if @exprUtils.getExprAggrStatus(expr) and @exprUtils.getExprAggrStatus(expr) not in options.aggrStatuses
