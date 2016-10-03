@@ -82,10 +82,15 @@ module.exports = class ExprValidator
         if error
           return error
 
+        if expr.input
+          enumValueIds = _.pluck(@exprUtils.getExprEnumValues(expr.input), "id")
+        else
+          enumValueIds = null
+
         for key, value of expr.scores
-          if options.enumValueIds and key not in options.enumValueIds 
+          if enumValueIds and key not in enumValueIds
             return "Invalid score enum"
-            
+
           error = @validateExpr(value, _.extend({}, options, types: ["number"]))
           if error
             return error
