@@ -17,6 +17,8 @@ _base is optional.
 
 `desc`: localized description of table (optional)
 
+`code`: non-localized short code for a table (optional)
+
 `primaryKey`: column with primary key (optional). Can be JsonQL expression with `{alias}` for table alias
 
 `ordering`: column with natural ordering (optional). Can be JsonQL expression with `{alias}` for table alias
@@ -84,7 +86,7 @@ Special column types:
 
 ### enumValues
 
-Enum values are represented by an array of objects e.g. `{ id: some id, name: some name }`. `id` should be a string. `name` is a string label of the enum value
+Enum values are represented by an array of objects e.g. `{ id: some id, code: optional non-localized code, name: some name, desc: optional description localized }`. `id` should be a string. `name` is a string label of the enum value
 
 ### join
 

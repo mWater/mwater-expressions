@@ -83,16 +83,17 @@ describe "ExprCleaner", ->
         expr = { type: "field", table: "t1", column: "enum" }
         compare(@exprCleaner.cleanExpr(expr, types: ["boolean"]), { type: "op", table: "t1", op: "= any", exprs: [expr, null] })
 
-      it "creates count where from enum", ->
+      it "creates percent where from enum", ->
         expr = { type: "field", table: "t1", column: "enum" }
         compare(
           @exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate", "literal"]) 
           {
             type: "op"
-            op: "count where"
+            op: "percent where"
             table: "t1"
             exprs: [
               { type: "op", table: "t1", op: "= any", exprs: [expr, null] }
+              null
             ]
           }
         )
