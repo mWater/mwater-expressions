@@ -131,6 +131,19 @@ describe "ExprValidator", ->
       expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "xyz" }, scores: {} }
       @notValid(expr)
 
+    it "validates score keys", ->
+      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+          a: { type: "field", table: "t1", column: "number" }
+        } 
+      }
+      @isValid(expr, enumValueIds: ['a', 'b'])
+
+      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+          xyz: { type: "field", table: "t1", column: "number" }
+        } 
+      }
+      @notValid(expr, enumValueIds: ['a', 'b'])
+
     it "validates score values", ->
       expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
           a: { type: "field", table: "t1", column: "number" }
