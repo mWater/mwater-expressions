@@ -4,6 +4,7 @@ exports.PriorityDataQueue = require './PriorityDataQueue'
 exports.NullDataSource = require './NullDataSource'
 
 exports.ExprCleaner = require './ExprCleaner'
+exports.ExprValidator = require './ExprValidator'
 exports.ExprUtils = require './ExprUtils'
 exports.ExprCompiler = require './ExprCompiler'
 exports.ExprEvaluator = require './ExprEvaluator'
