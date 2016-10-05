@@ -5,6 +5,11 @@ _ = require 'lodash'
 ExprUtils = require '../src/ExprUtils'
 Schema = require '../src/Schema'
 
+canonical = require 'canonical-json'
+
+compare = (actual, expected) ->
+  assert.equal canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
+
 describe "ExprUtils", ->
   beforeEach ->
     @exprUtils = new ExprUtils(fixtures.simpleSchema())
@@ -299,37 +304,37 @@ describe "ExprUtils", ->
       assert.equal opItem.op, "= any"
       assert.equal opItem.exprTypes[0], "text"
 
-  # describe "getImmediateReferencedColumns", ->
-  #   it "gets field", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "t1", column: "number" })
-  #     assert.deepEqual(cols, ["number"])
+  describe "getReferencedFields", ->
+    it "gets field", ->
+      cols = @exprUtils.getReferencedFields({ type: "field", table: "t1", column: "number" })
+      compare(cols, [{ type: "field", table: "t1", column: "number" }])
 
-  #   it "gets expr field", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ type: "field", table: "t1", column: "expr_number" })
-  #     assert.deepEqual(cols, ["number"])
+    it "gets expr field", ->
+      cols = @exprUtils.getReferencedFields({ type: "field", table: "t1", column: "expr_number" })
+      compare(cols, [{ type: "field", table: "t1", column: "expr_number" }, { type: "field", table: "t1", column: "number" }])
 
-  #   it "gets first join", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f1" }]})
-  #     assert.deepEqual(cols, ["f1"])
+    it "gets join", ->
+      cols = @exprUtils.getReferencedFields({ type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", table: "t2", exprs: [{ type: "field", table: "t2", column: "number" }]}})
+      compare(cols, [{ type: "field", table: "t1", column: "1-2" }, { type: "field", table: "t2", column: "number" }])
 
-  #   it "recurses into ops", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f2" }]})
-  #     assert.deepEqual(cols, ["f1", "f2"])
+    it "recurses into ops", ->
+      cols = @exprUtils.getReferencedFields({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }]})
+      compare(cols, [{ type: "field", table: "t1", column: "number" }])
 
-  #   it "includes cases", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ 
-  #       type: "case"
-  #       cases: [
-  #         {
-  #           when: { type: "field", table: "xyz", column: "f1" }
-  #           then: { type: "field", table: "xyz", column: "f2" }
-  #         }
-  #       ]
-  #       else: { type: "field", table: "xyz", column: "f3" }
-  #     })
+    it "includes cases", ->
+      cols = @exprUtils.getReferencedFields({ 
+        type: "case"
+        cases: [
+          {
+            when: { type: "field", table: "t1", column: "boolean" }
+            then: { type: "field", table: "t1", column: "enum" }
+          }
+        ]
+        else: { type: "field", table: "t1", column: "text" }
+      })
 
-  #     assert.deepEqual(cols, ["f1", "f2", "f3"])
+      compare(cols, [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "enum" }, { type: "field", table: "t1", column: "text" }])
 
-  #   it "de-duplicates", ->
-  #     cols = @exprUtils.getImmediateReferencedColumns({ type: "op", op: "+", exprs: [{ type: "field", table: "xyz", column: "f1" }, { type: "field", table: "xyz", column: "f1" }]})
-  #     assert.deepEqual(cols, ["f1"])
+    it "de-duplicates", ->
+      cols = @exprUtils.getReferencedFields({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]})
+      compare(cols, [{ type: "field", table: "t1", column: "number" }])

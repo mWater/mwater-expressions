@@ -474,6 +474,49 @@ module.exports = class ExprUtils
 
     return lhsType
 
+  # Get a list of fields that are referenced in a an expression
+  # Useful to know which fields and joins are used. Includes joins as fields
+  getReferencedFields: (expr) ->
+    cols = []
+
+    if not expr
+      return cols
+
+    switch expr.type
+      when "field"
+        cols.push(expr)
+        column = @schema.getColumn(expr.table, expr.column)
+        if column?.expr
+          cols = cols.concat(@getReferencedFields(column.expr))
+      when "op"
+        for subexpr in expr.exprs
+          cols = cols.concat(@getReferencedFields(subexpr))
+      when "case"
+        for subcase in expr.cases
+          cols = cols.concat(@getReferencedFields(subcase.when))
+          cols = cols.concat(@getReferencedFields(subcase.then))
+        cols = cols.concat(@getReferencedFields(expr.else))
+      when "scalar"
+        table = expr.table
+        for join in expr.joins
+          cols.push({ type: "field", table: table, column: join })
+          column = @schema.getColumn(table, join)
+          # Handle gracefully
+          if not column
+            break
+
+          table = column.join.toTable
+
+        cols = cols.concat(@getReferencedFields(expr.expr))
+
+      when "score"
+        cols = cols.concat(@getReferencedFields(expr.input))
+        for value in _.values(expr.scores)
+          cols = cols.concat(@getReferencedFields(value))
+
+    return _.uniq(cols, (col) -> col.table + "/" + col.column)
+
+
   # # Get a list of column ids of expression table that are referenced in a an expression
   # # Useful to know which fields and joins are used. Does not follow joins, beyond including 
   # # the first join (which is a column in the start table).
