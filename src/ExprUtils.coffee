@@ -66,6 +66,9 @@ module.exports = class ExprUtils
       return
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
+      if not column
+        return null
+        
       if column.type == "expr"
         return @getExprEnumValues(column.expr)
       return column?.enumValues
