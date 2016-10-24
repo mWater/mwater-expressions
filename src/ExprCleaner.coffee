@@ -172,7 +172,7 @@ module.exports = class ExprCleaner
 
         return expr
       when "+", "*"
-        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, types: ["number"], table: expr.table)))
+        expr = _.extend({}, expr, exprs: _.map(expr.exprs, (e) => @cleanExpr(e, types: ["number"], table: expr.table, aggrStatuses: options.aggrStatuses)))
 
         # Simplify
         if expr.exprs.length == 1
