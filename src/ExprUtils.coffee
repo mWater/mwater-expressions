@@ -153,9 +153,11 @@ module.exports = class ExprUtils
       when "literal"
         return expr.valueType
       when "case"
-        # Use type of first then
-        if expr.cases[0]
-          return @getExprType(expr.cases[0].then)
+        # Use type of first then that has value
+        for cse in expr.cases
+          type = @getExprType(cse.then)
+          if type
+            return type
         return @getExprType(expr.else)
       when "score"
         return "number"
