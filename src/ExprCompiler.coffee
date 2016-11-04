@@ -280,7 +280,7 @@ module.exports = class ExprCompiler
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: compiledExprs, orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
             1
           ]
         }
@@ -290,20 +290,26 @@ module.exports = class ExprCompiler
         if not compiledExprs[0]
           return null
 
-        # Null if not condition present
-        if not compiledExprs[1]
-          return null
-
-        # Compiles to:
-        # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> desc nulls last))[1]
-        # which prevents non-matching from appearing
-
         # Get ordering
         ordering = @schema.getTable(expr.table)?.ordering
         if not ordering
           throw new Error("Table #{expr.table} must be ordered to use last()")
 
-        # (array_agg(xyz order by theordering desc nulls last))[1]
+        # Simple last if not condition present
+        if not compiledExprs[1]
+          # (array_agg(xyz order by theordering desc nulls last))[1]
+          return { 
+            type: "op"
+            op: "[]"
+            exprs: [
+              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
+              1
+            ]
+          }
+
+        # Compiles to:
+        # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> desc nulls last))[1]
+        # which prevents non-matching from appearing
         return { 
           type: "op"
           op: "[]"

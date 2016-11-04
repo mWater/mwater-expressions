@@ -75,8 +75,8 @@ module.exports = class ExprUtils
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
-    # "last" is only op to pass through enum values
-    if expr.type == "op" and expr.op == "last" and expr.exprs[0]
+    # "last" and "last where" are only ops to pass through enum values
+    if expr.type == "op" and expr.op in ["last", "last where"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
 
   # gets the id table of an expression of type id
@@ -616,7 +616,7 @@ addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes:
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
-  addOpItem(op: "last where", name: "Latest that", resultType: type, exprTypes: [type, "boolean"], prefix: true, aggr: true, ordered: true, rhsLiteral: false)
+  addOpItem(op: "last where", name: "Latest that", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
 
 addOpItem(op: "sum", name: "Total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 addOpItem(op: "avg", name: "Average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
@@ -626,7 +626,7 @@ for type in ['number', 'date', 'datetime']
 
 addOpItem(op: "percent where", name: "Percent that", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 addOpItem(op: "count where", name: "Number that", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-addOpItem(op: "sum where", name: "Total that", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
+addOpItem(op: "sum where", name: "Total that", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
