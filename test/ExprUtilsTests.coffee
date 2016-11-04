@@ -84,7 +84,7 @@ describe "ExprUtils", ->
     it "first within for id type hierarchical", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "thier" })[0].op, "within"
 
-  describe "getAggrs", ->
+  describe "getAggrTypes", ->
     beforeEach ->
       @schema = new Schema()
         .addTable({ id: "a", name: "A", ordering: "z", contents: [
@@ -93,36 +93,19 @@ describe "ExprUtils", ->
           ]})
       @exprUtils = new ExprUtils(@schema)
 
-    it "includes last if has natural ordering", ->
+    it "includes text (last)", ->
       field = { type: "field", table: "a", column: "y" }
-      assert.equal _.findWhere(@exprUtils.getAggrs(field), id: "last").type, "text"
+      types = @exprUtils.getAggrTypes(field)
+      assert.isFalse "number" in types, JSON.stringify(types)
+      assert.isTrue "text" in types, JSON.stringify(types)
 
-    it "doesn't include most recent normally", ->
+    it "doesn't include last normally", ->
       @schema = @schema.addTable({ id: "b", name: "B", contents:[{ id: "x", name: "X", type: "text" }]})
       @exprUtils = new ExprUtils(@schema)
+
       field = { type: "field", table: "b", column: "x" }
-      assert.isUndefined _.findWhere(@exprUtils.getAggrs(field), id: "last")
-
-    it "does not include count for text", ->
-      field = { type: "field", table: "a", column: "y" }
-      aggrs = @exprUtils.getAggrs(field)
-
-      assert.isUndefined _.findWhere(aggrs, id: "count")
-      assert.isUndefined _.findWhere(aggrs, id: "avg")
-      assert.isUndefined _.findWhere(aggrs, id: "sum")
-      assert.isUndefined _.findWhere(aggrs, id: "avg")
-
-    it "includes sum, avg, etc for number", ->
-      field = { type: "field", table: "a", column: "z" }
-      aggrs = @exprUtils.getAggrs(field)
-
-      assert.equal _.findWhere(aggrs, id: "sum").type, "number"
-      assert.equal _.findWhere(aggrs, id: "avg").type, "number"
-      # TODO etc
-
-    it "includes nothing for null", ->
-      aggrs = @exprUtils.getAggrs(null)
-      assert.equal aggrs.length, 0
+      types = @exprUtils.getAggrTypes(field)
+      assert.deepEqual types, []
  
   describe "getExprType", ->
     it 'gets field type', ->

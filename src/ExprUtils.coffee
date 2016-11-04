@@ -238,44 +238,10 @@ module.exports = class ExprUtils
 
     return expr.table
 
+  # Gets the types that can be formed by aggregating an expression
   getAggrTypes: (expr) ->
-    # Get available aggregations
-    aggrs = @getAggrs(expr)
-
-    # Keep unique types
-    return _.uniq(_.pluck(aggrs, "type"))
-
-  # Gets available aggregations [{id, name, type}]
-  getAggrs: (expr) ->
-    aggrs = []
-
-    type = @getExprType(expr)
-
-    # If null type, return none
-    if not type
-      return []
-    
-    table = @schema.getTable(expr.table)
-    switch type
-      when "date", "datetime"
-        aggrs.push({ id: "max", name: "Maximum", type: type })
-        aggrs.push({ id: "min", name: "Minimum", type: type })
-
-      when "number", "integer", "decimal" # integer and decimal are legacy. TODO remove
-        aggrs.push({ id: "sum", name: "Total", type: type })
-        aggrs.push({ id: "avg", name: "Average", type: type })
-        aggrs.push({ id: "max", name: "Maximum", type: type })
-        aggrs.push({ id: "min", name: "Minimum", type: type })
-
-    if table.ordering and type not in ["id", "count"] # count is legacy. TODO remove
-      aggrs.push({ id: "last", name: "Latest", type: type })
-
-    # Don't include count as that can only be created directly, not switched to.
-    # switch type
-    #   when "id", "count" # count is legacy. TODO remove
-    #     aggrs.push({ id: "count", name: "Number of", type: "number" })
-
-    return aggrs
+    aggrOpItems = @findMatchingOpItems(lhsExpr: expr, aggr: true, ordered: @schema.getTable(expr.table)?.ordering?)
+    return _.uniq(_.pluck(aggrOpItems, "resultType"))
 
   localizeString: (name, locale) ->
     return ExprUtils.localizeString(name, locale)
@@ -310,9 +276,9 @@ module.exports = class ExprUtils
       when "scalar"
         return @summarizeScalarExpr(expr, locale)
       when "field"
-        return @localizeString(@schema.getColumn(expr.table, expr.column).name, locale)
+        return @localizeString(@schema.getColumn(expr.table, expr.column)?.name, locale)
       when "id"
-        return @localizeString(@schema.getTable(expr.table).name, locale)
+        return @localizeString(@schema.getTable(expr.table)?.name, locale)
       when "op"
         # Special case for contains with literal RHS
         if expr.op == "contains" and expr.exprs[1]?.type == "literal"
@@ -650,6 +616,7 @@ addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes:
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+  addOpItem(op: "last where", name: "Latest that", resultType: type, exprTypes: [type, "boolean"], prefix: true, aggr: true, ordered: true)
 
 addOpItem(op: "sum", name: "Total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 addOpItem(op: "avg", name: "Average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
@@ -657,9 +624,9 @@ for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
   addOpItem(op: "max", name: "Maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
-addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
-addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-addOpItem(op: "sum where", name: "Total where", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
+addOpItem(op: "percent where", name: "Percent that", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+addOpItem(op: "count where", name: "Number that", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
+addOpItem(op: "sum where", name: "Total that", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)

@@ -59,7 +59,7 @@ Aggregate ones:
 
 `count where`: aggregate that takes a boolean condition
 `percent where`: aggregate that takes two boolean condition (filter and basis. resolves to percentage where [filter] of [basis])
-
+`last where`: aggregate that takes any type expression and a boolean filter
 
 ### literal expressions
 

@@ -645,7 +645,7 @@ describe "ExprCompiler", ->
         }
       )
 
-    it "compiles last()", ->
+    it "compiles last", ->
       text = { type: "field", table: "t2", column: "text" }
       textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
 
@@ -660,7 +660,44 @@ describe "ExprCompiler", ->
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: [textJsonQL], orderBy: [{ expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "desc"}]}
+            { type: "op", op: "array_agg", exprs: [textJsonQL], orderBy: [{ expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "desc", nulls: "last"}]}
+            1
+          ]
+        }
+      )
+
+    it "compiles last where", ->
+      text = { type: "field", table: "t2", column: "text" }
+      textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+      cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
+      condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
+
+      # Compiles to 
+      # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> desc nulls last))[1]
+      # Which prevents non-matching from appearing
+
+      @compile(
+        {
+          type: "op"
+          op: "last where"
+          table: "t2"
+          exprs: [text, cond]
+        }
+        {
+          type: "op"
+          op: "[]"
+          exprs: [
+            { 
+              type: "op"
+              op: "array_agg"
+              exprs: [
+                { type: "case", cases: [{ when: condJsonQL, then: textJsonQL }], else: null }
+              ]
+              orderBy: [
+                { expr: { type: "case", cases: [{ when: condJsonQL, then: 0 }], else: 1 } }
+                { expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "desc", nulls: "last" }
+              ]
+            }
             1
           ]
         }

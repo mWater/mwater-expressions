@@ -275,12 +275,50 @@ module.exports = class ExprCompiler
         if not ordering
           throw new Error("Table #{expr.table} must be ordered to use last()")
 
-        # (array_agg(xyz order by theordering desc))[1]
+        # (array_agg(xyz order by theordering desc nulls last))[1]
         return { 
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: compiledExprs, orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc" }] }
+            { type: "op", op: "array_agg", exprs: compiledExprs, orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
+            1
+          ]
+        }
+
+      when "last where"
+        # Null if not value present
+        if not compiledExprs[0]
+          return null
+
+        # Null if not condition present
+        if not compiledExprs[1]
+          return null
+
+        # Compiles to:
+        # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> desc nulls last))[1]
+        # which prevents non-matching from appearing
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table)?.ordering
+        if not ordering
+          throw new Error("Table #{expr.table} must be ordered to use last()")
+
+        # (array_agg(xyz order by theordering desc nulls last))[1]
+        return { 
+          type: "op"
+          op: "[]"
+          exprs: [
+            { 
+              type: "op"
+              op: "array_agg"
+              exprs: [
+                { type: "case", cases: [{ when: compiledExprs[1], then: compiledExprs[0] }], else: null }
+              ]
+              orderBy: [
+                { expr: { type: "case", cases: [{ when: compiledExprs[1], then: 0 }], else: 1 } }
+                { expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }
+              ] 
+            }
             1
           ]
         }
