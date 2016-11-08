@@ -64,17 +64,25 @@ module.exports = class ExprUtils
   getExprEnumValues: (expr) ->
     if not expr 
       return
+
     if expr.type == "field"
       column = @schema.getColumn(expr.table, expr.column)
       if not column
         return null
-        
+
+      # Prefer returning specified enumValues as expr might not cover all possibilities if it's an if/then, etc.        
+      if column.enumValues
+        return column.enumValues
+
       if column.type == "expr"
         return @getExprEnumValues(column.expr)
-      return column?.enumValues
+
+      return null
+
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
+        
     # "last" and "last where" are only ops to pass through enum values
     if expr.type == "op" and expr.op in ["last", "last where"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
