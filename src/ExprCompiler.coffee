@@ -402,6 +402,20 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "cardinality"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        # Cast both to jsonb and use jsonb_array_length. Also convert both to json first to handle literal arrays
+        return {
+          type: "op"
+          op: "jsonb_array_length"
+          exprs: [
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+          ]
+        }
+
       when "to text"
         # Null if not present
         if not compiledExprs[0]

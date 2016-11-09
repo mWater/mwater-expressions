@@ -82,7 +82,7 @@ module.exports = class ExprUtils
     if expr.type == "scalar"
       if expr.expr
         return @getExprEnumValues(expr.expr)  
-        
+
     # "last" and "last where" are only ops to pass through enum values
     if expr.type == "op" and expr.op in ["last", "last where"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
@@ -650,9 +650,13 @@ addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id
 addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: [], prefix: true, aggr: true)
 
 addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
-addOpItem(op: "not", name: "is false", resultType: "boolean", exprTypes: ["boolean"])
+addOpItem(op: "not", name: "not", resultType: "boolean", exprTypes: ["boolean"], prefix: true)
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'image', 'imagelist', 'id']
   addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
   addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
+
+addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["enumset"], prefix: true)
+addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["imagelist"], prefix: true)
+addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
 addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
