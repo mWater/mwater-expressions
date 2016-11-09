@@ -402,7 +402,7 @@ module.exports = class ExprCompiler
           ]
         }
 
-      when "cardinality"
+      when "length"
         # Null if not present
         if not compiledExprs[0] 
           return null

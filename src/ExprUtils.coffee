@@ -655,8 +655,8 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
   addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
   addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 
-addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["enumset"], prefix: true)
-addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["imagelist"], prefix: true)
-addOpItem(op: "cardinality", name: "Number of values in", resultType: "number", exprTypes: ["text[]"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["enumset"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["imagelist"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
 addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
