@@ -321,3 +321,17 @@ describe "ExprUtils", ->
     it "de-duplicates", ->
       cols = @exprUtils.getReferencedFields({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]})
       compare(cols, [{ type: "field", table: "t1", column: "number" }])
+
+  describe "andExprs", ->
+    it "handles trivial case", ->
+      assert.isNull ExprUtils.andExprs()
+      assert.isNull ExprUtils.andExprs(null)
+      assert.isNull ExprUtils.andExprs(null, null)
+
+    it "denests", ->
+      compare(ExprUtils.andExprs({ type: "field", table: "t1", column: "b1" }, { type: "op", op: "and", exprs: [{ type: "field", table: "t1", column: "b2" }, { type: "field", table: "t1", column: "b3" }] }),
+        { type: "op", op: "and", exprs: [
+          { type: "field", table: "t1", column: "b1" }
+          { type: "field", table: "t1", column: "b2" }
+          { type: "field", table: "t1", column: "b3" }
+        ]})

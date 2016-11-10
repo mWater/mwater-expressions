@@ -275,6 +275,17 @@ module.exports = class ExprUtils
 
     return null
 
+  # Combine n expressions together by and
+  @andExprs: (exprs...) ->
+    exprs = _.map(exprs, (expr) -> if expr?.type == "op" and expr.op == "and" then expr.exprs else expr)
+    exprs = _.compact(_.flatten(exprs))
+    if exprs.length == 0
+      return null
+    if exprs.length == 1
+      return exprs[0]
+
+    return { type: "op", op: "and", exprs: exprs }
+
   # Summarizes expression as text
   summarizeExpr: (expr, locale) ->
     if not expr

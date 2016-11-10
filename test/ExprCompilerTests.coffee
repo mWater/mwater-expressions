@@ -981,11 +981,11 @@ describe "ExprCompiler", ->
         null
       )
 
-    it "compiles cardinality", ->
+    it "compiles length", ->
       @compile(
         { 
           type: "op"
-          op: "cardinality", 
+          op: "length", 
           exprs: [
             { type: "field", table: "t1", column: "enumset" } 
           ]
