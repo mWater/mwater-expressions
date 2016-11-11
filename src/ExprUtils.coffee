@@ -39,6 +39,10 @@ module.exports = class ExprUtils
 
       return true
 
+  # Determine if op is aggregate
+  @isOpAggr: (op) ->
+    return _.findWhere(opItems, op: op, aggr: true)?
+
   # Follows a list of joins to determine final table
   followJoins: (startTable, joins) ->
     t = startTable
