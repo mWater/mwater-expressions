@@ -250,6 +250,9 @@ module.exports = class ExprEvaluator
 
   evaluteAggrOp: (op, exprs, context, callback) ->
     switch op
+      when "count"
+        callback(null, context.rows.length)
+
       when "sum"
         # Evaluate all rows
         async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
@@ -282,15 +285,120 @@ module.exports = class ExprEvaluator
 
           callback(null, _.max(values))
 
+      when "last"
+        # Evaluate all rows by ordering
+        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          # Find largest
+          if values.length == 0
+            return callback(null, null)
+
+          index = values.indexOf(_.max(values))
+          @evaluate(exprs[0], { row: context.rows[index] }, callback)
+
+      when "last where"
+        # Evaluate all rows by ordering
+        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, values) =>
+          if error
+            return callback(error)
+  
+          # Evaluate all rows by where
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, wheres) =>
+            # Find largest
+            if values.length == 0
+              return callback(null, null)
+
+            index = -1
+            largest = null
+            for row, i in context.rows
+              if (wheres[i] or not exprs[1]) and (index == -1 or values[i] > largest)
+                index = i
+                largest = values[i]
+  
+            if index >= 0
+              @evaluate(exprs[0], { row: context.rows[index] }, callback)
+            else
+              callback(null, null)
+
+      when "count where"
+        # Evaluate all rows by where
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, wheres) =>
+          if error
+            return callback(error)
+
+          count = 0
+          for where in wheres
+            if where == true
+              count += 1
+
+          return callback(null, count)
+
+      when "sum where"
+        # Evaluate all rows
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          # Evaluate all rows by where
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, wheres) =>
+            if error
+              return callback(error)
+
+            sum = 0
+            for row, i in context.rows
+              if wheres[i] == true
+                sum += values[i]
+
+            callback(null, sum)
+
+      when "percent where"
+        # Evaluate all rows
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, wheres) =>
+          if error
+            return callback(error)
+
+          # Evaluate all rows by of
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, ofs) =>
+            if error
+              return callback(error)
+
+            sum = 0
+            count = 0
+            for row, i in context.rows
+              if wheres[i] == true and (not exprs[1] or ofs[i] == true)
+                sum += 1
+              if not exprs[1] or ofs[i] == true
+                count += 1
+
+            if count == 0
+              callback(null, null)
+            else
+              callback(null, sum/count * 100)
+
       else      
         callback(new Error("Unknown op #{op}"))
 
-  evaluateCase: (expr, row) ->
-    for acase in expr.cases
-      if @evaluate(acase.when, row)
-        return @evaluate(acase.then, row)
+  evaluateCase: (expr, context, callback) ->
+    # Evaluate case whens and thens
+    async.map expr.cases, ((acase, cb) => @evaluate(acase.when, context, cb)), (error, whens) =>
+      if error
+        return callback(error)
 
-    return @evaluate(expr.else, row)        
+      async.map expr.cases, ((acase, cb) => @evaluate(acase.then, context, cb)), (error, thens) =>
+        if error
+          return callback(error)
+
+        @evaluate expr.else, context, (error, aelse) =>
+          if error
+            return callback(error)
+
+          for acase, i in expr.cases
+            if whens[i]
+              return callback(null, thens[i])
+
+          return callback(null, aelse)
 
   evaluateScalar: (expr, row) ->
     if expr.aggr

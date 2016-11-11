@@ -186,14 +186,14 @@ sampleRow = (data) ->
   return {
     getPrimaryKey: (callback) -> callback(null, data.id)
     getField: (columnId, callback) -> callback(null, data[columnId])
-    getOrdering: (columnId, callback) -> callback(null, data.ordering)
+    getOrdering: (callback) -> callback(null, data.ordering)
   }
 
 sampleRows = [
-  sampleRow(id: "1", a: 1, b: 1, ordering: 4)
-  sampleRow(id: "1", a: 2, b: 4, ordering: 1)
-  sampleRow(id: "1", a: 3, b: 9, ordering: 2)
-  sampleRow(id: "1", a: 4, b: 16, ordering: 3)
+  sampleRow(id: "1", a: 1, b: 1, c: true, d: true, ordering: 3)
+  sampleRow(id: "2", a: 2, b: 4, c: false, d: true, ordering: 4)
+  sampleRow(id: "3", a: 3, b: 9, c: true, d: true, ordering: 1)
+  sampleRow(id: "4", a: 4, b: 16, c: false, d: false, ordering: 2)
 ]
 
 add({ type: "field", table: "t1", column: "a" }, 4, { row: sampleRow(a: 4) })
@@ -202,14 +202,20 @@ add({ type: "op", table: "t1", op: "sum", exprs: [{ type: "field", table: "t1", 
 add({ type: "op", table: "t1", op: "avg", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2.5, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "min", exprs: [{ type: "field", table: "t1", column: "a" }] }, 1, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "max", exprs: [{ type: "field", table: "t1", column: "a" }] }, 4, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "count", exprs: [] }, 4, { rows: sampleRows })
 
-# for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
-#   addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
-#   addOpItem(op: "last where", name: "Latest that", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2, { rows: sampleRows })
 
-# addOpItem(op: "percent where", name: "Percent that", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
-# addOpItem(op: "count where", name: "Number that", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-# addOpItem(op: "sum where", name: "Total that", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 1, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, null] }, 2, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "count where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 2, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "sum where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 4, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 50, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }, { type: "field", table: "t1", column: "d" }] }, ((v) -> Math.abs(v- 200/3) < 0.1), { rows: sampleRows })
+
 
 # addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
 #   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
@@ -218,5 +224,68 @@ add({ type: "op", table: "t1", op: "max", exprs: [{ type: "field", table: "t1", 
 #   return false
 # )
 
-# addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: [], prefix: true, aggr: true)
+add({ 
+  type: "case"
+  cases: [
+    { when: literal(true, "boolean"), then: { type: "literal", valueType: "number", value: 1 } }
+    { when: literal(true, "boolean"), then: { type: "literal", valueType: "number", value: 2 } }
+  ]
+  else: { type: "literal", valueType: "number", value: 3 }
+}, 1)
 
+add({ 
+  type: "case"
+  cases: [
+    { when: literal(false, "boolean"), then: { type: "literal", valueType: "number", value: 1 } }
+    { when: literal(true, "boolean"), then: { type: "literal", valueType: "number", value: 2 } }
+  ]
+  else: { type: "literal", valueType: "number", value: 3 }
+}, 2)
+
+add({ 
+  type: "case"
+  cases: [
+    { when: literal(false, "boolean"), then: { type: "literal", valueType: "number", value: 1 } }
+    { when: literal(false, "boolean"), then: { type: "literal", valueType: "number", value: 2 } }
+  ]
+  else: { type: "literal", valueType: "number", value: 3 }
+}, 3)
+
+add({
+  type: "score"
+  input: literal("a", "enum")
+  scores: {
+    a: { type: "literal", valueType: "number", value: 3 }
+    b: { type: "literal", valueType: "number", value: 4 }
+  }
+}, 3)
+
+add({
+  type: "score"
+  input: literal("c", "enum")
+  scores: {
+    a: { type: "literal", valueType: "number", value: 3 }
+    b: { type: "literal", valueType: "number", value: 4 }
+  }
+}, 0)
+
+
+#     it "does enumset", ->
+#       expr = {
+#         type: "score"
+#         input: { type: "field", table: "t1", column: "x" }
+#         scores: {
+#           a: { type: "literal", valueType: "number", value: 3 }
+#           b: { type: "literal", valueType: "number", value: 4 }
+#         }
+#       }
+#       @check(expr, { x: ["a", "b"] }, 7)
+#       @check(expr, { x: ["a", "c"] }, 3)
+#       @check(expr, { x: null }, 0)
+
+#   describe "scalar", ->
+#     it "n-1 scalar", ->
+#       @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: { getField: (col) -> (if col == "y" then 4) }}, 4)
+
+#     it "n-1 null scalar", ->
+#       @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: null }, null)
