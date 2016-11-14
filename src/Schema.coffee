@@ -86,6 +86,6 @@ module.exports = class Schema
 
     return schema
 
-  # Convert to a JSON string
-  stringify: ->
-    return JSON.stringify({ tables: @tables })
+  # Convert to a JSON 
+  toJSON: ->
+    return { tables: @tables }

@@ -49,7 +49,7 @@ describe "Schema", ->
       }]
     })
 
-    assert.equal schema.stringify(), JSON.stringify({
+    assert.equal JSON.stringify(schema.toJSON()), JSON.stringify({
       tables: [{
         id: "a"
         name: "A"
