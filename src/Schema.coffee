@@ -16,9 +16,6 @@ module.exports = class Schema
     if json
       @tables = _.cloneDeep(json.tables)
 
-      # Strip id type
-      @tables = _.map(@tables, @stripIdColumns)
-
       # Setup maps
       for table in @tables
         @tableMap[table.id] = table
@@ -89,21 +86,6 @@ module.exports = class Schema
 
     return schema
 
-  # TODO readd someday
-  getNamedExprs: (tableId) ->
-    return []
-
-  # Strip id columns from a table
-  stripIdColumns: (table) ->
-    stripIdColumnsFromContents = (contents) ->
-      output = []
-      for item in contents
-        if item.type != "section" and item.type != "id"
-          output.push(item)
-        else if item.type == "section"
-          output.push(_.extend(item, { contents: stripIdColumnsFromContents(item.contents)}))
-
-      return output
-
-    return _.extend(table, contents: stripIdColumnsFromContents(table.contents))
-
+  # Convert to a JSON string
+  stringify: ->
+    return JSON.stringify({ tables: @tables })
