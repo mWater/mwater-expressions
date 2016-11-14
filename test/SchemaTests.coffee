@@ -34,17 +34,12 @@ describe "Schema", ->
 
     assert.equal schema.getColumn("a", "x").name, "X"
 
-  it "skips id types", ->
+  it "saves to JSON", ->
     schema = new Schema({
       tables: [{
         id: "a"
         name: "A"
         contents: [
-          { 
-            id: "id"
-            name: "ID"
-            type: "id"
-          },
           {
             id: "x"
             name: "X"
@@ -54,7 +49,41 @@ describe "Schema", ->
       }]
     })
 
-    assert not schema.getColumn("a", "id")
+    assert.equal JSON.stringify(schema.toJSON()), JSON.stringify({
+      tables: [{
+        id: "a"
+        name: "A"
+        contents: [
+          {
+            id: "x"
+            name: "X"
+            type: "text"
+          }
+        ]
+      }]
+    })
+
+  # it "skips id types", ->
+  #   schema = new Schema({
+  #     tables: [{
+  #       id: "a"
+  #       name: "A"
+  #       contents: [
+  #         { 
+  #           id: "id"
+  #           name: "ID"
+  #           type: "id"
+  #         },
+  #         {
+  #           id: "x"
+  #           name: "X"
+  #           type: "text"
+  #         }
+  #       ]
+  #     }]
+  #   })
+
+  #   assert not schema.getColumn("a", "id")
 
   it "loads from JSON object with sections", ->
     schema = new Schema({
