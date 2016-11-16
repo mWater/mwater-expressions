@@ -182,7 +182,7 @@ addOp(true, "last365days", literal(moment().subtract(1, "minutes").subtract(1, "
 
 
 # Create sample rows for testing aggregation
-sampleRow = (data) ->
+makeRow = (data) ->
   return {
     getPrimaryKey: (callback) -> callback(null, data.id)
     getField: (columnId, callback) -> callback(null, data[columnId])
@@ -190,13 +190,15 @@ sampleRow = (data) ->
   }
 
 sampleRows = [
-  sampleRow(id: "1", a: 1, b: 1, c: true, d: true, ordering: 3)
-  sampleRow(id: "2", a: 2, b: 4, c: false, d: true, ordering: 4)
-  sampleRow(id: "3", a: 3, b: 9, c: true, d: true, ordering: 1)
-  sampleRow(id: "4", a: 4, b: 16, c: false, d: false, ordering: 2)
+  makeRow(id: "1", a: 1, b: 1, c: true, d: true, ordering: 3)
+  makeRow(id: "2", a: 2, b: 4, c: false, d: true, ordering: 4)
+  makeRow(id: "3", a: 3, b: 9, c: true, d: true, ordering: 1)
+  makeRow(id: "4", a: 4, b: 16, c: false, d: false, ordering: 2)
 ]
 
-add({ type: "field", table: "t1", column: "a" }, 4, { row: sampleRow(a: 4) })
+add({ type: "field", table: "t1", column: "a" }, 4, { row: makeRow(a: 4) })
+
+add({ type: "id", table: "t1" }, "1", { row: makeRow(id: "1", a: 4) })
 
 add({ type: "op", table: "t1", op: "sum", exprs: [{ type: "field", table: "t1", column: "a" }] }, 10, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "avg", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2.5, { rows: sampleRows })
@@ -216,6 +218,25 @@ add({ type: "op", table: "t1", op: "sum where", exprs: [{ type: "field", table: 
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 50, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }, { type: "field", table: "t1", column: "d" }] }, ((v) -> Math.abs(v- 200/3) < 0.1), { rows: sampleRows })
 
+
+# Row with join
+singleJoinRow = makeRow(j: makeRow(id: "j1", a:1, b:2))
+
+add({ type: "scalar", joins: ["j"], expr: { type: "field", table: "t2", column: "b" }}, 2, { row: singleJoinRow })
+
+add({ type: "field", table: "t1", column: "j" }, "j1", { row: singleJoinRow })
+
+# Row with join
+multipleJoinRow = makeRow(j: sampleRows)
+
+add({ type: "scalar", joins: ["j"], expr: { type: "op", table: "t2", op: "sum", exprs: [{ type: "field", table: "t2", column: "a" }] }}, 10, { row: multipleJoinRow })
+
+add({ type: "field", table: "t1", column: "j" }, ["1", "2", "3", "4"], { row: multipleJoinRow })
+
+
+# Row with joins
+multipleJoinsRow = makeRow(j1: makeRow(j2: sampleRows))
+add({ type: "scalar", joins: ["j1", "j2"], expr: { type: "op", table: "t3", op: "sum", exprs: [{ type: "field", table: "t3", column: "a" }] }}, 10, { row: multipleJoinsRow })
 
 # addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
 #   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
@@ -270,18 +291,25 @@ add({
 }, 0)
 
 
-#     it "does enumset", ->
-#       expr = {
-#         type: "score"
-#         input: { type: "field", table: "t1", column: "x" }
-#         scores: {
-#           a: { type: "literal", valueType: "number", value: 3 }
-#           b: { type: "literal", valueType: "number", value: 4 }
-#         }
-#       }
-#       @check(expr, { x: ["a", "b"] }, 7)
-#       @check(expr, { x: ["a", "c"] }, 3)
-#       @check(expr, { x: null }, 0)
+add({
+  type: "score"
+  input: literal(["a"], "enumset")
+  scores: {
+    a: { type: "literal", valueType: "number", value: 3 }
+    b: { type: "literal", valueType: "number", value: 4 }
+  }
+}, 3)
+
+add({
+  type: "score"
+  input: literal(["a", "b"], "enumset")
+  scores: {
+    a: { type: "literal", valueType: "number", value: 3 }
+    b: { type: "literal", valueType: "number", value: 4 }
+  }
+}, 7)
+
+
 
 #   describe "scalar", ->
 #     it "n-1 scalar", ->

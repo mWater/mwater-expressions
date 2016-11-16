@@ -22,19 +22,35 @@ module.exports = class ExprEvaluator
 
     switch expr.type
       when "field"
-        return context.row.getField(expr.column, callback)
+        context.row.getField(expr.column, (error, value) =>
+          if error
+            return callback(error)
+
+          # Handle row case
+          if value and value.getPrimaryKey
+            return value.getPrimaryKey(callback)
+
+          # Handle rows case
+          if value and _.isArray(value) and value.length > 0 and value[0].getPrimaryKey
+            # Map to id
+            async.map value, ((item, cb) => item.getPrimaryKey(cb)), (error, ids) =>
+              callback(error, ids)
+            return
+
+          callback(null, value)
+          )
       when "literal"
-        return callback(null, expr.value)
+        callback(null, expr.value)
       when "op"
-        return @evaluateOp(expr.op, expr.exprs, context, callback)
+        @evaluateOp(expr.op, expr.exprs, context, callback)
       when "id"
-        return row.getPrimaryKey(callback)
+        context.row.getPrimaryKey(callback)
       when "case"
-        return @evaluateCase(expr, context, callback)
+        @evaluateCase(expr, context, callback)
       when "scalar"
-        return @evaluateScalar(expr, context, callback)
+        @evaluateScalar(expr, context, callback)
       when "score"
-        return @evaluateScore(expr, context, callback)
+        @evaluateScore(expr, context, callback)
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
@@ -400,36 +416,67 @@ module.exports = class ExprEvaluator
 
           return callback(null, aelse)
 
-  evaluateScalar: (expr, row) ->
-    if expr.aggr
-      throw new Error("Aggr not supported")
+  evaluateScalar: (expr, context, callback) ->
+    # Null expression is null
+    if not expr.expr
+      return callback(null, null)
 
-    if expr.joins.length > 1
-      throw new Error("Multi-joins not supported")
+    # Follow joins
+    async.reduce expr.joins, context, (memo, join, cb) =>
+      # Memo is the context to apply the join to 
+      # If multiple rows, get join for each and flatten
+      if memo.rows
+        async.map memo.rows, ((row, cb2) => row.getField(join, cb2)), (error, results) =>
+          if error
+            return cb(error)
 
-    # Get inner row
-    innerRow = row.getField(expr.joins[0])
-    if innerRow
-      return @evaluate(expr.expr, innerRow)
-    else 
-      return null
+          cb(null, { rows: _.flatten(results) })
+      else
+        # Single row
+        memo.row.getField(join, (error, result) =>
+          if error
+            return cb(error)
 
-  evaluateScore: (expr, row) ->
+          if _.isArray(result)
+            cb(null, { rows: result })
+          else
+            cb(null, { row: result })
+        )
+    , (error, exprContext) =>
+      if error
+        return callback(error)
+
+      @evaluate(expr.expr, exprContext, callback)
+
+  evaluateScore: (expr, context, callback) ->
     # Get input value
     if not expr.input
-      return null
+      return callback(null, null)
 
     sum = 0
-    input = @evaluate(expr.input, row)
-    if _.isArray(input)
-      for val in input
-        if expr.scores[val]
-          sum += @evaluate(expr.scores[val], row)
-    else if input
-      if expr.scores[input]
-        sum += @evaluate(expr.scores[input], row)
+    @evaluate(expr.input, context, (error, input) =>
+      if error
+        return callback(error)
 
-    return sum
+      scorePairs = _.pairs(expr.scores)
+      async.map scorePairs, ((scorePair, cb) => @evaluate(scorePair[1], context, cb)), (error, values) =>
+        if error
+          return callback(error)
+
+        scoreValues = {}
+        for scorePair, i in scorePairs
+          scoreValues[scorePair[0]] = values[i]
+
+        if _.isArray(input)
+          for val in input
+            if scoreValues[val]
+              sum += scoreValues[val]
+        else if input
+          if scoreValues[input]
+            sum += scoreValues[input]
+
+        callback(null, sum)
+    )
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->
