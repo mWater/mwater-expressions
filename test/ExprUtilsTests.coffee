@@ -226,6 +226,10 @@ describe "ExprUtils", ->
       expr = { type: "op", op: "count", table: "t1", exprs: [] }
       assert.equal @exprUtils.summarizeExpr(expr), "Number of T1"
 
+    it "summarizes date ops", ->
+      expr = { type: "op", op: "thisyear", table: "t1", exprs: [{ type: "field", table: "t1", column: "date" }] }
+      assert.equal @exprUtils.summarizeExpr(expr), "Date is this year"
+
     # TODO readd
     # it "uses named expression when matching one present", ->
     #   # Add named expression

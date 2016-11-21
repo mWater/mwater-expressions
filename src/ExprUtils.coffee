@@ -325,6 +325,9 @@ module.exports = class ExprUtils
           if opItem.prefix
             return opItem.name + " " + _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(", ")
 
+          if expr.exprs.length == 1
+            return @summarizeExpr(expr.exprs[0], locale) + " " + opItem.name 
+
           return _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(" " + opItem.name + " ")
         else
           return ""
