@@ -287,6 +287,29 @@ describe "ExprUtils", ->
       assert.equal opItem.op, "= any"
       assert.equal opItem.exprTypes[0], "text"
 
+  describe "getExprEnumValues", ->
+    it "finds in field", ->
+      assert.deepEqual @exprUtils.getExprEnumValues({ type: "field", table: "t1", column: "enum" }), [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}]
+
+    it "finds in case statement thens", ->
+      expr = {
+        type: "case"
+        cases: [
+          { when: null, then: { type: "field", table: "t1", column: "enum" } }
+        ]
+      }
+      assert.deepEqual @exprUtils.getExprEnumValues(expr), [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}]
+
+    it "finds in case statement else", ->
+      expr = {
+        type: "case"
+        cases: [
+          { when: null, then: null }
+        ]
+        else: { type: "field", table: "t1", column: "enum" }
+      }
+      assert.deepEqual @exprUtils.getExprEnumValues(expr), [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}]
+
   describe "getReferencedFields", ->
     it "gets field", ->
       cols = @exprUtils.getReferencedFields({ type: "field", table: "t1", column: "number" })

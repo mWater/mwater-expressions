@@ -91,6 +91,14 @@ module.exports = class ExprUtils
     if expr.type == "op" and expr.op in ["last", "last where"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
 
+    # Case statements search for possible values
+    if expr.type == "case"
+      for cse in expr.cases
+        enumValues = @getExprEnumValues(cse.then)
+        if enumValues
+          return enumValues
+      return @getExprEnumValues(expr.else)
+
   # gets the id table of an expression of type id
   getExprIdTable: (expr) ->
     if not expr

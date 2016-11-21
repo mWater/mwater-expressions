@@ -13,7 +13,7 @@ compare = (actual, expected) ->
   else
     assert.equal actual, expected
  
-describe.only "ExprEvaluator", ->
+describe "ExprEvaluator", ->
   for testExpr in testExprs
     do (testExpr) =>
       it JSON.stringify(testExpr.expr), (done) ->
