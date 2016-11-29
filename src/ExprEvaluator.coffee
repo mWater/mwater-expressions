@@ -12,7 +12,7 @@ ExprUtils = require './ExprUtils'
 # a row is a plain object that has the following functions as properties:
 #  getPrimaryKey(callback) : gets primary key of row. callback is called with (error, value)
 #  getField(columnId, callback) : gets the value of a column. callback is called with (error, value)
-#  getOrdering(columnId, callback) : gets the ordering of a row if they are ordered. Otherwise, not defined
+#  getOrdering(callback) : gets the ordering of a row if they are ordered. Otherwise, not defined
 #
 # For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
 module.exports = class ExprEvaluator
