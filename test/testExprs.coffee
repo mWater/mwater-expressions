@@ -238,6 +238,10 @@ add({ type: "field", table: "t1", column: "j" }, ["1", "2", "3", "4"], { row: mu
 multipleJoinsRow = makeRow(j1: makeRow(j2: sampleRows))
 add({ type: "scalar", joins: ["j1", "j2"], expr: { type: "op", table: "t3", op: "sum", exprs: [{ type: "field", table: "t3", column: "a" }] }}, 10, { row: multipleJoinsRow })
 
+# Scalar with no row
+add({ type: "scalar", joins: ["j"], expr: { type: "field", table: "t2", column: "b" }}, null, { row: makeRow(j: null) })
+
+
 # addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
 #   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
 #   if lhsIdTable

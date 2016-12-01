@@ -430,7 +430,8 @@ module.exports = class ExprEvaluator
           if error
             return cb(error)
 
-          cb(null, { rows: _.flatten(results) })
+          if results
+            cb(null, { rows: _.flatten(results) })
       else
         # Single row
         memo.row.getField(join, (error, result) =>
@@ -446,6 +447,10 @@ module.exports = class ExprEvaluator
       if error
         return callback(error)
 
+      # Null row and null/empty rows is null
+      if not exprContext.row? and (not exprContext.rows? or exprContext.rows.length == 0)
+        return callback(null, null)
+      
       @evaluate(expr.expr, exprContext, callback)
 
   evaluateScore: (expr, context, callback) ->
