@@ -364,6 +364,109 @@ describe "ExprCompiler", ->
         { type: "literal", value: 0 }
       )
 
+  describe "build enumset", ->
+    it "builds", ->
+      @compile(
+        { 
+          type: "build enumset"
+          values: { 
+            a: { type: "literal", valueType: "boolean", value: true }
+            b: { type: "literal", valueType: "boolean", value: false }
+          }
+        }
+        # (select to_jsonb(array_agg(bes.v)) from (select (case when true then 'x' end) as v union all select (case when true then 'y' end) as v union all select (case when false then 'z' end) as v) as bes where v is not null)
+        {
+          type: "scalar"
+          # to_jsonb(array_agg(bes.v))
+          expr: { type: "op", op: "to_jsonb", exprs: [{ type: "op", op: "array_agg", exprs: [{ type: "field", tableAlias: "bes", column: "v" }] }] }
+          from: { 
+            type: "subquery"
+            query: {
+              type: "union all"
+              queries: [
+                # Each is a "(select (case when true then 'x' end) as v)"
+                { type: "query", selects: [{ type: "select", expr: { type: "case", cases: [{ when: { type: "literal", value: true }, then: "a" }] }, alias: "v" }] }
+                { type: "query", selects: [{ type: "select", expr: { type: "case", cases: [{ when: { type: "literal", value: false }, then: "b" }] }, alias: "v" }] }
+              ]
+            }
+            alias: "bes"
+          }
+          # Skip any null values
+          where: {
+            type: "op"
+            op: "is not null"
+            exprs: [
+              { type: "field", tableAlias: "bes", column: "v" }
+            ]
+          }
+        }
+      )
+
+    it "scores empty enum", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enum" }
+          scores: { }
+        }
+        { type: "literal", value: 0 }
+      )
+
+    it "scores enumset", ->
+      @compile(
+        { 
+          type: "score"
+          input: { type: "field", table: "t1", column: "enumset" }
+          scores: { 
+            a: { type: "literal", valueType: "number", value: 3 }
+            b: { type: "literal", valueType: "number", value: 4 } 
+          }
+        }
+        # case when T1.enum  then 4 else 0 end
+        {
+          type: "op"
+          op: "+"
+          exprs: [
+            {
+              type: "case"
+              cases: [
+                { 
+                  when: {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: ["a"] }] }]}
+                    ]
+                  }
+                  then: { type: "literal", value: 3 } 
+                }
+              ]
+              else: { type: "literal", value: 0 }
+            }
+            {
+              type: "case"
+              cases: [
+                { 
+                  when: {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: ["b"] }] }]}
+                    ]
+                  }
+                  then: { type: "literal", value: 4 } 
+                }
+              ]
+              else: { type: "literal", value: 0 }
+            }
+          ]
+        }
+      )
+
+
+
   it "simplifies scalar join to id where toColumn is primary key", ->
     @compile({ 
       type: "scalar", 

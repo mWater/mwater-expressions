@@ -179,6 +179,8 @@ module.exports = class ExprUtils
           if type
             return type
         return @getExprType(expr.else)
+      when "build enumset"
+        return "enumset"
       when "score"
         return "number"
       when "count" # Deprecated
@@ -234,6 +236,10 @@ module.exports = class ExprUtils
         return getListAggrStatus(exprs)
       when "score"
         return @getExprAggrStatus(expr.input)
+      when "build enumset"
+        # Gather all exprs
+        exprs = _.values(expr.values)
+        return getListAggrStatus(exprs)
       when "count", "comparison", "logical" # Deprecated
         return "individual"
       else
@@ -338,6 +344,8 @@ module.exports = class ExprUtils
         return expr.value + ""
       when "score"
         return "Score of " + @summarizeExpr(expr.input, locale)
+      when "build enumset"
+        return "Build Enumset"
       when "count"
         return "Count" # Deprecated
       else
@@ -517,6 +525,10 @@ module.exports = class ExprUtils
       when "score"
         cols = cols.concat(@getReferencedFields(expr.input))
         for value in _.values(expr.scores)
+          cols = cols.concat(@getReferencedFields(value))
+
+      when "build enumset"
+        for value in _.values(expr.values)
           cols = cols.concat(@getReferencedFields(value))
 
     return _.uniq(cols, (col) -> col.table + "/" + col.column)

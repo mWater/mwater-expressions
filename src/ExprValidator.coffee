@@ -95,6 +95,16 @@ module.exports = class ExprValidator
           if error
             return error
 
+      when "build enumset"
+        for key, value of expr.values
+          if options.enumValueIds and key not in options.enumValueIds
+            return "Invalid score enum"
+
+          error = @validateExpr(value, _.extend({}, options, types: ["boolean"]))
+          if error
+            return error
+      
+
     # Validate table
     if options.idTable and @exprUtils.getExprIdTable(expr) and @exprUtils.getExprIdTable(expr) != options.idTable
       return "Wrong idTable"

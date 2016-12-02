@@ -51,6 +51,8 @@ module.exports = class ExprEvaluator
         @evaluateScalar(expr, context, callback)
       when "score"
         @evaluateScore(expr, context, callback)
+      when "build enumset"
+        @evaluateBuildEnumset(expr, context, callback)
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
@@ -482,6 +484,20 @@ module.exports = class ExprEvaluator
 
         callback(null, sum)
     )
+
+  evaluateBuildEnumset: (expr, context, callback) ->
+    # Evaluate each boolean
+    valuePairs = _.pairs(expr.values)
+    async.map valuePairs, ((valuePair, cb) => @evaluate(valuePair[1], context, cb)), (error, values) =>
+      if error
+        return callback(error)
+
+      result = []
+      for valuePair, i in valuePairs
+        if values[i]
+          result.push(valuePair[0])
+
+      callback(null, result)
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->

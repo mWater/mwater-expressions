@@ -17,7 +17,7 @@ The types are:
 - `op`: Operation that takes expressions and an op.
 - `case`: Series of boolean when/thens and an else
 
-### field expressions 
+### `field` expressions 
 
 Column of the database
 
@@ -25,7 +25,7 @@ Column of the database
 - `table`: Table id of table
 - `column`: Column id of column
 
-### scalar expressions
+### `scalar` expressions
 
 Gets a single value given a row of a table.
 
@@ -40,7 +40,7 @@ Gets a single value given a row of a table.
 
 aggr: "last", "sum", "count", "max", "min", "stdev", "stdevp"
 
-### op expression
+### `op` expression
 
 - `type`: "op"
 - `table`: Table id of table
@@ -61,21 +61,21 @@ Aggregate ones:
 `percent where`: aggregate that takes two boolean condition (filter and basis. resolves to percentage where [filter] of [basis])
 `last where`: aggregate that takes any type expression and a boolean filter
 
-### literal expressions
+### `literal` expressions
 
 - `type`: "literal"
 - `valueType`: "text", "number", "boolean", "enum", "date", "enumset", "text[]", "datetime", "id"
 - `idTable`: id of table that id is for if id valueType = "literal"
 - `value`: value of literal. date is ISO 8601 YYYY-MM-DD. datetime is ISO 8601 ending in Z
 
-### case expressions
+### `case` expressions
 
 - `type`: "case"
 - `table`: Table id of table
 - `cases`: array of { when: boolean expression, then: result value }
 - `else`: optional else if no cases match
 
-### id expressions
+### `id` expressions
 
 This gets the id of the table:
 
@@ -84,7 +84,7 @@ This gets the id of the table:
 
 It is used as the inner expression when trying to do a count(*), as it is logically equivalent to count(sometable.theprimarykey)
 
-### score expressions
+### `score` expressions
 
 Scores an enum or enumset by assigning and summing the scores for each value.
 
@@ -92,3 +92,11 @@ Scores an enum or enumset by assigning and summing the scores for each value.
 - `table`: Table id of table
 - `input`: enum or enumset expression
 - `scores`: map of enum/enumset id to score expression
+
+### `build enumset` expressions
+
+Creates an enumset from a set of boolean expressions for each value
+
+- `type`: "build enumset"
+- `table`: Table id of table
+- `values`: map of enumset id to boolean expression. If true, will be included

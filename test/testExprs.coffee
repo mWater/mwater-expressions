@@ -313,7 +313,15 @@ add({
   }
 }, 7)
 
-
+# Build enumset
+add({
+  type: "build enumset"
+  values: {
+    a: { type: "literal", valueType: "boolean", value: true }
+    b: { type: "literal", valueType: "boolean", value: false }
+    c: { type: "literal", valueType: "boolean", value: true }
+  }
+}, ["a", "c"])
 
 #   describe "scalar", ->
 #     it "n-1 scalar", ->

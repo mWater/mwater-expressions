@@ -33,6 +33,8 @@ module.exports = class ExprCompiler
         compiledExpr = @compileCaseExpr(options)
       when "score"
         compiledExpr = @compileScoreExpr(options)
+      when "build enumset"
+        compiledExpr = @compileBuildEnumsetExpr(options)
       when "count" # DEPRECATED
         compiledExpr = null
       when "comparison" # DEPRECATED
@@ -981,6 +983,54 @@ module.exports = class ExprCompiler
       # Null if no expression
       else
         return null
+
+  compileBuildEnumsetExpr: (options) ->
+    # Create enumset
+    # select to_jsonb(array_agg(bes.v)) from (select (case when true then 'x' end) as v union all select (case when true then 'y' end) as v ...) as bes where v is not null
+
+    expr = options.expr
+
+    return {
+      type: "scalar"
+      expr: {
+        type: "op"
+        op: "to_jsonb"
+        exprs: [
+          { 
+            type: "op"
+            op: "array_agg"
+            exprs: [{ type: "field", tableAlias: "bes", column: "v" }]
+          }
+        ]
+      }
+      from: {
+        type: "subquery"
+        alias: "bes"
+        query: {
+          type: "union all"
+          queries: _.map _.pairs(expr.values), (pair) =>
+            {
+              type: "query"
+              selects: [
+                { 
+                  type: "select"
+                  expr: {
+                    type: "case"
+                    cases: [{ when: @compileExpr(expr: pair[1], tableAlias: options.tableAlias), then: pair[0] }]
+                  }
+                  alias: "v"
+                }
+              ]
+            }
+        }
+      }
+
+      where: {
+        type: "op"
+        op: "is not null"
+        exprs: [{ type: "field", tableAlias: "bes", column: "v" }]
+      }
+    }
 
   compileComparisonExpr: (options) ->
     expr = options.expr

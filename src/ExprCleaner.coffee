@@ -129,6 +129,8 @@ module.exports = class ExprCleaner
         return @cleanIdExpr(expr, options)
       when "score"
         return @cleanScoreExpr(expr, options)
+      when "build enumset"
+        return @cleanBuildEnumsetExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -369,6 +371,18 @@ module.exports = class ExprCleaner
       enumValues = @exprUtils.getExprEnumValues(expr.input)
       expr = _.extend({}, expr, scores: _.pick(expr.scores, (value, key) =>
         return _.findWhere(enumValues, id: key) and value?
+      ))
+
+    return expr
+
+  cleanBuildEnumsetExpr: (expr, options) ->
+    # Clean values
+    expr = _.extend({}, expr, values: _.mapValues(expr.values, (valueExpr) => @cleanExpr(valueExpr, { table: expr.table, types: ['boolean']})))
+
+    # Remove unknown enum values 
+    if options.enumValues
+      expr = _.extend({}, expr, values: _.pick(expr.values, (value, key) =>
+        return _.findWhere(options.enumValues, id: key) and value?
       ))
 
     return expr
