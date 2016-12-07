@@ -212,6 +212,12 @@ describe "ExprUtils", ->
       }      
       assert.equal @exprUtils.summarizeExpr(expr), "If Boolean Then Text Else Text"
 
+    it "summarizes = with enum literal", ->
+      fieldExpr = { type: "field", table: "t1", column: "enum" }
+      literalExpr = { type: "literal", valueType: "enum", value: "a" }
+      opExpr = { type: "op", op: "=", exprs: [fieldExpr, literalExpr]}
+      assert.equal @exprUtils.summarizeExpr(opExpr), "Enum is A"
+
     it "summarizes contains with enumset literal", ->
       fieldExpr = { type: "field", table: "t1", column: "enumset" }
       literalExpr = { type: "literal", valueType: "enumset", value: ["a"] }

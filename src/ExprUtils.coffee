@@ -321,11 +321,14 @@ module.exports = class ExprUtils
         if expr.op == "contains" and expr.exprs[1]?.type == "literal"
           return @summarizeExpr(expr.exprs[0], locale) + " contains " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
 
+        # Special case for = with literal RHS
+        if expr.op == "=" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enum" 
+          return @summarizeExpr(expr.exprs[0], locale) + " is " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
+
         # Special case for count
         if expr.op == "count"
           return "Number of " + @localizeString(@schema.getTable(expr.table).name, locale)
 
-        # TODO handle prefix ops
         opItem = @findMatchingOpItems(op: expr.op)[0]
         if opItem
           if opItem.prefix
