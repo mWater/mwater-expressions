@@ -20,7 +20,7 @@ module.exports = class ExprCompiler
 
     switch expr.type 
       when "id"
-        compiledExpr = { type: "field", tableAlias: options.tableAlias, column: @schema.getTable(expr.table).primaryKey }
+        compiledExpr = @compileColumnRef(@schema.getTable(expr.table).primaryKey, options.tableAlias)
       when "field"
         compiledExpr = @compileFieldExpr(options)
       when "scalar"
@@ -69,7 +69,7 @@ module.exports = class ExprCompiler
                 type: "op"
                 op: "array_agg"
                 exprs: [
-                  { type: "field", tableAlias: "inner", column: @schema.getTable(column.join.toTable).primaryKey }
+                  @compileColumnRef(@schema.getTable(column.join.toTable).primaryKey, "inner")
                 ]
               }
             ]
@@ -178,7 +178,7 @@ module.exports = class ExprCompiler
           limit = 1
 
           # order descending
-          orderBy = [{ expr: @compileColumnRef(ordering, tableAlias),  direction: "desc" }]
+          orderBy = [{ expr: @compileColumnRef(ordering, tableAlias), direction: "desc" }]
         when "sum", "count", "avg", "max", "min", "stdev", "stdevp"
           # Don't include scalarExpr if null
           if not scalarExpr
@@ -282,7 +282,7 @@ module.exports = class ExprCompiler
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
             1
           ]
         }
@@ -304,7 +304,7 @@ module.exports = class ExprCompiler
             type: "op"
             op: "[]"
             exprs: [
-              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }] }
+              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
               1
             ]
           }
@@ -324,7 +324,7 @@ module.exports = class ExprCompiler
               ]
               orderBy: [
                 { expr: { type: "case", cases: [{ when: compiledExprs[1], then: 0 }], else: 1 } }
-                { expr: { type: "field", tableAlias: options.tableAlias, column: ordering }, direction: "desc", nulls: "last" }
+                { expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }
               ] 
             }
             1
@@ -553,7 +553,7 @@ module.exports = class ExprCompiler
             compiledExprs[0]
             {
               type: "scalar"
-              expr: { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).primaryKey }
+              expr: @compileColumnRef(@schema.getTable(idTable).primaryKey, "subwithin")
               from: { type: "table", table: idTable, alias: "subwithin" }
               where: {
                 type: "op"

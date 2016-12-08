@@ -4,6 +4,7 @@ _ = require 'lodash'
 canonical = require 'canonical-json'
 moment = require 'moment'
 sinon = require 'sinon'
+Schema = require '../src/Schema'
 
 ExprCompiler = require '../src/ExprCompiler'
 ColumnNotFoundException = require '../src/ColumnNotFoundException'
@@ -56,6 +57,15 @@ describe "ExprCompiler", ->
       table: "t2",
       column: ["2-1"]
     }, { type: "field", tableAlias: "T1", column: "t1" })
+
+  it "compiles jsonql primaryKey", ->
+    schema = new Schema().addTable({ id: "tpk", name: { en: "T1" }, primaryKey: { type: "field", tableAlias: "{alias}", column: "primary" }, contents: [
+      { id: "text", name: { en: "Text" }, type: "text" }
+    ]})
+
+    ec = new ExprCompiler(schema)
+    jsonql = ec.compileExpr(expr: { type: "id", table: "tpk" }, tableAlias: "TPK")
+    compare(jsonql, { type: "field", tableAlias: "TPK", column: "primary" })
 
   it "throws ColumnNotFoundException", ->
     assert.throws () =>
