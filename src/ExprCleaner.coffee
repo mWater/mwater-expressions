@@ -380,10 +380,15 @@ module.exports = class ExprCleaner
     expr = _.extend({}, expr, values: _.mapValues(expr.values, (valueExpr) => @cleanExpr(valueExpr, { table: expr.table, types: ['boolean']})))
 
     # Remove unknown enum values 
-    if options.enumValues
+    if options.enumValueIds
       expr = _.extend({}, expr, values: _.pick(expr.values, (value, key) =>
-        return _.findWhere(options.enumValues, id: key) and value?
+        return key in options.enumValueIds
       ))
+
+    # Remove blank values
+    expr = _.extend({}, expr, values: _.pick(expr.values, (value, key) =>
+      return value?
+    ))
 
     return expr
 

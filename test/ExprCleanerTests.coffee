@@ -296,6 +296,31 @@ describe "ExprCleaner", ->
         expr = { type: "score", table: "t1", input: null, scores: { a: 3, nonsuch: 4 } }
         @clean(expr, { type: "score", table: "t1", input: null, scores: { } })
 
+    describe "build enumset", ->
+      it "cleans values", ->
+        expr = { type: "build enumset", table: "t1", values: { a: { type: "field", table: "t1", column: "boolean" }} }
+        @clean(expr, expr)
+
+        expr = { type: "build enumset", table: "t1", values: { a: { type: "field", table: "t1", column: "xyz" }} }
+        @clean(expr, { type: "build enumset", table: "t1", values: {} })
+
+      it "removes invalid value keys", ->
+        expr = { 
+          type: "build enumset"
+          table: "t1"
+          values: { 
+            a: { type: "literal", valueType: "boolean", value: true }
+            b: { type: "literal", valueType: "boolean", value: false }
+          }
+        }
+        compare(@exprCleaner.cleanExpr(expr, types: ["enumset"], enumValueIds: ['a']), 
+          {           
+            type: "build enumset"
+            table: "t1"
+            values: { 
+              a: { type: "literal", valueType: "boolean", value: true }
+            }
+          })
 
     describe "literal", ->
       it "cleans invalid literal enum valueIds", ->

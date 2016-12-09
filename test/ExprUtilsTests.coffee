@@ -351,6 +351,17 @@ describe "ExprUtils", ->
 
       compare(cols, [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "enum" }, { type: "field", table: "t1", column: "text" }])
 
+    it "includes build enumset", ->
+      cols = @exprUtils.getReferencedFields({ 
+        type: "build enumset"
+        table: "t1"
+        values: {
+          a: { type: "field", table: "t1", column: "boolean" }
+        }
+      })
+
+      compare(cols, [{ type: "field", table: "t1", column: "boolean" }])
+
     it "de-duplicates", ->
       cols = @exprUtils.getReferencedFields({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]})
       compare(cols, [{ type: "field", table: "t1", column: "number" }])
