@@ -421,7 +421,11 @@ module.exports = class ExprUtils
         ).join(', ')
 
     # Text array
-    if type == "text[]" and _.isArray(literal)
+    if type == "text[]"
+      # Parse if string
+      if _.isString(literal)
+        literal = JSON.parse(literal or "[]")
+
       return literal.join(', ')
 
     if type == "date"
