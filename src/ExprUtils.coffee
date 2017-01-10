@@ -643,12 +643,12 @@ for type in ['date', 'datetime']
 
 addOpItem(op: "between", name: "is between", resultType: "boolean", exprTypes: ["number", "number", "number"])
 
-addOpItem(op: "round", name: "Round", resultType: "number", exprTypes: ["number"], prefix: true)
-addOpItem(op: "floor", name: "Floor", resultType: "number", exprTypes: ["number"], prefix: true)
-addOpItem(op: "ceiling", name: "Ceiling", resultType: "number", exprTypes: ["number"], prefix: true)
-addOpItem(op: "latitude", name: "Latitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
-addOpItem(op: "longitude", name: "Longitude of", resultType: "number", exprTypes: ["geometry"], prefix: true)
-addOpItem(op: "distance", name: "Distance between", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")
+addOpItem(op: "round", name: "Round", desc: "Round a number to closest whole number", resultType: "number", exprTypes: ["number"], prefix: true)
+addOpItem(op: "floor", name: "Floor", desc: "Round a number down", resultType: "number", exprTypes: ["number"], prefix: true)
+addOpItem(op: "ceiling", name: "Ceiling", desc: "Round a number up", resultType: "number", exprTypes: ["number"], prefix: true)
+addOpItem(op: "latitude", name: "Latitude of", desc: "Get latitude in degrees of a location", resultType: "number", exprTypes: ["geometry"], prefix: true)
+addOpItem(op: "longitude", name: "Longitude of", desc: "Get longitude in degrees of a location", resultType: "number", exprTypes: ["geometry"], prefix: true)
+addOpItem(op: "distance", name: "Distance between", desc: "Get distance in meters between two locations", resultType: "number", exprTypes: ["geometry", "geometry"], prefix: true, rhsLiteral: false, joiner: "and")
 
 # And/or is a list of booleans
 addOpItem(op: "and", name: "and", resultType: "boolean", exprTypes: [], moreExprType: "boolean")
@@ -661,25 +661,25 @@ addOpItem(op: "-", name: "-", resultType: "number", exprTypes: ["number", "numbe
 addOpItem(op: "/", name: "/", resultType: "number", exprTypes: ["number", "number"])
 
 # Date subtraction
-addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
-addOpItem(op: "days difference", name: "Days between", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
+addOpItem(op: "days difference", name: "Days between", desc: "Get the number of days between two dates", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
+addOpItem(op: "days difference", name: "Days between", desc: "Get the number of days between two dates", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
 
-addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
-addOpItem(op: "days since", name: "Days since", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
-  addOpItem(op: "last", name: "Latest", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
-  addOpItem(op: "last where", name: "Latest where", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+  addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+  addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
 
-addOpItem(op: "sum", name: "Total", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
-addOpItem(op: "avg", name: "Average", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+addOpItem(op: "sum", name: "Total", desc: "Add all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+addOpItem(op: "avg", name: "Average", desc: "Average all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 for type in ['number', 'date', 'datetime']
-  addOpItem(op: "min", name: "Minimum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-  addOpItem(op: "max", name: "Maximum", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+  addOpItem(op: "min", name: "Minimum", desc: "Get smallest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+  addOpItem(op: "max", name: "Maximum", desc: "Get largest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
 
-addOpItem(op: "percent where", name: "Percent where", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
-addOpItem(op: "count where", name: "Number where", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-addOpItem(op: "sum where", name: "Total where", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of items that match a condition", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
+addOpItem(op: "sum where", name: "Total where", desc: "Add together only values that match a condition", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
@@ -692,16 +692,16 @@ addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTy
 addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
 addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
-addOpItem(op: "count", name: "Number of", resultType: "number", exprTypes: [], prefix: true, aggr: true)
+addOpItem(op: "count", name: "Number of", desc: "Get total number of items", resultType: "number", exprTypes: [], prefix: true, aggr: true)
 
 addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
-addOpItem(op: "not", name: "not", resultType: "boolean", exprTypes: ["boolean"], prefix: true)
+addOpItem(op: "not", name: "Not", desc: "Opposite of a value", resultType: "boolean", exprTypes: ["boolean"], prefix: true)
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'image', 'imagelist', 'id']
   addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
   addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 
-addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["enumset"], prefix: true)
-addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["imagelist"], prefix: true)
-addOpItem(op: "length", name: "Number of values in", resultType: "number", exprTypes: ["text[]"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of values selected in a multi-choice field", resultType: "number", exprTypes: ["enumset"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of images present", resultType: "number", exprTypes: ["imagelist"], prefix: true)
+addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of items present in a text list", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
-addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
+addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert an choice type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true)
