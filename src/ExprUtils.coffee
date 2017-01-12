@@ -391,55 +391,56 @@ module.exports = class ExprUtils
 
     return str
 
-  # Converts all literals to string, using name of enums. preferEnumCodes tries to use code over name
+  # Converts a literal value related to an expression to a string, using name of enums. preferEnumCodes tries to use code over name
   stringifyExprLiteral: (expr, literal, locale, preferEnumCodes = false) ->
-    if not literal?
+    return @stringifyLiteralValue(@getExprType(expr), literal, locale, @getExprEnumValues(expr), preferEnumCodes)
+
+  # Stringify a literal value of a certain type
+  # type is "text", "number", etc.
+  # Does not have intelligence to properly handle type id and id[], so just puts in raw id
+  stringifyLiteralValue: (type, value, locale, enumValues, preferEnumCodes = false) ->
+    if not value?
       return "None" # TODO localize
 
-    type = @getExprType(expr)
-    if type == 'enum'
-      enumValues = @getExprEnumValues(expr)
-      if enumValues
-        item = _.findWhere(enumValues, id: literal)
+    switch type
+      when "text"
+        return value
+      when "number"
+        return "" + value
+      when "enum"
+        # Get enumValues
+        item = _.findWhere(enumValues, id: value)
         if item
-          if preferEnumCodes and item.code
-            return item.code
-          return @localizeString(item.name, locale)
+          return ExprUtils.localizeString(item.name, locale)
         return "???"
-
-    # Map enumset to A,B...
-    if type == "enumset" and _.isArray(literal)
-      enumValues = @getExprEnumValues(expr)
-      if enumValues
-        return _.map(literal, (val) =>
+      when "enumset"
+        return _.map(value, (val) =>
           item = _.findWhere(enumValues, id: val)
           if item
-            if preferEnumCodes and item.code
-              return item.code
-            return @localizeString(item.name, locale)
+            return ExprUtils.localizeString(item.name, locale)
           return "???"
         ).join(', ')
 
-    # Text array
-    if type == "text[]"
-      # Parse if string
-      if _.isString(literal)
-        literal = JSON.parse(literal or "[]")
+      when "text[]"
+        # Parse if string
+        if _.isString(value)
+          value = JSON.parse(value or "[]")
 
-      return literal.join(', ')
+        return value.join(', ')
 
-    if type == "date"
-      return moment(literal, moment.ISO_8601).format("ll")
+      when "date"
+        return moment(value, moment.ISO_8601).format("ll")
 
-    if type == "datetime"
-      return moment(literal, moment.ISO_8601).format("lll")
+      when "datetime"
+        return moment(value, moment.ISO_8601).format("lll")
 
-    if literal == true
+    if value == true
       return "True"
-    if literal == false
+
+    if value == false
       return "False"
 
-    return "#{literal}"
+    return "#{value}"
 
   # Get all comparison ops (id and name) for a given left hand side type DEPRECATED
   getComparisonOps: (lhsType) ->
