@@ -434,7 +434,7 @@ module.exports = class ExprEvaluator
 
           if results
             cb(null, { rows: _.flatten(results) })
-      else
+      else if memo.row
         # Single row
         memo.row.getField(join, (error, result) =>
           if error
@@ -445,6 +445,8 @@ module.exports = class ExprEvaluator
           else
             cb(null, { row: result })
         )
+      else
+        cb(null, { row: null })
     , (error, exprContext) =>
       if error
         return callback(error)
