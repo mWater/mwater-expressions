@@ -87,8 +87,8 @@ module.exports = class ExprUtils
       if expr.expr
         return @getExprEnumValues(expr.expr)  
 
-    # "last" and "last where" are only ops to pass through enum values
-    if expr.type == "op" and expr.op in ["last", "last where"] and expr.exprs[0]
+    # "last", "last where" and "previous" are only ops to pass through enum values
+    if expr.type == "op" and expr.op in ["last", "last where", "previous"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
 
     # Case statements search for possible values
