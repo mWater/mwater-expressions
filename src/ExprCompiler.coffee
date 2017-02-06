@@ -26,7 +26,10 @@ module.exports = class ExprCompiler
       when "scalar"
         compiledExpr = @compileScalarExpr(options)
       when "literal" 
-        compiledExpr = { type: "literal", value: expr.value }
+        if expr.value?
+          compiledExpr = { type: "literal", value: expr.value }
+        else
+          compiledExpr = null
       when "op"
         compiledExpr = @compileOpExpr(options)
       when "case"

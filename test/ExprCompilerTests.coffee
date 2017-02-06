@@ -19,6 +19,20 @@ describe "ExprCompiler", ->
       jsonql = @ec.compileExpr(expr: expr, tableAlias: "T1")
       compare(jsonql, expected)
 
+  it "compiles literal", ->
+    @compile(
+      { type: "literal", valueType: "number", value: 2 }
+      {
+        type: "literal"
+        value: 2
+      })
+
+  it "compiles null literal", ->
+    @compile(
+      { type: "literal", value: null }
+      null
+    )
+
   it "compiles field", ->
     @compile(
       { type: "field", table: "t1", column: "number" }
