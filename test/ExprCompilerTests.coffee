@@ -816,6 +816,27 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles previous", ->
+      text = { type: "field", table: "t2", column: "text" }
+      textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+
+      @compile(
+        {
+          type: "op"
+          op: "previous"
+          table: "t2"
+          exprs: [text]
+        }
+        {
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: [textJsonQL], orderBy: [{ expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "desc", nulls: "last"}]}
+            2
+          ]
+        }
+      )
+
     it "compiles count where", ->
       cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
       condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }

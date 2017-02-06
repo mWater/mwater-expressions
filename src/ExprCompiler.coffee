@@ -331,6 +331,26 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "previous"
+        # Null if not present
+        if not compiledExprs[0]
+          return null
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table)?.ordering
+        if not ordering
+          throw new Error("Table #{expr.table} must be ordered to use previous()")
+
+        # (array_agg(xyz order by theordering desc nulls last))[2]
+        return { 
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
+            2
+          ]
+        }
+
       when '= any'
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
