@@ -671,6 +671,7 @@ addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
   addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+  addOpItem(op: "previous", name: "Previous", desc: "Get 2nd latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
 addOpItem(op: "sum", name: "Total", desc: "Add all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 addOpItem(op: "avg", name: "Average", desc: "Average all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
