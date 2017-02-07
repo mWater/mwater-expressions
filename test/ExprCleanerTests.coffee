@@ -157,6 +157,22 @@ describe "ExprCleaner", ->
         expr = { type: "op", op: "=", table: "t1", exprs: [null, null]}
         compare(@exprCleaner.cleanExpr(expr), null)
 
+      it "allows math on aggregates", ->
+        field = { type: "field", table: "t1", column: "number" }
+        expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+
+        expr = { type: "op", op: "+", table: "t1", exprs: [expr, expr]}
+
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), expr)
+
+      it "allows building math on aggregates", ->
+        field = { type: "field", table: "t1", column: "number" }
+        expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+
+        expr = { type: "op", op: "+", table: "t1", exprs: [expr, null]}
+
+        compare(@exprCleaner.cleanExpr(expr, types: ["number"], aggrStatuses: ["aggregate"]), expr)
+
       it "does not allow enum = enumset", ->
         expr = { type: "op", op: "=", table: "t1", exprs: [{ type: "field", table: "t1", column: "enum" }, { type: "literal", valueType: "enumset", value: ["a"] }]}
         compare(@exprCleaner.cleanExpr(expr).exprs[1], null)

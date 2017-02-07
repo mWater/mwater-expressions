@@ -188,15 +188,20 @@ module.exports = class ExprCleaner
         if expr.op == "count" and (not options.types or "number" in options.types) and "aggregate" in options.aggrStatuses
           return { type: "op", op: "count", table: expr.table, exprs: [] }
 
-        # Determine aggr setting. Prevent non-aggr for aggr and vice-versa
+        # Determine aggregate type of op
+        opIsAggr = ExprUtils.isOpAggr(expr.op)
+
+        # Aggregate ops are never allowed if aggregates are not allowed
+        if opIsAggr and "aggregate" not in options.aggrStatuses
+          return null
+
+        # Determine aggr setting. Prevent aggr for non-aggr output
         aggr = null
-        if "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
-          aggr = true
         if "aggregate" not in options.aggrStatuses and "individual" in options.aggrStatuses
           aggr = false
 
         # Determine innerAggrStatuses (same as outer, unless aggregate expression, in which case always aggregate)
-        if @exprUtils.findMatchingOpItems(op: expr.op)[0]?.aggr
+        if opIsAggr
           innerAggrStatuses = ["literal", "individual"]
         else
           innerAggrStatuses = options.aggrStatuses
