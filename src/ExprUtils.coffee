@@ -30,7 +30,7 @@ module.exports = class ExprUtils
       # Handle list of specified types
       if search.lhsExpr
         lhsType = @getExprType(search.lhsExpr)
-        if opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType and opItem.moreExprType != lhsType
+        if lhsType and opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType and opItem.moreExprType != lhsType
           return false
 
       # Check lhsCond
@@ -42,6 +42,10 @@ module.exports = class ExprUtils
   # Determine if op is aggregate
   @isOpAggr: (op) ->
     return _.findWhere(opItems, op: op, aggr: true)?
+
+  # Determine if op is prefix
+  @isOpPrefix: (op) ->
+    return _.findWhere(opItems, op: op, prefix: true)?
 
   # Follows a list of joins to determine final table
   followJoins: (startTable, joins) ->

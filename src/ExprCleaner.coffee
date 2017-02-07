@@ -218,12 +218,12 @@ module.exports = class ExprCleaner
           if not lhsExpr?
             lhsExpr = @cleanExpr(expr.exprs[0], table: expr.table, aggrStatuses: innerAggrStatuses)
 
+        # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params. Allow null type (ones being built out) to stand too
+        if not lhsExpr and not ExprUtils.isOpPrefix(expr.op)
+          return null
+
         # Get opItem
         opItems = @exprUtils.findMatchingOpItems(op: expr.op, lhsExpr: lhsExpr, resultTypes: options.types, aggr: aggr, ordered: @schema.getTable(expr.table)?.ordering?)
-
-        # Need LHS for a normal op that is not a prefix. If it is a prefix op, allow the op to stand alone without params
-        if not lhsExpr and not opItems[0]?.prefix
-          return null
 
         # If ambiguous, just clean subexprs and return
         if opItems.length > 1
