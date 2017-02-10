@@ -323,11 +323,15 @@ module.exports = class ExprUtils
       when "op"
         # Special case for contains with literal RHS
         if expr.op == "contains" and expr.exprs[1]?.type == "literal"
-          return @summarizeExpr(expr.exprs[0], locale) + " contains " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
+          return @summarizeExpr(expr.exprs[0], locale) + " includes all of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
+
+        # Special case for = any with literal RHS
+        if expr.op == "= any" and expr.exprs[1]?.type == "literal"
+          return @summarizeExpr(expr.exprs[0], locale) + " is any of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
         # Special case for = with literal RHS
         if expr.op == "=" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enum" 
-          return @summarizeExpr(expr.exprs[0], locale) + " is " + @stringifyExprLiteral(expr.exprs[0], expr.exprs[1].value, locale)
+          return @summarizeExpr(expr.exprs[0], locale) + " is " + @stringifyLiteralValue("enum", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
         # Special case for count
         if expr.op == "count"

@@ -208,7 +208,7 @@ describe "ExprCleaner", ->
         expr = { type: "op", op: "distance", table: "t1", exprs: []}
         compare(@exprCleaner.cleanExpr(expr), { type: "op", op: "distance", table: "t1", exprs: [null, null]})
 
-      it.only "allows null-type lhs for prefix-type expressions", ->
+      it "allows null-type lhs for prefix-type expressions", ->
         expr = { type: "op", op: "distance", table: "t1", exprs: [{ type: "scalar", table: "t1", joins: ["1-2"], expr: null }, null] }
         compare(@exprCleaner.cleanExpr(expr), expr)
 
