@@ -22,7 +22,6 @@ exports.simpleSchema = ->
   ]})
 
   schema = schema.addTable({ id: "t2", name: { en: "T2" }, primaryKey: "primary", ordering: "number", contents: [
-    { id: "t1", name: { en: "T1" }, type: "uuid" }
     { id: "text", name: { en: "Text" }, type: "text" }
     { id: "number", name: { en: "Number" }, type: "number" }
     { id: "2-1", name: { en: "T2->T1" }, type: "join", join: { type: "n-1", toTable: "t1", fromColumn: "t1", toColumn: "primary" }}
@@ -30,10 +29,13 @@ exports.simpleSchema = ->
 
   # Hierarchical table (since has ancestry)
   schema = schema.addTable({ id: "thier", name: { en: "THier" }, primaryKey: "primary", ordering: "number", ancestry: "path", contents: [
-    { id: "t1", name: { en: "T1" }, type: "uuid" }
     { id: "text", name: { en: "Text" }, type: "text" }
     { id: "number", name: { en: "Number" }, type: "number" }
     { id: "2-1", name: { en: "T2->T1" }, type: "join", join: { type: "n-1", toTable: "t1", fromColumn: "t1", toColumn: "primary" }}
+  ]})
+
+  schema = schema.addTable({ id: "t3", name: { en: "T3" }, primaryKey: "primary", contents: [
+    { id: "3-2", name: { en: "T3->T2" }, type: "join", join: { type: "n-1", toTable: "t2", fromColumn: "t2", toColumn: "primary" }}
   ]})
 
   return schema

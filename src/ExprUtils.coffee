@@ -375,7 +375,7 @@ module.exports = class ExprUtils
       t = joinCol.join.toTable
 
     # Special case for id type to be rendered as {last join name}
-    if exprType == "id" and not expr.aggr
+    if expr.expr?.type == "id" and not expr.aggr
       str = str.substring(0, str.length - 3)
     else
       innerExpr = expr.expr

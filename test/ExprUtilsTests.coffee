@@ -193,6 +193,10 @@ describe "ExprUtils", ->
       scalarExpr = { type: "scalar", table: "t2", joins: ['2-1'], expr: { type: "id", table: "t1" } }
       assert.equal @exprUtils.summarizeExpr(scalarExpr), "T2->T1"
 
+    it "shows join types", ->
+      scalarExpr = { type: "scalar", table: "t3", joins: ['3-2'], expr: { type: "field", table: "t2", column: "2-1" } }
+      assert.equal @exprUtils.summarizeExpr(scalarExpr), "T3->T2 > T2->T1"
+
     it "summarizes +/-/*//", ->
       fieldExpr = { type: "field", table: "t2", column: "number" }
       literalExpr = { type: "literal", valueType: "number", value: 5 }
