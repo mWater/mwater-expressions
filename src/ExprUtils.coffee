@@ -419,12 +419,16 @@ module.exports = class ExprUtils
         # Get enumValues
         item = _.findWhere(enumValues, id: value)
         if item
+          if preferEnumCodes and item.code
+            return item.code
           return ExprUtils.localizeString(item.name, locale)
         return "???"
       when "enumset"
         return _.map(value, (val) =>
           item = _.findWhere(enumValues, id: val)
           if item
+            if preferEnumCodes and item.code
+              return item.code
             return ExprUtils.localizeString(item.name, locale)
           return "???"
         ).join(', ')
