@@ -70,8 +70,8 @@ module.exports = class MWaterDataSource extends DataSource
   # Can be used to upload by posting to this url
   getImageUrl: (imageId, height) ->
     apiUrl = @options.imageApiUrl or @apiUrl 
-    
-    url = @apiUrl + "images/#{imageId}"
+
+    url = apiUrl + "images/#{imageId}"
     query = {}
     if height
       query.h = height
