@@ -8,6 +8,7 @@ module.exports = class MWaterDataSource extends DataSource
   # options:
   # serverCaching: allows server to send cached results. default true
   # localCaching allows local MRU cache. default true
+  # imageApiUrl: overrides apiUrl for images
   constructor: (apiUrl, client, options = {}) ->
     @apiUrl = apiUrl
     @client = client
@@ -68,6 +69,8 @@ module.exports = class MWaterDataSource extends DataSource
   # Height, if specified, is minimum height needed. May return larger image
   # Can be used to upload by posting to this url
   getImageUrl: (imageId, height) ->
+    apiUrl = @options.imageApiUrl or @apiUrl 
+    
     url = @apiUrl + "images/#{imageId}"
     query = {}
     if height
