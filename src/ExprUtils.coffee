@@ -682,7 +682,7 @@ addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
-  addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+  addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
   addOpItem(op: "previous", name: "Previous", desc: "Get 2nd latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
 
 addOpItem(op: "sum", name: "Total", desc: "Add all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
@@ -693,7 +693,7 @@ for type in ['number', 'date', 'datetime']
 
 addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of items that match a condition", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
-addOpItem(op: "sum where", name: "Total where", desc: "Add together only values that match a condition", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "that", rhsPlaceholder: "All")
+addOpItem(op: "sum where", name: "Total where", desc: "Add together only values that match a condition", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
 addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
