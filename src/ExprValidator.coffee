@@ -29,7 +29,7 @@ module.exports = class ExprValidator
     # Check table if not literal
     if expr.type != "literal"
       if options.table and expr.table != options.table 
-        return "Wrong table"
+        return "Wrong table #{expr.table} (expected #{options.table})"
 
     # Literal is ok if right type
     switch expr.type
