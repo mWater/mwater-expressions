@@ -26,9 +26,10 @@ module.exports = class ExprValidator
     if _.isEmpty(expr)
       return null
 
-    # Check table
-    if options.table and expr.table != options.table
-      return "Wrong table"
+    # Check table if not literal
+    if expr.type != "literal"
+      if options.table and expr.table != options.table 
+        return "Wrong table"
 
     # Literal is ok if right type
     switch expr.type
