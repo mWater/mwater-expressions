@@ -1283,7 +1283,7 @@ describe "ExprCompiler", ->
         }
       )
 
-    it "compiles to text", ->
+    it "compiles enum to text", ->
       @compile(
         {
           type: "op"
@@ -1297,6 +1297,21 @@ describe "ExprCompiler", ->
             { when: { type: "literal", value: "a" }, then: { type: "literal", value: "A" } }
             { when: { type: "literal", value: "b" }, then: { type: "literal", value: "B" } }
           ]
+        }
+      )
+
+    it "compiles number to text", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "to text"
+          exprs: [{ type: "field", table: "t1", column: "number" }]
+        }
+        {
+          type: "op"
+          op: "::text"
+          exprs: [{ type: "field", tableAlias: "T1", column: "number" }]
         }
       )
 

@@ -126,6 +126,8 @@ addOp(null, "length", literal(null, "enumset"))
 # TODO "to text" requires a schema! 
 # addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
 
+addOp("2.5", "to text", literal(2.5, "number"))
+
 addOp(true, "thisyear", literal(moment().subtract(1, "minutes").format("YYYY-MM-DD"), "date"))
 addOp(false, "thisyear", literal(moment().subtract(1, "minutes").add(1, "years").format("YYYY-MM-DD"), "date"))
 

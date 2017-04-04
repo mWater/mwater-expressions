@@ -722,4 +722,5 @@ addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of 
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of images present", resultType: "number", exprTypes: ["imagelist"], prefix: true)
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of items present in a text list", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
-addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert an choice type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true)
+addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true)
+addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["number"], prefix: true)

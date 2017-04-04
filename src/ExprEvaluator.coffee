@@ -267,7 +267,7 @@ module.exports = class ExprEvaluator
           return null
 
         # TODO should localize, but would require schema
-        return values[0]
+        return values[0] + ""
 
       else
         throw new Error("Unknown op #{op}")
