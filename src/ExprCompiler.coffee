@@ -837,6 +837,32 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'last24hours'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(1, 'days').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<=", exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(24, 'hours').toISOString() ] }
+                { type: "op", op: "<=", exprs: [compiledExprs[0], moment().toISOString() ] }
+              ]
+            }
+          else
+            return null
+
       when 'last7days'
         if not compiledExprs[0]
           return null

@@ -213,6 +213,12 @@ module.exports = class ExprEvaluator
         date = values[0]
         return moment(date, moment.ISO_8601).add(1, "years").format("YYYY") == moment().format("YYYY")
 
+      when "last24hours"
+        if hasNull
+          return null
+        date = values[0]
+        return moment(date, moment.ISO_8601).isSameOrBefore(moment()) and moment(date, moment.ISO_8601).isAfter(moment().subtract(24, "hours")) 
+
       when "last7days"
         if hasNull
           return null

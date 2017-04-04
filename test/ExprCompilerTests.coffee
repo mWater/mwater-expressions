@@ -1561,6 +1561,23 @@ describe "ExprCompiler", ->
           }
         )
 
+      it "last24hours", ->
+        @compile(
+          {
+            type: "op"
+            op: "last24hours"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().subtract(24, "hours").toISOString()]}
+              { type: "op", op: "<=", exprs: [@datetime1JsonQL, moment().toISOString()]}
+            ]
+          }
+        )
+
       it "last7days", ->
         @compile(
           {

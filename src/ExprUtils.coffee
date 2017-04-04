@@ -617,6 +617,7 @@ relativeDateOps = [
   ['lastmonth', 'is last month']
   ['today', 'is today']
   ['yesterday', 'is yesterday']
+  ['last24hours', 'is in last 24 hours']
   ['last7days', 'is in last 7 days']
   ['last30days', 'is in last 30 days']
   ['last365days', 'is in last 365 days']

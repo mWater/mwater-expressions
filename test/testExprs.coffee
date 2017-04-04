@@ -171,6 +171,9 @@ addOp(false, "today", literal(moment().subtract(1, "minutes").add(1, "years").to
 addOp(false, "yesterday", literal(new Date().toISOString(), "datetime"))
 addOp(true, "yesterday", literal(moment().subtract(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
 
+addOp(false, "last24hours", literal(moment().subtract(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
+addOp(true, "last24hours", literal(moment().add(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
+
 addOp(false, "last7days", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
 addOp(true, "last7days", literal(moment().subtract(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
 
