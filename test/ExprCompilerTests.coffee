@@ -1003,6 +1003,26 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles count distinct", ->
+      # Compiles as count(distinct value)
+      value = { type: "field", table: "t1", column: "text" }
+      valueJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+
+      @compile(
+        {
+          type: "op"
+          op: "count distinct"
+          table: "t1"
+          exprs: [value]
+        }
+        {
+          type: "op"
+          op: "count"
+          modifier: "distinct"
+          exprs: [valueJsonQL]
+        }
+      )
+
     it "compiles = any", ->
       @compile(
         { 

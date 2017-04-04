@@ -193,10 +193,10 @@ makeRow = (data) ->
   }
 
 sampleRows = [
-  makeRow(id: "1", a: 1, b: 1, c: true, d: true, ordering: 3)
-  makeRow(id: "2", a: 2, b: 4, c: false, d: true, ordering: 4)
-  makeRow(id: "3", a: 3, b: 9, c: true, d: true, ordering: 1)
-  makeRow(id: "4", a: 4, b: 16, c: false, d: false, ordering: 2)
+  makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", ordering: 3)
+  makeRow(id: "2", a: 2, b: 4, c: false, d: true, e: "y", ordering: 4)
+  makeRow(id: "3", a: 3, b: 9, c: true, d: true, e: "z", ordering: 1)
+  makeRow(id: "4", a: 4, b: 16, c: false, d: false, e: "z", ordering: 2)
 ]
 
 add({ type: "field", table: "t1", column: "a" }, 4, { row: makeRow(a: 4) })
@@ -221,6 +221,7 @@ add({ type: "op", table: "t1", op: "sum where", exprs: [{ type: "field", table: 
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 50, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }, { type: "field", table: "t1", column: "d" }] }, ((v) -> Math.abs(v- 200/3) < 0.1), { rows: sampleRows })
 
+add({ type: "op", table: "t1", op: "count distinct", exprs: [{ type: "field", table: "t1", column: "e" }] }, 3, { rows: sampleRows })
 
 # Row with join
 singleJoinRow = makeRow(j: makeRow(id: "j1", a:1, b:2))

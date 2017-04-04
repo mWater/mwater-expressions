@@ -401,6 +401,16 @@ module.exports = class ExprEvaluator
             else
               callback(null, sum/count * 100)
 
+      when "count distinct"
+        # Evaluate all rows 
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          count = _.uniq(values).length
+
+          return callback(null, count)
+
       else      
         callback(new Error("Unknown op #{op}"))
 

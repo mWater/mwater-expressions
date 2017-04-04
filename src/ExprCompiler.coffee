@@ -560,6 +560,18 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "count distinct"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        return {
+          type: "op"
+          op: "count"
+          exprs: [compiledExprs[0]]
+          modifier: "distinct"
+        }
+
       # Hierarchical test that uses ancestry column
       when "within"
         # Null if either not present

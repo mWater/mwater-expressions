@@ -96,7 +96,6 @@ describe "ExprUtils", ->
     it "includes text (last)", ->
       field = { type: "field", table: "a", column: "y" }
       types = @exprUtils.getAggrTypes(field)
-      assert.isFalse "number" in types, JSON.stringify(types)
       assert.isTrue "text" in types, JSON.stringify(types)
 
     it "doesn't include last normally", ->
@@ -105,7 +104,7 @@ describe "ExprUtils", ->
 
       field = { type: "field", table: "b", column: "x" }
       types = @exprUtils.getAggrTypes(field)
-      assert.deepEqual types, []
+      assert.deepEqual types, ['number']
  
   describe "getExprType", ->
     it 'gets field type', ->
