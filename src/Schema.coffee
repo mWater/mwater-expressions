@@ -14,7 +14,7 @@ module.exports = class Schema
     @columnMap = {}
 
     if json
-      @tables = _.cloneDeep(json.tables)
+      @tables = json.tables
 
       # Setup maps
       for table in @tables
