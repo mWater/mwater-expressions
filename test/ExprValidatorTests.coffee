@@ -53,6 +53,16 @@ describe "ExprValidator", ->
     exprValidator = new ExprValidator(schema)
     assert exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_invalid" })
 
+  it "handles recursive field expr", ->
+    table = @schema.getTable("t1")
+    table.contents.push(
+      { id: "expr_recursive", name: { en: "Expr Recursive"}, type: "expr", expr: { type: "field", table: "t1", column: "expr_recursive" }}
+    )
+    schema = @schema.addTable(table)
+
+    exprValidator = new ExprValidator(schema)
+    assert exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" })
+
   describe "op", ->
     it "invalid if mixed aggregate and individual"
 

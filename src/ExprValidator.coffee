@@ -26,6 +26,10 @@ module.exports = class ExprValidator
     if _.isEmpty(expr)
       return null
 
+    # Prevent infinite recursion
+    if options.depth > 100
+      return "Circular reference"
+
     # Check table if not literal
     if expr.type != "literal"
       if options.table and expr.table != options.table 
@@ -47,7 +51,8 @@ module.exports = class ExprValidator
 
         # Validate expression
         if column.expr
-          error = @validateExpr(column.expr, options)
+          # Use depth to prevent infinite recursion
+          error = @validateExpr(column.expr, _.extend({}, options, depth: (options.depth or 0) + 1))
           if error
             return error
 
