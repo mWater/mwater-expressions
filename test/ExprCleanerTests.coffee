@@ -39,6 +39,16 @@ describe "ExprCleaner", ->
       assert.isNotNull @exprCleaner.cleanExpr(field, enumValueIds: ["a", "b", "c"])
       assert.isNull @exprCleaner.cleanExpr(field, enumValueIds: ["a"])
 
+    it "nulls recursive field expr", ->
+      table = @schema.getTable("t1")
+      table.contents.push(
+        { id: "expr_recursive", name: { en: "Expr Recursive"}, type: "expr", expr: { type: "field", table: "t1", column: "expr_recursive" }}
+      )
+      schema = @schema.addTable(table)
+      exprCleaner = new ExprCleaner(schema)
+
+      assert.isNull exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_recursive" })
+
     describe "aggregation", ->
       it "aggregates if required", ->
         field = { type: "field", table: "t1", column: "number" }

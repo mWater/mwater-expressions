@@ -311,40 +311,60 @@ module.exports = class ExprEvaluator
 
       when "last"
         # Evaluate all rows by ordering
-        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, values) =>
+        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, orderValues) =>
           if error
             return callback(error)
 
-          # Find largest
-          if values.length == 0
-            return callback(null, null)
+          # Evaluate all rows
+          async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+            if error
+              return callback(error)
 
-          index = values.indexOf(_.max(values))
-          @evaluate(exprs[0], { row: context.rows[index] }, callback)
+            zipped = _.zip(values, orderValues)
+
+            # Sort by ordering reverse
+            zipped = _.sortByOrder(zipped, [(entry) => entry[1]], ["desc"])
+            values = _.map(zipped, (entry) -> entry[0])
+
+            # Take first non-null
+            for value in values
+              if value?
+                callback(null, value)
+                return
+
+            callback(null, null)
 
       when "last where"
         # Evaluate all rows by ordering
-        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, values) =>
+        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, ordering) =>
           if error
             return callback(error)
   
           # Evaluate all rows by where
           async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, wheres) =>
-            # Find largest
-            if values.length == 0
-              return callback(null, null)
+            if error
+              return callback(error)
 
-            index = -1
-            largest = null
-            for row, i in context.rows
-              if (wheres[i] or not exprs[1]) and (index == -1 or values[i] > largest)
-                index = i
-                largest = values[i]
-  
-            if index >= 0
-              @evaluate(exprs[0], { row: context.rows[index] }, callback)
-            else
-              callback(null, null)
+            # Evaluate all rows
+            async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+              if error
+                return callback(error)
+
+              # Find largest
+              if ordering.length == 0
+                return callback(null, null)
+
+              index = -1
+              largest = null
+              for row, i in context.rows
+                if (wheres[i] or not exprs[1]) and (index == -1 or ordering[i] > largest) and values[i]?
+                  index = i
+                  largest = ordering[i]
+    
+              if index >= 0
+                callback(null, values[index])
+              else
+                callback(null, null)
 
       when "count where"
         # Evaluate all rows by where

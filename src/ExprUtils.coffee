@@ -195,6 +195,7 @@ module.exports = class ExprUtils
   # Determines the aggregation status of an expression. This is whether the expression is
   # aggregate (like sum, avg, etc) or individual (a regular field-containing expression) or 
   # literal (which is neither, just a number or text). 
+  # Invisible second parameter is depth to prevent infinite recursion
   getExprAggrStatus: (expr) ->
     if not expr? or not expr.type
       return null
@@ -222,7 +223,11 @@ module.exports = class ExprUtils
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
         if column?.type == "expr"
-          return @getExprAggrStatus(column.expr)
+          depth = (arguments[1] or 0) + 1
+          if depth > 100
+            throw new Error("Infinite recursion")
+            
+          return @getExprAggrStatus(column.expr, depth + 1)
         return "individual"
       when "op"
         # If aggregate op
@@ -702,7 +707,16 @@ addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["i
     return exprUtils.schema.getTable(lhsIdTable).ancestry?
   return false
 )
+
+addOpItem(op: "within any", name: "is within any of", resultType: "boolean", exprTypes: ["id", "id[]"], lhsCond: (lhsExpr, exprUtils) => 
+  lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
+  if lhsIdTable
+    return exprUtils.schema.getTable(lhsIdTable).ancestry?
+  return false
+)
+
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
+
 addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"])
 addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
 addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])

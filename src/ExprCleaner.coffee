@@ -50,6 +50,16 @@ module.exports = class ExprCleaner
     if expr.table and not @schema.getTable(expr.table)
       return null
 
+    # Handle infinite recursion that can occur when cleaning field expressions that self-reference
+    aggrStatus = null
+    try
+      aggrStatus = @exprUtils.getExprAggrStatus(expr)
+    catch ex
+      if ex.message == 'Infinite recursion'
+        return null
+      throw ex
+    
+
     # Default aggregation if needed and not aggregated
     if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
       aggrOpItems = @exprUtils.findMatchingOpItems(resultTypes: options.types, lhsExpr: expr, aggr: true, ordered: @schema.getTable(expr.table)?.ordering?)

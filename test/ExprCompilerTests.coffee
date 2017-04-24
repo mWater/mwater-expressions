@@ -1242,6 +1242,35 @@ describe "ExprCompiler", ->
         }
       ) 
 
+    it "compiles within any", ->
+      @compile(
+        {
+          type: "op"
+          op: "within any"
+          exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id[]", idTable: "thier", value: ["123", "456"] }]
+        }
+        { 
+          type: "op"
+          op: "in"
+          exprs: [
+            { type: "field", tableAlias: "T1", column: "primary" }
+            {
+              type: "scalar"
+              expr: { type: "field", tableAlias: "subwithin", column: "primary" }
+              from: { type: "table", table: "thier", alias: "subwithin" }
+              where: {
+                type: "op"
+                op: "?|"
+                exprs: [
+                  { type: "field", tableAlias: "subwithin", column: "path" }
+                  { type: "literal", value: ["123", "456" ] }
+                ]
+              } 
+            }
+          ]
+        }
+      ) 
+
     it "compiles days difference (date)", ->
       @compile(
         {

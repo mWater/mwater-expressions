@@ -612,6 +612,36 @@ module.exports = class ExprCompiler
           ]
         }
 
+      # Hierarchical test that uses ancestry column
+      when "within any"
+        # Null if either not present
+        if not compiledExprs[0] or not compiledExprs[1]
+          return null
+
+        # Get table being used
+        idTable = exprUtils.getExprIdTable(expr.exprs[0])
+
+        return {
+          type: "op"
+          op: "in"
+          exprs: [
+            compiledExprs[0]
+            {
+              type: "scalar"
+              expr: @compileColumnRef(@schema.getTable(idTable).primaryKey, "subwithin")
+              from: { type: "table", table: idTable, alias: "subwithin" }
+              where: {
+                type: "op"
+                op: "?|"
+                exprs: [
+                  { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
+                  compiledExprs[1]
+                ]
+              }
+            }            
+          ]
+        }
+
       when "latitude"
         if not compiledExprs[0]
           return null

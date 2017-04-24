@@ -195,10 +195,10 @@ makeRow = (data) ->
   }
 
 sampleRows = [
-  makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", ordering: 3)
-  makeRow(id: "2", a: 2, b: 4, c: false, d: true, e: "y", ordering: 4)
-  makeRow(id: "3", a: 3, b: 9, c: true, d: true, e: "z", ordering: 1)
-  makeRow(id: "4", a: 4, b: 16, c: false, d: false, e: "z", ordering: 2)
+  makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", f: 1, ordering: 3)
+  makeRow(id: "2", a: 2, b: 4, c: false, d: true, e: "y", f: null, ordering: 4)
+  makeRow(id: "3", a: 3, b: 9, c: true, d: true, e: "z", f: 3, ordering: 1)
+  makeRow(id: "4", a: 4, b: 16, c: false, d: false, e: "z", f: 4, ordering: 2)
 ]
 
 add({ type: "field", table: "t1", column: "a" }, 4, { row: makeRow(a: 4) })
@@ -212,9 +212,11 @@ add({ type: "op", table: "t1", op: "max", exprs: [{ type: "field", table: "t1", 
 add({ type: "op", table: "t1", op: "count", exprs: [] }, 4, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "f" }] }, 1, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 1, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, null] }, 2, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "f" }, null] }, 1, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "count where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 2, { rows: sampleRows })
 
