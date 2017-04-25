@@ -120,6 +120,9 @@ addOp(false, "contains", literal(["a", "b", "c"], "enumset"), literal(["a", "b",
 addOp(false, "contains", literal(["a", "b"], "enumset"), literal(["a", "b", "c"], "enumset"))
 addOp(null, "contains", literal(null, "enumset"), literal(["c", "b"], "enumset"))
 
+addOp(true, "intersects", literal(["a", "b", "c"], "enumset"), literal(["a", "x"], "enumset"))
+addOp(false, "intersects", literal(["a", "b", "c"], "enumset"), literal(["d"], "enumset"))
+
 addOp(2, "length", literal(["a", "b"], "enumset"))
 addOp(null, "length", literal(null, "enumset"))
 

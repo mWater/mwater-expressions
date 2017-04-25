@@ -1149,6 +1149,39 @@ describe "ExprCompiler", ->
         null
       )
 
+    it "compiles intersects", ->
+      @compile(
+        { 
+          type: "op"
+          op: "intersects", 
+          exprs: [
+            { type: "field", table: "t1", column: "enumset" } 
+            { type: "literal", valueType: "enumset", value: ["a", "b"] }
+          ]
+        }
+        {
+          type: "op"
+          op: "?|"
+          exprs: [
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+            { type: "literal", value: ["a", "b"] }
+          ]
+        }
+      )
+
+    it "compiles empty intersects", ->
+      @compile(
+        { 
+          type: "op"
+          op: "intersects", 
+          exprs: [
+            { type: "field", table: "t1", column: "enumset" } 
+            { type: "literal", valueType: "enumset", value: [] }
+          ]
+        }
+        null
+      )
+
     it "compiles length", ->
       @compile(
         { 

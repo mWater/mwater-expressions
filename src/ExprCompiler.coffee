@@ -427,6 +427,25 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "intersects"
+        # Null if either not present
+        if not compiledExprs[0] or not compiledExprs[1]
+          return null
+
+        # Null if no expressions in literal list
+        if compiledExprs[1].type == "literal" and compiledExprs[1].value.length == 0
+          return null
+
+        # Cast to jsonb and use ?| Also convert to json first to handle literal arrays
+        return {
+          type: "op"
+          op: "?|"
+          exprs: [
+            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+            compiledExprs[1]
+          ]
+        }
+
       when "length"
         # Null if not present
         if not compiledExprs[0] 

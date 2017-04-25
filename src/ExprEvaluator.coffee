@@ -146,6 +146,10 @@ module.exports = class ExprEvaluator
         if hasNull
           return null
         return _.difference(values[1], values[0]).length == 0
+      when "intersects"
+        if hasNull
+          return null
+        return _.intersection(values[0], values[1]).length > 0
       when "length"
         if hasNull
           return null

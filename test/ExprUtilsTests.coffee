@@ -233,6 +233,12 @@ describe "ExprUtils", ->
       opExpr = { type: "op", op: "contains", exprs: [fieldExpr, literalExpr]}
       assert.equal @exprUtils.summarizeExpr(opExpr), "EnumSet includes all of A"
 
+    it "summarizes intersects with enumset literal", ->
+      fieldExpr = { type: "field", table: "t1", column: "enumset" }
+      literalExpr = { type: "literal", valueType: "enumset", value: ["a"] }
+      opExpr = { type: "op", op: "intersects", exprs: [fieldExpr, literalExpr]}
+      assert.equal @exprUtils.summarizeExpr(opExpr), "EnumSet includes any of A"
+
     it "summarizes sum(field) expr", ->
       expr = { type: "op", op: "sum", table: "t2", exprs: [{ type: "field", table: "t2", column: "number" }] }
       assert.equal @exprUtils.summarizeExpr(expr), "Total Number"

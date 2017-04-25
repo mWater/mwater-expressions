@@ -326,9 +326,12 @@ module.exports = class ExprUtils
       when "id"
         return @localizeString(@schema.getTable(expr.table)?.name, locale)
       when "op"
-        # Special case for contains with literal RHS
+        # Special case for contains/intersects with literal RHS
         if expr.op == "contains" and expr.exprs[1]?.type == "literal"
           return @summarizeExpr(expr.exprs[0], locale) + " includes all of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
+
+        if expr.op == "intersects" and expr.exprs[1]?.type == "literal"
+          return @summarizeExpr(expr.exprs[0], locale) + " includes any of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
         # Special case for = any with literal RHS
         if expr.op == "= any" and expr.exprs[1]?.type == "literal"
@@ -612,7 +615,7 @@ addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["te
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["enum", "enumset"])
 
 addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["enumset", "enumset"])
-# addOpItem("intersects", "includes any of", "boolean", ["enumset", "enumset"]) Painful to implement...
+addOpItem(op: "intersects", name: "includes any of", resultType: "boolean", exprTypes: ["enumset", "enumset"])
 
 # Add relative dates
 relativeDateOps = [
