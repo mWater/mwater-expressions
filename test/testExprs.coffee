@@ -30,6 +30,8 @@ addOp(null, "*", literal(3, "number"), literal(null, "number"))
 
 addOp(3, "/", literal(6, "number"), literal(2, "number"))
 addOp(null, "/", literal(6, "number"), literal(null, "number"))
+# Divide by zero gives null to prevent SQL errors
+addOp(null, "/", literal(6, "number"), literal(0, "number"))
 
 # === and or not
 addOp(true, "and", literal(true, "boolean"), literal(true, "boolean"), literal(true, "boolean"))

@@ -260,7 +260,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
-      when "-", "/", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
+      when "-", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
@@ -269,6 +269,19 @@ module.exports = class ExprCompiler
           type: "op"
           op: expr.op
           exprs: compiledExprs
+        }
+      when "/"
+        # Null if any not present
+        if _.any(compiledExprs, (ce) -> not ce?)
+          return null
+
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: [
+            compiledExprs[0]
+            { type: "op", op: "nullif", exprs: [compiledExprs[1], 0] }
+          ]
         }
       when "last"
         # Null if not present

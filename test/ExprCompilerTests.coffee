@@ -609,29 +609,51 @@ describe "ExprCompiler", ->
           }
         )
 
-    it "compiles -, /", ->
-      for op in ["-", "/"]
-        @compile(
-          {
-            type: "op"
-            op: op
-            exprs: [@number1, @number2]
-          }
-          {
-            type: "op"
-            op: op
-            exprs: [@number1JsonQL, @number2JsonQL]
-          }
-        )
+    it "compiles -", ->
+      @compile(
+        {
+          type: "op"
+          op: "-"
+          exprs: [@number1, @number2]
+        }
+        {
+          type: "op"
+          op: "-"
+          exprs: [@number1JsonQL, @number2JsonQL]
+        }
+      )
 
-        @compile(
-          {
-            type: "op"
-            op: op
-            exprs: [null, @number2]
-          }
-          null
-        )
+      @compile(
+        {
+          type: "op"
+          op: "-"
+          exprs: [null, @number2]
+        }
+        null
+      )
+
+    it "compiles /, avoiding divide by zero which is fatal", ->
+      @compile(
+        {
+          type: "op"
+          op: "/"
+          exprs: [@number1, @number2]
+        }
+        {
+          type: "op"
+          op: "/"
+          exprs: [@number1JsonQL, { type: "op", op: "nullif", exprs: [@number2JsonQL, 0] }]
+        }
+      )
+
+      @compile(
+        {
+          type: "op"
+          op: "/"
+          exprs: [null, @number2]
+        }
+        null
+      )
 
     it "compiles between", ->
       @compile(

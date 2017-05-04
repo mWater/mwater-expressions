@@ -93,6 +93,8 @@ module.exports = class ExprEvaluator
       when "/"
         if hasNull
           return null
+        if values[1] == 0
+          return null
         return values[0] / values[1]
       when "and"
         return _.reduce(values, (acc, value) -> acc and value)
