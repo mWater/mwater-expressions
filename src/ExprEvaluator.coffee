@@ -183,6 +183,11 @@ module.exports = class ExprEvaluator
           return null
         return moment().diff(moment(values[0], moment.ISO_8601))/24/3600/1000
 
+      when "weekofmonth"
+        if hasNull
+          return null
+        return (Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1) + "" # Make string
+
       when "today"
         if hasNull
           return null

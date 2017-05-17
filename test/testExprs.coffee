@@ -190,6 +190,11 @@ addOp(true, "last30days", literal(moment().subtract(1, "minutes").subtract(1, "d
 addOp(false, "last365days", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
 addOp(true, "last365days", literal(moment().subtract(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
 
+addOp("1", "weekofmonth", literal("2015-05-07", "date"))
+addOp("2", "weekofmonth", literal("2015-05-08", "date"))
+
+addOp("1", "weekofmonth", literal("2015-05-07", "datetime"))
+addOp("2", "weekofmonth", literal("2015-05-08", "datetime"))
 
 # Create sample rows for testing aggregation
 makeRow = (data) ->

@@ -95,6 +95,16 @@ module.exports = class ExprUtils
     if expr.type == "op" and expr.op in ["last", "last where", "previous"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
 
+    # Weeks of month has predefined values (1-5 as text)
+    if expr.type == "op" and expr.op == "weekofmonth"
+      return [
+        { id: "1", name: { en: "1" }}
+        { id: "2", name: { en: "2" }}
+        { id: "3", name: { en: "3" }}
+        { id: "4", name: { en: "4" }}
+        { id: "5", name: { en: "5" }}
+      ]
+
     # Case statements search for possible values
     if expr.type == "case"
       for cse in expr.cases
@@ -688,6 +698,9 @@ addOpItem(op: "days difference", name: "Days between", desc: "Get the number of 
 
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+
+addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)

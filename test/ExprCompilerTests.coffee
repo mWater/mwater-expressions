@@ -1399,6 +1399,22 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles weekofmonth", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "weekofmonth"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        { type: "op", op: "to_char", exprs: [
+          { type: "op", op: "::timestamp", exprs: [
+            { type: "field", tableAlias: "T1", column: "date" }
+          ]}
+          "W"
+        ]}
+      )
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(

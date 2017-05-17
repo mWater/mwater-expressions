@@ -764,6 +764,18 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'weekofmonth'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }
+            "W"
+          ]
+        }
 
       when 'thisyear'
         if not compiledExprs[0]
