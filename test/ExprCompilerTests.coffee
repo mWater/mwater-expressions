@@ -1315,12 +1315,26 @@ describe "ExprCompiler", ->
               from: { type: "table", table: "thier", alias: "subwithin" }
               where: {
                 type: "op"
-                op: "?|"
+                op: "or"
                 exprs: [
-                  { type: "field", tableAlias: "subwithin", column: "path" }
-                  { type: "literal", value: ["123", "456" ] }
+                  {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "field", tableAlias: "subwithin", column: "path" }
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: "123" }] }
+                    ]
+                  } 
+                  {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "field", tableAlias: "subwithin", column: "path" }
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: "456" }] }
+                    ]
+                  } 
                 ]
-              } 
+              }
             }
           ]
         }

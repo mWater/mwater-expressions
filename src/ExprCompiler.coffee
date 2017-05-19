@@ -653,6 +653,32 @@ module.exports = class ExprCompiler
         # Get table being used
         idTable = exprUtils.getExprIdTable(expr.exprs[0])
 
+        # This older code fails now that admin_regions uses integer pk. Replaced with literal-only code
+        # return {
+        #   type: "op"
+        #   op: "in"
+        #   exprs: [
+        #     compiledExprs[0]
+        #     {
+        #       type: "scalar"
+        #       expr: @compileColumnRef(@schema.getTable(idTable).primaryKey, "subwithin")
+        #       from: { type: "table", table: idTable, alias: "subwithin" }
+        #       where: {
+        #         type: "op"
+        #         op: "?|"
+        #         exprs: [
+        #           { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
+        #           compiledExprs[1]
+        #         ]
+        #       }
+        #     }            
+        #   ]
+        # }
+
+        # If not literal, fail
+        if compiledExprs[1].type != "literal"
+          throw new Error("Non-literal RHS of within any not supported")
+
         return {
           type: "op"
           op: "in"
@@ -664,11 +690,16 @@ module.exports = class ExprCompiler
               from: { type: "table", table: idTable, alias: "subwithin" }
               where: {
                 type: "op"
-                op: "?|"
-                exprs: [
-                  { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
-                  compiledExprs[1]
-                ]
+                op: "or"
+                exprs: _.map(compiledExprs[1].value, (value) =>
+                  {
+                    type: "op"
+                    op: "@>"
+                    exprs: [
+                      { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: value }] }
+                    ]
+                  })
               }
             }            
           ]
