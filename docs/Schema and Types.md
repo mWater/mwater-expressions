@@ -51,15 +51,22 @@ Either a section, join or column.
 
 `enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
-`idTable`: table for id[] fields
+`idTable`: table for id, id[] fields
 
 `join`: Details of the join. See below. For type `join` only.
 
 `deprecated`: true if column is deprecated. Do not show unless already selected
 
+`expr`: set to expression if the column is an mwater-expression to be evaluated
+
+`confidential`: true if column contains confidential data and should be not displayed by default
+
+`redacted`: true if column is redacted and might be blank or scrambled
+
 `jsonql`: Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr`
 
 `sql`: sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
+
 
 ## Column types
 
@@ -82,7 +89,7 @@ joins and columns can be nested within sections for organizational purposes.
 Special column types:
 * `join`: not a columns per se, but link to one or N rows in another table
 * `section`: has contents which is list of other columns/sections
-* `expr`: has `expr` field which is an expression to be evaluated. Can be aggregate or individual expression
+* `expr`: DEPRECATED. Use expr field but set to actual type. Can be aggregate or individual expression
 
 ### enumValues
 

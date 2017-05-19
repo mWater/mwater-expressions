@@ -82,6 +82,7 @@ module.exports = class ExprUtils
       if column.enumValues
         return column.enumValues
 
+      # DEPRECATED. Remove July 2017
       if column.type == "expr"
         return @getExprEnumValues(column.expr)
 
@@ -134,10 +135,11 @@ module.exports = class ExprUtils
       if column?.type == "join"
         return column.join.toTable
 
+      # DEPRECATED. Remove July 2017
       if column?.type == "expr"
         return @getExprIdTable(column.expr)
 
-      if column?.type == "id[]"
+      if column?.type in ["id", "id[]"]
         return column.idTable
 
       return null
@@ -156,6 +158,7 @@ module.exports = class ExprUtils
               return "id"
             else
               return "id[]"
+          # DEPRECATED. Remove July 2017
           else if column.type == "expr"
             return @getExprType(column.expr)
           return column.type
@@ -232,7 +235,7 @@ module.exports = class ExprUtils
         return "individual"
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
-        if column?.type == "expr"
+        if column?.expr
           depth = (arguments[1] or 0) + 1
           if depth > 100
             throw new Error("Infinite recursion")
@@ -389,7 +392,10 @@ module.exports = class ExprUtils
     t = expr.table
     for join in expr.joins
       joinCol = @schema.getColumn(t, join)
-      str += @localizeString(joinCol.name, locale) + " > "
+      if joinCol
+        str += @localizeString(joinCol.name, locale) + " > "
+      else
+        str += "NOT FOUND > "
       t = joinCol.join.toTable
 
     # Special case for id type to be rendered as {last join name}

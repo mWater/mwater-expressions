@@ -81,8 +81,8 @@ module.exports = class ExprCompiler
           where: @compileJoin(column.join, options.tableAlias, "inner")
         }
 
-    # Handle expr type
-    if column.type == "expr"
+    # Handle if has expr 
+    if column.expr
       return @compileExpr({ expr: column.expr, tableAlias: options.tableAlias })
 
     # If column has custom jsonql, use that instead of id
