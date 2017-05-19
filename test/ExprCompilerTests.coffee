@@ -1302,7 +1302,7 @@ describe "ExprCompiler", ->
         {
           type: "op"
           op: "within any"
-          exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id[]", idTable: "thier", value: ["123", "456"] }]
+          exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id[]", idTable: "thier", value: [123, 456] }]
         }
         { 
           type: "op"

@@ -697,7 +697,7 @@ module.exports = class ExprCompiler
                     op: "@>"
                     exprs: [
                       { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: value }] }
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: JSON.stringify(value) }] }
                     ]
                   })
               }
