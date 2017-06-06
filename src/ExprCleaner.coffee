@@ -1,5 +1,6 @@
 _ = require 'lodash'
 ExprUtils = require './ExprUtils'
+ExprValidator = require './ExprValidator'
 
 # Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
 module.exports = class ExprCleaner
@@ -159,12 +160,17 @@ module.exports = class ExprCleaner
     if not column
       return null
 
+    # Invalid expr
+    if column.expr
+      if new ExprValidator(@schema).validateExpr(column.expr, options)
+        return null
+
     # Invalid enums
     if options.enumValueIds and column.type == "enum"
       if _.difference(_.pluck(column.enumValues, "id"), options.enumValueIds).length > 0
         return null
 
-    if options.enumValueIds and column.type == "expr"
+    if options.enumValueIds and column.expr
       if @exprUtils.getExprType(column.expr) == "enum"
         if _.difference(_.pluck(@exprUtils.getExprEnumValues(column.expr), "id"), options.enumValueIds).length > 0
           return null

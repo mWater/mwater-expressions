@@ -49,6 +49,19 @@ describe "ExprCleaner", ->
 
       assert.isNull exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_recursive" })
 
+    it "nulls if expr is invalid", ->
+      table = @schema.getTable("t1")
+      table.contents.push(
+        { id: "expr_invalid", name: { en: "Expr Invalid"}, type: "expr", expr: { type: "field", table: "t1", column: "nonsuch" }}
+        { id: "expr_valid", name: { en: "Expr Invalid"}, type: "expr", expr: { type: "field", table: "t1", column: "enum" }}
+      )
+      schema = @schema.addTable(table)
+      exprCleaner = new ExprCleaner(schema)
+
+      assert.isNull exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_invalid" })
+      assert exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_valid" })
+
+
     describe "aggregation", ->
       it "aggregates if required", ->
         field = { type: "field", table: "t1", column: "number" }
