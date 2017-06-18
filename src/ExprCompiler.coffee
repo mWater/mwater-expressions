@@ -411,7 +411,19 @@ module.exports = class ExprCompiler
           exprs: compiledExprs
         }
 
-      when "not", "is null", "is not null"
+      when "not"
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: expr.op
+          exprs: [
+            { type: "op", op: "coalesce", exprs: [compiledExprs[0], false] }
+          ]
+        }
+
+      when "is null", "is not null"
         if not compiledExprs[0]
           return null
 

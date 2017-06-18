@@ -50,7 +50,7 @@ addOp(true, "or", literal(true, "boolean"), literal(null, "boolean"))
 
 addOp(false, "not", literal(true, "boolean"))
 addOp(true, "not", literal(false, "boolean"))
-addOp(null, "not", literal(null, "boolean"))
+addOp(true, "not", literal(null, "boolean"))
 
 addOp(false, "=", literal(1, "number"), literal(2, "number"))
 addOp(true, "=", literal(2, "number"), literal(2, "number"))

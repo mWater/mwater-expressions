@@ -717,7 +717,11 @@ describe "ExprCompiler", ->
         {
           type: "op"
           op: "not"
-          exprs: [@bool1JsonQL]
+          exprs: [{
+            type: "op"
+            op: "coalesce"
+            exprs: [@bool1JsonQL, false]
+          }]
         }
       )
 

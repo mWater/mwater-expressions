@@ -670,8 +670,8 @@ addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["boolean"
 addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["number", "number"])
 addOpItem(op: ">", name: "is greater than", resultType: "boolean", exprTypes: ["number", "number"])
 addOpItem(op: "<", name: "is less than", resultType: "boolean", exprTypes: ["number", "number"])
-addOpItem(op: ">=", name: "is greater or equal to", resultType: "boolean", exprTypes: ["number", "number"])
-addOpItem(op: "<=", name: "is less or equal to", resultType: "boolean", exprTypes: ["number", "number"])
+addOpItem(op: ">=", name: "is greater than or equal to", resultType: "boolean", exprTypes: ["number", "number"])
+addOpItem(op: "<=", name: "is less than or equal to", resultType: "boolean", exprTypes: ["number", "number"])
 
 for type in ['date', 'datetime']
   addOpItem(op: ">", name: "is after", resultType: "boolean", exprTypes: [type, type])

@@ -102,7 +102,7 @@ module.exports = class ExprEvaluator
         return _.reduce(values, (acc, value) -> acc or value)
       when "not"
         if hasNull
-          return null
+          return true
         return not values[0]
       when "="
         if hasNull
