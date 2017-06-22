@@ -79,9 +79,7 @@ module.exports = class ExprEvaluator
 
     switch op
       when "+"
-        if hasNull
-          return null
-        return _.reduce(values, (acc, value) -> acc + value)
+        return _.reduce(values, (acc, value) -> acc + (if value? then value else 0))
       when "*"
         if hasNull
           return null

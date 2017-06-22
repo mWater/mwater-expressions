@@ -594,20 +594,41 @@ describe "ExprCompiler", ->
         null
       )
 
-    it "compiles +, *", ->
-      for op in ["+", "*"]
-        @compile(
-          {
-            type: "op"
-            op: op
-            exprs: [@number1, @number2, @number1, null]
-          }
-          {
-            type: "op"
-            op: op
-            exprs: [@number1JsonQL, @number2JsonQL, @number1JsonQL]
-          }
-        )
+    it "compiles +", ->
+      @compile(
+        {
+          type: "op"
+          op: "+"
+          exprs: [@number1, @number2, @number1, null]
+        }
+        {
+          type: "op"
+          op: "+"
+          exprs: [
+            { type: "op", op: "coalesce", exprs:[@number1JsonQL, 0] }
+            { type: "op", op: "coalesce", exprs:[@number2JsonQL, 0] }
+            { type: "op", op: "coalesce", exprs:[@number1JsonQL, 0] }
+          ]
+        }
+      )
+
+    it "compiles *", ->
+      @compile(
+        {
+          type: "op"
+          op: "*"
+          exprs: [@number1, @number2, @number1, null]
+        }
+        {
+          type: "op"
+          op: "*"
+          exprs: [
+            @number1JsonQL
+            @number2JsonQL
+            @number1JsonQL
+          ]
+        }
+      )
 
     it "compiles -", ->
       @compile(

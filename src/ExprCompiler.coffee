@@ -249,7 +249,7 @@ module.exports = class ExprCompiler
 
     # Handle multi
     switch expr.op
-      when "and", "or", "+", "*"
+      when "and", "or", "*"
         # Strip nulls
         compiledExprs = _.compact(compiledExprs)
         if compiledExprs.length == 0
@@ -259,6 +259,17 @@ module.exports = class ExprCompiler
           type: "op"
           op: expr.op
           exprs: compiledExprs
+        }
+      when "+"
+        # Strip nulls
+        compiledExprs = _.compact(compiledExprs)
+        if compiledExprs.length == 0
+          return null
+
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "coalesce", exprs: [e, 0] })
         }
       when "-", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
         # Null if any not present

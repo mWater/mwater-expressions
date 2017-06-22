@@ -20,10 +20,10 @@ add(literal(3, "number"), 3)
 
 # === Basic ops
 addOp(5, "+", literal(3, "number"), literal(2, "number"))
-addOp(null, "+", literal(3, "number"), literal(null, "number"))
+addOp(3, "+", literal(3, "number"), literal(null, "number")) # Note that is different from SQL standard in null handling
 
 addOp(2, "-", literal(3, "number"), literal(1, "number"))
-addOp(null, "-", literal(3, "number"), literal(null, "number"))
+addOp(null, "-", literal(3, "number"), literal(null, "number")) 
 
 addOp(6, "*", literal(3, "number"), literal(2, "number"))
 addOp(null, "*", literal(3, "number"), literal(null, "number"))
@@ -48,6 +48,7 @@ addOp(false, "or", literal(false, "boolean"), literal(false, "boolean"), literal
 addOp(null, "or", literal(false, "boolean"), literal(null, "boolean"))
 addOp(true, "or", literal(true, "boolean"), literal(null, "boolean"))
 
+# Null handling different than SQL!
 addOp(false, "not", literal(true, "boolean"))
 addOp(true, "not", literal(false, "boolean"))
 addOp(true, "not", literal(null, "boolean"))
