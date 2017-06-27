@@ -59,7 +59,7 @@ module.exports = class ExprValidator
       when "op"
         # Validate exprs
         for subexpr in expr.exprs
-          error = @validateExpr(subexpr, _.omit(options, "types"))
+          error = @validateExpr(subexpr, _.omit(options, "types", "enumValueIds", "idTable"))
           if error
             return error
 
