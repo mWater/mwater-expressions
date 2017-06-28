@@ -25,6 +25,8 @@ _base is optional.
 
 `ancestry`: column with jsonb array of primary keys, including self. Makes table hierarchical.
 
+`ancestryText`: column with jsonb array of primary keys as JSON text, including self. Required if non-text primary keys for optimization purposes.
+
 `label`: column with label when choosing a single row. Can be JsonQL expression with `{alias}` for table alias
 
 `contents`: array of content items (columns, sections and joins) of the table
