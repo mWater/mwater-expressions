@@ -713,16 +713,12 @@ module.exports = class ExprCompiler
               from: { type: "table", table: idTable, alias: "subwithin" }
               where: {
                 type: "op"
-                op: "or"
-                exprs: _.map(compiledExprs[1].value, (value) =>
-                  {
-                    type: "op"
-                    op: "@>"
-                    exprs: [
-                      { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: JSON.stringify(value) }] }
-                    ]
-                  })
+                op: "@>"
+                modifier: "any"
+                exprs: [
+                  { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
+                  { type: "op", op: "::jsonb[]", exprs: [{ type: "literal", value: _.map(compiledExprs[1].value, (value) => JSON.stringify(value)) }] }
+                ]
               }
             }            
           ]

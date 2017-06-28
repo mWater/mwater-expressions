@@ -1340,24 +1340,11 @@ describe "ExprCompiler", ->
               from: { type: "table", table: "thier", alias: "subwithin" }
               where: {
                 type: "op"
-                op: "or"
+                op: "@>"
+                modifier: "any"
                 exprs: [
-                  {
-                    type: "op"
-                    op: "@>"
-                    exprs: [
-                      { type: "field", tableAlias: "subwithin", column: "path" }
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: "123" }] }
-                    ]
-                  } 
-                  {
-                    type: "op"
-                    op: "@>"
-                    exprs: [
-                      { type: "field", tableAlias: "subwithin", column: "path" }
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: "456" }] }
-                    ]
-                  } 
+                  { type: "field", tableAlias: "subwithin", column: "path" }
+                  { type: "op", op: "::jsonb[]", exprs: [{ type: "literal", value: ["123", "456"] }] }
                 ]
               }
             }
