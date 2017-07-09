@@ -3,6 +3,7 @@ _ = require 'lodash'
 canonical = require 'canonical-json'
 moment = require 'moment'
 sinon = require 'sinon'
+fixtures = require './fixtures'
 
 ExprEvaluator = require '../src/ExprEvaluator'
 testExprs = require './testExprs'
@@ -17,7 +18,7 @@ describe "ExprEvaluator", ->
   for testExpr in testExprs
     do (testExpr) =>
       it JSON.stringify(testExpr.expr), (done) ->
-        ev = new ExprEvaluator()
+        ev = new ExprEvaluator(fixtures.simpleSchema())
         ev.evaluate(testExpr.expr, testExpr.context, (error, value) =>
           if error
             throw error

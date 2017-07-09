@@ -12,6 +12,14 @@ literal = (value, type) -> { type: "literal", valueType: type, value: value }
 # Adds a test for an op. Pass result, op, exprs
 addOp = (result, op, exprs...) -> add({ type: "op", op: op, exprs: exprs }, result)
 
+# Create sample rows for testing 
+makeRow = (data) ->
+  return {
+    getPrimaryKey: (callback) -> callback(null, data.id)
+    getField: (columnId, callback) -> callback(null, data[columnId])
+    getOrdering: (callback) -> callback(null, data.ordering)
+  }
+
 # Null
 add(null, null)
 
@@ -129,8 +137,8 @@ addOp(false, "intersects", literal(["a", "b", "c"], "enumset"), literal(["d"], "
 addOp(2, "length", literal(["a", "b"], "enumset"))
 addOp(null, "length", literal(null, "enumset"))
 
-# TODO "to text" requires a schema! 
-# addOpItem(op: "to text", name: "Convert to text", resultType: "text", exprTypes: ["enum"], prefix: true)
+sampleRow = makeRow({ enum: "a" })
+add({ type: "op", table: "t1", op: "to text", exprs: [{ type: "field", table: "t1", column: "enum" }] }, "A", { row: sampleRow })
 
 addOp("2.5", "to text", literal(2.5, "number"))
 
@@ -196,14 +204,6 @@ addOp("2", "weekofmonth", literal("2015-05-08", "date"))
 
 addOp("1", "weekofmonth", literal("2015-05-07", "datetime"))
 addOp("2", "weekofmonth", literal("2015-05-08", "datetime"))
-
-# Create sample rows for testing aggregation
-makeRow = (data) ->
-  return {
-    getPrimaryKey: (callback) -> callback(null, data.id)
-    getField: (columnId, callback) -> callback(null, data[columnId])
-    getOrdering: (callback) -> callback(null, data.ordering)
-  }
 
 sampleRows = [
   makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", f: 1, ordering: 3)

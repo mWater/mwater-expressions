@@ -16,6 +16,11 @@ ExprUtils = require './ExprUtils'
 #
 # For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
 module.exports = class ExprEvaluator
+  # Schema is optional and used for "to text" function
+  constructor: (schema, locale) ->
+    @schema = schema
+    @locale = locale
+
   evaluate: (expr, context, callback) ->
     if not expr?
       return callback(null, null)
@@ -67,13 +72,13 @@ module.exports = class ExprEvaluator
         return callback(error)
 
       try
-        result = @evaluateOpValues(op, values)
+        result = @evaluateOpValues(op, exprs, values)
         callback(null, result)
       catch error
         return callback(error)        
 
   # Synchronous evaluation
-  evaluateOpValues: (op, values) ->
+  evaluateOpValues: (op, exprs, values) ->
     # Check if has null argument
     hasNull = _.any(values, (v) -> not v?)
 
@@ -275,8 +280,11 @@ module.exports = class ExprEvaluator
         if hasNull
           return null
 
-        # TODO should localize, but would require schema
-        return values[0] + ""
+        if @schema
+          exprUtils = new ExprUtils(@schema)
+          return exprUtils.stringifyExprLiteral(exprs[0], values[0], @locale)
+        else
+          return values[0] + ""
 
       else
         throw new Error("Unknown op #{op}")
