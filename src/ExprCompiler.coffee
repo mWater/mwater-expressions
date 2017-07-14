@@ -819,6 +819,20 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'month'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "substr"
+          exprs: [
+            compiledExprs[0]
+            6
+            2
+          ]
+        }
+
       when 'weekofmonth'
         if not compiledExprs[0]
           return null

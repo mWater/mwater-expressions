@@ -191,6 +191,11 @@ module.exports = class ExprEvaluator
           return null
         return (Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1) + "" # Make string
 
+      when "month"
+        if hasNull
+          return null
+        return values[0].substr(5, 2)
+
       when "today"
         if hasNull
           return null

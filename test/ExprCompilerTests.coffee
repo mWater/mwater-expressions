@@ -1440,6 +1440,25 @@ describe "ExprCompiler", ->
         ]}
       )
 
+    it "compiles month", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "month"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "substr"
+          exprs: [
+            { type: "field", tableAlias: "T1", column: "date" }
+            6
+            2
+          ]
+        }
+      )
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(

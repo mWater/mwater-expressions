@@ -106,6 +106,23 @@ module.exports = class ExprUtils
         { id: "5", name: { en: "5" }}
       ]
 
+    # Month has predefined values
+    if expr.type == "op" and expr.op == "month"
+      return [
+        { id: "01", name: { en: "January" } }
+        { id: "02", name: { en: "February" } }
+        { id: "03", name: { en: "March" } }
+        { id: "04", name: { en: "April" } }
+        { id: "05", name: { en: "May" } }
+        { id: "06", name: { en: "June" } }
+        { id: "07", name: { en: "July" } }
+        { id: "08", name: { en: "August" } }
+        { id: "09", name: { en: "September" } }
+        { id: "10", name: { en: "October" } }
+        { id: "11", name: { en: "November" } }
+        { id: "12", name: { en: "December" } }
+      ]
+
     # Case statements search for possible values
     if expr.type == "case"
       for cse in expr.cases
@@ -704,6 +721,9 @@ addOpItem(op: "days difference", name: "Days between", desc: "Get the number of 
 
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+
+addOpItem(op: "month", name: "Month", desc: "Month of year", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "month", name: "Month", desc: "Month of year", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)

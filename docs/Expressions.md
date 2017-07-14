@@ -82,8 +82,6 @@ This gets the id of the table:
 - `type`: "id"
 - `table`: Table id of table
 
-It is used as the inner expression when trying to do a count(*), as it is logically equivalent to count(sometable.theprimarykey)
-
 ### `score` expressions
 
 Scores an enum or enumset by assigning and summing the scores for each value.
