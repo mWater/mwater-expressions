@@ -208,6 +208,12 @@ addOp("2", "weekofmonth", literal("2015-05-08", "datetime"))
 addOp("05", "month", literal("2015-05-08", "date"))
 addOp("05", "month", literal("2015-05-08", "datetime"))
 
+addOp("2015-05-01", "yearmonth", literal("2015-05-08", "date"))
+addOp("2015-05-01", "yearmonth", literal("2015-05-08", "datetime"))
+
+addOp("2015-01-01", "year", literal("2015-05-08", "date"))
+addOp("2015-01-01", "year", literal("2015-05-08", "datetime"))
+
 sampleRows = [
   makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", f: 1, ordering: 3)
   makeRow(id: "2", a: 2, b: 4, c: false, d: true, e: "y", f: null, ordering: 4)

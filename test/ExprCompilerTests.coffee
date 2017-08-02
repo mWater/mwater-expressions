@@ -1459,6 +1459,60 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles yearmonth", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "yearmonth"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "rpad"
+          exprs: [
+            { type: "op", op: "substr", exprs: [{ type: "field", tableAlias: "T1", column: "date" }, 1, 7] }
+            10
+            "-01"
+          ]
+        }
+      )
+
+    it "compiles year", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "year"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "rpad"
+          exprs: [
+            { type: "op", op: "substr", exprs: [{ type: "field", tableAlias: "T1", column: "date" }, 1, 4] }
+            10
+            "-01-01"
+          ]
+        }
+      )
+
+    it "compiles weekofmonth", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "weekofmonth"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        { type: "op", op: "to_char", exprs: [
+          { type: "op", op: "::timestamp", exprs: [
+            { type: "field", tableAlias: "T1", column: "date" }
+          ]}
+          "W"
+        ]}
+      )
+
     describe "relative dates", ->
       it "thisyear", ->
         @compile(

@@ -833,6 +833,34 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when 'yearmonth'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "rpad"
+          exprs: [
+            { type: "op", op: "substr", exprs: [compiledExprs[0], 1, 7] }
+            10
+            "-01"
+          ]
+        }
+
+      when 'year'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "rpad"
+          exprs: [
+            { type: "op", op: "substr", exprs: [compiledExprs[0], 1, 4] }
+            10
+            "-01-01"
+          ]
+        }
+
       when 'weekofmonth'
         if not compiledExprs[0]
           return null

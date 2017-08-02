@@ -725,6 +725,12 @@ addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a
 addOpItem(op: "month", name: "Month", desc: "Month of year", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "month", name: "Month", desc: "Month of year", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
+addOpItem(op: "yearmonth", name: "Year and Month", desc: "Date of start of month", resultType: "date", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "yearmonth", name: "Year and Month", desc: "Date of start of month", resultType: "date", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+
+addOpItem(op: "year", name: "Year", desc: "Date of start of year", resultType: "date", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "year", name: "Year", desc: "Date of start of year", resultType: "date", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 

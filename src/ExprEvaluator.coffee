@@ -196,6 +196,16 @@ module.exports = class ExprEvaluator
           return null
         return values[0].substr(5, 2)
 
+      when "yearmonth"
+        if hasNull
+          return null
+        return values[0].substr(0, 7) + "-01"
+
+      when "year"
+        if hasNull
+          return null
+        return values[0].substr(0, 4) + "-01-01"
+
       when "today"
         if hasNull
           return null
