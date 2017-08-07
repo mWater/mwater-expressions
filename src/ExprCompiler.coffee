@@ -646,6 +646,29 @@ module.exports = class ExprCompiler
         # Get table being used
         idTable = exprUtils.getExprIdTable(expr.exprs[0])
 
+        # Prefer ancestryTable
+        if @schema.getTable(idTable).ancestryTable
+          # exists (select null from <ancestryTable> as subwithin where ancestor = compiledExprs[1] and descendant = compiledExprs[0])
+          return {
+            type: "op"
+            op: "exists"
+            exprs: [
+              {
+                type: "scalar"
+                expr: null
+                from: { type: "table", table: @schema.getTable(idTable).ancestryTable, alias: "subwithin" }
+                where: {
+                  type: "op"
+                  op: "and"
+                  exprs: [
+                    { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "ancestor" }, compiledExprs[1]]}
+                    { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "descendant" }, compiledExprs[0]]}
+                  ]
+                }
+              }
+            ]
+          }
+
         return {
           type: "op"
           op: "in"
@@ -675,6 +698,29 @@ module.exports = class ExprCompiler
 
         # Get table being used
         idTable = exprUtils.getExprIdTable(expr.exprs[0])
+
+        # Prefer ancestryTable
+        if @schema.getTable(idTable).ancestryTable
+          # exists (select null from <ancestryTable> as subwithin where ancestor = any(compiledExprs[1]) and descendant = compiledExprs[0])
+          return {
+            type: "op"
+            op: "exists"
+            exprs: [
+              {
+                type: "scalar"
+                expr: null
+                from: { type: "table", table: @schema.getTable(idTable).ancestryTable, alias: "subwithin" }
+                where: {
+                  type: "op"
+                  op: "and"
+                  exprs: [
+                    { type: "op", op: "=", modifier: "any", exprs: [{ type: "field", tableAlias: "subwithin", column: "ancestor" }, compiledExprs[1]]}
+                    { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "descendant" }, compiledExprs[0]]}
+                  ]
+                }
+              }
+            ]
+          }
 
         # This older code fails now that admin_regions uses integer pk. Replaced with literal-only code
         # return {

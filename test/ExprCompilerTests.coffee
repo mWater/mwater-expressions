@@ -1302,21 +1302,20 @@ describe "ExprCompiler", ->
         }
         { 
           type: "op"
-          op: "in"
+          op: "exists"
           exprs: [
-            { type: "field", tableAlias: "T1", column: "primary" }
             {
               type: "scalar"
-              expr: { type: "field", tableAlias: "subwithin", column: "primary" }
-              from: { type: "table", table: "thier", alias: "subwithin" }
+              expr: null
+              from: { type: "table", table: "thier_ancestry", alias: "subwithin" }
               where: {
                 type: "op"
-                op: "@>"
+                op: "and"
                 exprs: [
-                  { type: "field", tableAlias: "subwithin", column: "path" }
-                  { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "json_build_array", exprs: [{ type: "literal", value: "123" }] }] }
+                  { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "ancestor" }, { type: "literal", value: "123" }]}
+                  { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "descendant" }, { type: "field", tableAlias: "T1", column: "primary" }]}
                 ]
-              } 
+              }
             }
           ]
         }
@@ -1331,25 +1330,84 @@ describe "ExprCompiler", ->
         }
         { 
           type: "op"
-          op: "in"
+          op: "exists"
           exprs: [
-            { type: "field", tableAlias: "T1", column: "primary" }
             {
               type: "scalar"
-              expr: { type: "field", tableAlias: "subwithin", column: "primary" }
-              from: { type: "table", table: "thier", alias: "subwithin" }
+              expr: null
+              from: { type: "table", table: "thier_ancestry", alias: "subwithin" }
               where: {
                 type: "op"
-                op: "?|"
+                op: "and"
                 exprs: [
-                  { type: "field", tableAlias: "subwithin", column: "path_text" }
-                  { type: "literal", value: ["123", "456"] }
+                  { type: "op", op: "=", modifier: "any", exprs: [{ type: "field", tableAlias: "subwithin", column: "ancestor" }, { type: "literal", value: [123, 456] }]}
+                  { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "subwithin", column: "descendant" }, { type: "field", tableAlias: "T1", column: "primary" }]}
                 ]
               }
             }
           ]
         }
       ) 
+
+    # # DEPRECATED. Use ancestryTable
+    # it "compiles within", ->
+    #   @compile(
+    #     {
+    #       type: "op"
+    #       op: "within"
+    #       exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id", idTable: "thier", value: "123" }]
+    #     }
+    #     { 
+    #       type: "op"
+    #       op: "in"
+    #       exprs: [
+    #         { type: "field", tableAlias: "T1", column: "primary" }
+    #         {
+    #           type: "scalar"
+    #           expr: { type: "field", tableAlias: "subwithin", column: "primary" }
+    #           from: { type: "table", table: "thier", alias: "subwithin" }
+    #           where: {
+    #             type: "op"
+    #             op: "@>"
+    #             exprs: [
+    #               { type: "field", tableAlias: "subwithin", column: "path" }
+    #               { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "json_build_array", exprs: [{ type: "literal", value: "123" }] }] }
+    #             ]
+    #           } 
+    #         }
+    #       ]
+    #     }
+    #   ) 
+
+    # # DEPRECATED. Use ancestryTable
+    # it "compiles within any", ->
+    #   @compile(
+    #     {
+    #       type: "op"
+    #       op: "within any"
+    #       exprs: [{ type: "id", table: "thier" }, { type: "literal", valueType: "id[]", idTable: "thier", value: [123, 456] }]
+    #     }
+    #     { 
+    #       type: "op"
+    #       op: "in"
+    #       exprs: [
+    #         { type: "field", tableAlias: "T1", column: "primary" }
+    #         {
+    #           type: "scalar"
+    #           expr: { type: "field", tableAlias: "subwithin", column: "primary" }
+    #           from: { type: "table", table: "thier", alias: "subwithin" }
+    #           where: {
+    #             type: "op"
+    #             op: "?|"
+    #             exprs: [
+    #               { type: "field", tableAlias: "subwithin", column: "path_text" }
+    #               { type: "literal", value: ["123", "456"] }
+    #             ]
+    #           }
+    #         }
+    #       ]
+    #     }
+    #   ) 
 
     it "compiles days difference (date)", ->
       @compile(

@@ -752,14 +752,14 @@ addOpItem(op: "sum where", name: "Total where", desc: "Add together only values 
 addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
   if lhsIdTable
-    return exprUtils.schema.getTable(lhsIdTable).ancestry?
+    return exprUtils.schema.getTable(lhsIdTable).ancestry? or exprUtils.schema.getTable(lhsIdTable).ancestryTable?
   return false
 )
 
 addOpItem(op: "within any", name: "is within any of", resultType: "boolean", exprTypes: ["id", "id[]"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
   if lhsIdTable
-    return exprUtils.schema.getTable(lhsIdTable).ancestry?
+    return exprUtils.schema.getTable(lhsIdTable).ancestry? or exprUtils.schema.getTable(lhsIdTable).ancestryTable?
   return false
 )
 

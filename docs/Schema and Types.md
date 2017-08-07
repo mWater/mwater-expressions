@@ -23,9 +23,11 @@ _base is optional.
 
 `ordering`: column with natural ordering (optional). Can be JsonQL expression with `{alias}` for table alias
 
-`ancestry`: column with jsonb array of primary keys, including self. Makes table hierarchical.
+`ancestryTable`: table with "ancestor" and "descendant". Faster than ancestry and ancestryText
 
-`ancestryText`: column with jsonb array of primary keys as JSON text, including self. Required if non-text primary keys for optimization purposes.
+`ancestry`: DEPRECATED: column with jsonb array of primary keys, including self. Makes table hierarchical.
+
+`ancestryText`: DEPRECATED: column with jsonb array of primary keys as JSON text, including self. Required if non-text primary keys for optimization purposes.
 
 `label`: column with label when choosing a single row. Can be JsonQL expression with `{alias}` for table alias
 
