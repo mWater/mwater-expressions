@@ -79,6 +79,7 @@ module.exports = class ExprCompiler
           }
           from: @compileTable(column.join.toTable, "inner")
           where: @compileJoin(column.join, options.tableAlias, "inner")
+          limit: 1  # Limit 1 to be safe
         }
 
     # Handle if has expr 

@@ -63,6 +63,7 @@ describe "ExprCompiler", ->
           { type: "field", tableAlias: "inner", column: "t1" }
           { type: "field", tableAlias: "T1", column: "primary" }
           ]}
+        limit: 1
       })
 
   it "compiles join (id) field", ->
