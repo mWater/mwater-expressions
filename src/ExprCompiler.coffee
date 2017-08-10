@@ -95,7 +95,6 @@ module.exports = class ExprCompiler
     where = null
     from = null
     orderBy = null
-    limit = null
 
     # Null expr is null
     if not expr.expr
@@ -178,9 +177,6 @@ module.exports = class ExprCompiler
           if not ordering
             throw new Error("No ordering defined")
 
-          # Limit
-          limit = 1
-
           # order descending
           orderBy = [{ expr: @compileColumnRef(ordering, tableAlias), direction: "desc" }]
         when "sum", "count", "avg", "max", "min", "stdev", "stdevp"
@@ -197,13 +193,14 @@ module.exports = class ExprCompiler
       return null
 
     # If no where, from, orderBy or limit, just return expr for simplicity
-    if not from and not where and not orderBy and not limit
+    if not from and not where and not orderBy
       return scalarExpr
 
     # Create scalar
     scalar = {
       type: "scalar"
       expr: scalarExpr
+      limit: 1
     }
 
     if from
@@ -214,9 +211,6 @@ module.exports = class ExprCompiler
 
     if orderBy
       scalar.orderBy = orderBy
-
-    if limit
-      scalar.limit = limit
 
     return scalar
 

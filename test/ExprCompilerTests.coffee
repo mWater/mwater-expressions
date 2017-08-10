@@ -171,6 +171,7 @@ describe "ExprCompiler", ->
             { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
+          limit: 1
         })
 
     it "compiles scalar with one join and sql aggr", ->
@@ -184,7 +185,8 @@ describe "ExprCompiler", ->
             { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
-        })
+          limit: 1
+      })
 
     it "compiles scalar with one join and count(<primary key>) aggr", ->
       @compile(
@@ -197,6 +199,7 @@ describe "ExprCompiler", ->
             { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
+          limit: 1
         })
 
     it "compiles scalar with one join and last aggr", ->
@@ -235,7 +238,8 @@ describe "ExprCompiler", ->
             { type: "field", tableAlias: "1_2", column: "t1" }
             { type: "field", tableAlias: "T1", column: "primary" }
             ]}
-        })
+          limit: 1
+      })
 
     it "compiles scalar with one join and where", ->
       where = {
@@ -293,6 +297,7 @@ describe "ExprCompiler", ->
               }
             ]
           }
+          limit: 1
         })
 
   describe "score", ->
