@@ -1181,7 +1181,7 @@ module.exports = class ExprCompiler
 
         return {
           type: "op"
-          op: "ST_Distance_Sphere"
+          op: "ST_DistanceSphere"
           exprs: [
             { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
             { type: "op", op: "ST_Transform", exprs: [compiledExprs[1], 4326] }

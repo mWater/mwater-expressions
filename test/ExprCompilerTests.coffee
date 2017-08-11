@@ -1957,10 +1957,10 @@ describe "ExprCompiler", ->
           op: "distance"
           exprs: [@geometry, @geometry]
         }
-        # ST_Distance_Sphere(ST_Transform(x, 4326), ST_Transform(y, 4326))
+        # ST_DistanceSphere(ST_Transform(x, 4326), ST_Transform(y, 4326))
         {
           type: "op"
-          op: "ST_Distance_Sphere"
+          op: "ST_DistanceSphere"
           exprs: [
             { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
             { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
