@@ -13,6 +13,9 @@ module.exports = class MWaterDataSource extends DataSource
     @apiUrl = apiUrl
     @client = client
 
+    # cacheExpiry is time in ms from epoch that is oldest data that can be accepted. 0 = any (if serverCaching is true)
+    @cacheExpiry = 0
+
     _.defaults(options, { serverCaching: true, localCaching: true })
     @options = options
 
@@ -43,8 +46,12 @@ module.exports = class MWaterDataSource extends DataSource
 
     # Setup caching
     headers = {}
-    if not @options.serverCaching and method == "GET"
-      headers['Cache-Control'] = "no-cache"
+    if method == "GET"
+      if not @options.serverCaching
+        headers['Cache-Control'] = "no-cache"
+      else if @cacheExpiry
+        seconds = Math.floor((new Date().getTime() - @cacheExpiry) / 1000)
+        headers['Cache-Control'] = "max-age=#{seconds}"
 
     $.ajax({ 
       dataType: "json"
@@ -61,9 +68,15 @@ module.exports = class MWaterDataSource extends DataSource
     .fail (xhr) =>
       cb(new Error(xhr.responseText))
 
+  # Get the cache expiry time in ms from epoch. No cached items before this time will be used
+  getCacheExpiry: -> @cacheExpiry
+
   # Clears the local cache 
   clearCache: ->
     @cache?.reset()
+
+    # Set new cache expiry
+    @cacheExpiry = new Date().getTime()
 
   # Get the url to download an image (by id from an image or imagelist column)
   # Height, if specified, is minimum height needed. May return larger image
