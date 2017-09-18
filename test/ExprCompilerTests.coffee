@@ -936,7 +936,7 @@ describe "ExprCompiler", ->
       cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
       condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
 
-      # Compiles as sum(case when cond then 100 else 0 end) * 100/sum(1) (prevent div by zero)
+      # Compiles as sum(case when cond then 100::decimal else 0 end) * 100/sum(1) (prevent div by zero)
       @compile(
         {
           type: "op"
@@ -956,7 +956,7 @@ describe "ExprCompiler", ->
                   type: "case"
                   cases: [
                     when: condJsonQL
-                    then: 100
+                    then: { type: "op", op: "::decimal", exprs: [100] }
                   ]
                   else: 0
                 }
@@ -994,7 +994,7 @@ describe "ExprCompiler", ->
                   type: "case"
                   cases: [
                     when: { type: "op", op: "and", exprs: [condJsonQL, cond2JsonQL] }
-                    then: 100
+                    then: { type: "op", op: "::decimal", exprs: [100] }
                   ]
                   else: 0
                 }
