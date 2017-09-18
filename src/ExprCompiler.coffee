@@ -632,6 +632,31 @@ module.exports = class ExprCompiler
           modifier: "distinct"
         }
 
+      when "percent"
+        # Compiles as count(*) * 100::decimal / sum(count(*)) over()
+        return {
+          type: "op"
+          op: "/"
+          exprs: [
+            {
+              type: "op"
+              op: "*"
+              exprs: [
+                { type: "op", op: "count", exprs: [] }
+                { type: "op", op: "::decimal", exprs: [100] }
+              ]
+            }
+            { 
+              type: "op"
+              op: "sum"
+              exprs: [
+                { type: "op", op: "count", exprs: [] }
+              ]
+              over: {}
+            }
+          ]
+        }
+
       # Hierarchical test that uses ancestry column
       when "within"
         # Null if either not present

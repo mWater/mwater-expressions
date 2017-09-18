@@ -325,6 +325,10 @@ module.exports = class ExprEvaluator
 
           callback(null, _.sum(values)/values.length)
 
+      # TODO. Uses window functions, so returning 100 for now
+      when "percent"
+        callback(null, 100)
+
       when "min"
         # Evaluate all rows
         async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>

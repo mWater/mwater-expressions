@@ -231,6 +231,9 @@ add({ type: "op", table: "t1", op: "min", exprs: [{ type: "field", table: "t1", 
 add({ type: "op", table: "t1", op: "max", exprs: [{ type: "field", table: "t1", column: "a" }] }, 4, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "count", exprs: [] }, 4, { rows: sampleRows })
 
+# TODO: Doesn't work for evaluating correctly as is a window function. Use 100 for now
+add({ type: "op", table: "t1", op: "percent", exprs: [] }, 100, { rows: sampleRows })
+
 add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "f" }] }, 1, { rows: sampleRows })
 

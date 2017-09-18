@@ -904,6 +904,39 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles percent", ->
+      # Compiles as count(*) * 100::decimal / sum(count(*)) over()
+      @compile(
+        {
+          type: "op"
+          op: "percent"
+          table: "t2"
+          exprs: []
+        }
+        {
+          type: "op"
+          op: "/"
+          exprs: [
+            {
+              type: "op"
+              op: "*"
+              exprs: [
+                { type: "op", op: "count", exprs: [] }
+                { type: "op", op: "::decimal", exprs: [100] }
+              ]
+            }
+            { 
+              type: "op"
+              op: "sum"
+              exprs: [
+                { type: "op", op: "count", exprs: [] }
+              ]
+              over: {}
+            }
+          ]
+        }
+      )
+
     it "compiles count where", ->
       cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
       condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }

@@ -741,6 +741,7 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
 
 addOpItem(op: "sum", name: "Total", desc: "Add all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 addOpItem(op: "avg", name: "Average", desc: "Average all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
+
 for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", desc: "Get smallest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
   addOpItem(op: "max", name: "Maximum", desc: "Get largest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
@@ -769,7 +770,8 @@ addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTy
 addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
 addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
 
-addOpItem(op: "count", name: "Number of", desc: "Get total number of items", resultType: "number", exprTypes: [], prefix: true, aggr: true)
+addOpItem(op: "count", name: "Total Number", desc: "Get total number of items", resultType: "number", exprTypes: [], prefix: true, aggr: true)
+addOpItem(op: "percent", name: "Percent of Total", desc: "Percent of all items", resultType: "number", exprTypes: [], prefix: true, aggr: true)
 
 addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
 addOpItem(op: "not", name: "Not", desc: "Opposite of a value", resultType: "boolean", exprTypes: ["boolean"], prefix: true)
