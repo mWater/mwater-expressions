@@ -13,3 +13,8 @@ module.exports = class PriorityDataSource
 
   getImageUrl: (imageId, height) ->
     @priorityDataQueue.getImageUrl(imageId, height)
+
+  # Clears the cache if possible with this data source
+  clearCache: ->
+    # Do nothing by default
+    return
