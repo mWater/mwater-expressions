@@ -15,6 +15,7 @@ module.exports = class PriorityDataSource
     @priorityDataQueue.getImageUrl(imageId, height)
 
   # Clears the cache if possible with this data source
-  clearCache: ->
-    # Do nothing by default
-    return
+  clearCache: -> @priorityDataQueue.clearCache()
+
+  # Get the cache expiry time in ms from epoch. No cached items before this time will be used
+  getCacheExpiry: -> @priorityDataQueue.getCacheExpiry()

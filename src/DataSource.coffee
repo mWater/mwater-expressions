@@ -14,5 +14,9 @@ module.exports = class DataSource
 
   # Clears the cache if possible with this data source
   clearCache: ->
-    # Do nothing by default
-    return
+    throw new Error("Not implemented")
+
+  # Get the cache expiry time in ms from epoch. No cached items before this time will be used. 0 for no cache limit.
+  # Useful for knowing when cache has been cleared, as it will be set to time of clearing.
+  getCacheExpiry: -> 
+    throw new Error("Not implemented")

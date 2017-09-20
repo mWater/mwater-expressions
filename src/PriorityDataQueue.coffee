@@ -24,6 +24,14 @@ module.exports = class PriorityDataQueue
     # Push to the priorityQueue
     @performQueryPriorityQueue.push query, priority, cb
 
+  # Clears the cache if possible with this data source
+  clearCache: -> 
+    @dataSource.clearCache()
+
+  # Get the cache expiry time in ms from epoch. No cached items before this time will be used
+  getCacheExpiry: -> 
+    @dataSource.getCacheExpiry()
+
   # Simply call the dataSource since this is not an async function
   getImageUrl: (imageId, height) ->
     @dataSource.getImageUrl(imageId, height)
