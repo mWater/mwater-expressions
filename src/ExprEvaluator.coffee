@@ -16,7 +16,7 @@ ExprUtils = require './ExprUtils'
 #
 # For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
 module.exports = class ExprEvaluator
-  # Schema is optional and used for "to text" function
+  # Schema is optional and used for "to text" function and expression columns
   constructor: (schema, locale) ->
     @schema = schema
     @locale = locale
@@ -27,6 +27,10 @@ module.exports = class ExprEvaluator
 
     switch expr.type
       when "field"
+        # If schema is present and column is an expression column, use that
+        if @schema and @schema.getColumn(expr.table, expr.column)?.expr
+          return @evaluate(@schema.getColumn(expr.table, expr.column).expr, context, callback)
+
         context.row.getField(expr.column, (error, value) =>
           if error
             return callback(error)

@@ -223,6 +223,9 @@ sampleRows = [
 
 add({ type: "field", table: "t1", column: "a" }, 4, { row: makeRow(a: 4) })
 
+# expression columns
+add({ type: "field", table: "t1", column: "expr_number" }, 4, { row: makeRow(number: 4) })
+
 add({ type: "id", table: "t1" }, "1", { row: makeRow(id: "1", a: 4) })
 
 add({ type: "op", table: "t1", op: "sum", exprs: [{ type: "field", table: "t1", column: "a" }] }, 10, { rows: sampleRows })
