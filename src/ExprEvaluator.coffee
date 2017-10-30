@@ -270,6 +270,24 @@ module.exports = class ExprEvaluator
         date = values[0]
         return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) and moment(date, moment.ISO_8601).isAfter(moment().subtract(365, "days")) 
 
+      when "last12months"
+        if hasNull
+          return null
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) and moment(date, moment.ISO_8601).isAfter(moment().subtract(11, "months").startOf('month')) 
+
+      when "last6months"
+        if hasNull
+          return null
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) and moment(date, moment.ISO_8601).isAfter(moment().subtract(5, "months").startOf('month')) 
+
+      when "last3months"
+        if hasNull
+          return null
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) and moment(date, moment.ISO_8601).isAfter(moment().subtract(2, "months").startOf('month')) 
+
       when "latitude"
         if hasNull
           return null

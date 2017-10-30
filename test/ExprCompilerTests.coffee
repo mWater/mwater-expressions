@@ -1959,6 +1959,57 @@ describe "ExprCompiler", ->
           }
         )
 
+        it "last3months", ->
+        @compile(
+          {
+            type: "op"
+            op: "last3months"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().subtract(2, "months").startOf('month').toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "last6months", ->
+        @compile(
+          {
+            type: "op"
+            op: "last6months"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().subtract(5, "months").startOf('month').toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
+      it "last12months", ->
+        @compile(
+          {
+            type: "op"
+            op: "last12months"
+            exprs: [@datetime1]
+          }
+          {
+            type: "op"
+            op: "and"
+            exprs: [
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().subtract(11, "months").startOf('month').toISOString()]}
+              { type: "op", op: "<", exprs: [@datetime1JsonQL, moment().startOf("day").add(1, "days").toISOString()]}
+            ]
+          }
+        )
+
       it "compiles days since (datetime)", ->
         @compile(
           {
