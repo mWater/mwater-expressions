@@ -1200,6 +1200,84 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'last12months'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(11, "months").startOf('month').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(11, "months").startOf('month').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
+      
+      when 'last6months'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(5, "months").startOf('month').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(5, "months").startOf('month').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
+
+      when 'last3months'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(2, "months").startOf('month').format("YYYY-MM-DD") ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().add(1, 'days').format("YYYY-MM-DD") ] }
+              ]
+            }
+          when "datetime"
+            return { 
+              type: "op"
+              op: "and"
+              exprs: [
+                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(2, "months").startOf('month').toISOString() ] }
+                { type: "op", op: "<", exprs: [compiledExprs[0], moment().startOf("day").add(1, 'days').toISOString() ] }
+              ]
+            }
+          else
+            return null
+
       when 'distance'
         if not compiledExprs[0] or not compiledExprs[1]
           return null

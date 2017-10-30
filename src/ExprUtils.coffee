@@ -662,6 +662,9 @@ relativeDateOps = [
   ['last7days', 'is in last 7 days']
   ['last30days', 'is in last 30 days']
   ['last365days', 'is in last 365 days']
+  ['last3months', 'is in last 3 months']
+  ['last6months', 'is in last 6 months']
+  ['last12months', 'is in last 12 months']
 ]
 for relativeDateOp in relativeDateOps
   addOpItem(op: relativeDateOp[0], name: relativeDateOp[1], resultType: "boolean", exprTypes: ['date'])

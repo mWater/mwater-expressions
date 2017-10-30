@@ -199,6 +199,18 @@ addOp(true, "last30days", literal(moment().subtract(1, "minutes").subtract(1, "d
 addOp(false, "last365days", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
 addOp(true, "last365days", literal(moment().subtract(1, "minutes").subtract(1, "days").toISOString(), "datetime"))
 
+addOp(false, "last12months", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
+addOp(false, "last12months", literal(moment().subtract(1, "minutes").subtract(12, "months").toISOString(), "datetime"))
+addOp(true, "last12months", literal(moment().subtract(1, "minutes").subtract(3, "days").toISOString(), "datetime"))
+
+addOp(false, "last6months", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
+addOp(false, "last6months", literal(moment().subtract(1, "minutes").subtract(6, "months").toISOString(), "datetime"))
+addOp(true, "last6months", literal(moment().subtract(1, "minutes").subtract(3, "days").toISOString(), "datetime"))
+
+addOp(false, "last3months", literal(moment().subtract(1, "minutes").add(3, "days").toISOString(), "datetime"))
+addOp(false, "last3months", literal(moment().subtract(1, "minutes").subtract(3, "months").toISOString(), "datetime"))
+addOp(true, "last3months", literal(moment().subtract(1, "minutes").subtract(3, "days").toISOString(), "datetime"))
+
 addOp("1", "weekofmonth", literal("2015-05-07", "date"))
 addOp("2", "weekofmonth", literal("2015-05-08", "date"))
 
