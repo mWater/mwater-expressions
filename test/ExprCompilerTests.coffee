@@ -2052,6 +2052,55 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "is latest", ->
+      @compile(
+        {
+          type: "op"
+          op: "is latest"
+          table: "t2"  # t2 is ordered by number. Note that alias is still T1 in the testing, but just ignore that
+          exprs: [@enum1, @bool1]
+        }
+        # _id in (select id from (select id, row_number() over (partition by EXPR1 order by ORDERING desc) as rn from the_table as innerrn where filter) as outerrn where outerrn.rn = 1)
+        {
+          type: "op"
+          op: "in"
+          exprs: [
+            { type: "field", tableAlias: "T1", column: "primary" }    
+            {
+              type: "scalar"
+              expr: { type: "field", tableAlias: "outerrn", column: "id" }
+              from: {
+                type: "subquery"
+                query: {
+                  type: "query"
+                  selects: [
+                    { type: "select", expr: { type: "field", tableAlias: "innerrn", column: "primary" }, alias: "id" }
+                    { 
+                      type: "select"
+                      expr: {
+                        type: "op"
+                        op: "row_number"
+                        exprs: []
+                        over: {
+                          partitionBy: [@enum1JsonQL]
+                          orderBy: [{ expr: { type: "field", tableAlias: "innerrn", column: "number" }, direction: "desc" }]
+                        }
+                      }
+                      alias: "rn" 
+                    }
+                  ]
+                  from: { type: "table", table: "t2", alias: "innerrn" }
+                  where: @bool1JsonQL
+                }
+                alias: "outerrn"
+              }
+              where: { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "outerrn", column: "rn" }, 1]}
+            }
+          ]
+        }
+      )
+
+
   describe "custom jsonql", ->
     describe "table", ->
       it "substitutes table", ->

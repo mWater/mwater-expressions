@@ -789,5 +789,8 @@ addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of 
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of images present", resultType: "number", exprTypes: ["imagelist"], prefix: true)
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of items present in a text list", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
+for type in ['id']
+  addOpItem(op: "is latest", name: "Is latest for each", desc: "Only include latest item for each of something", resultType: "boolean", exprTypes: [type, "boolean"], prefix: true, ordered: true, aggr: false, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
+
 addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true)
 addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["number"], prefix: true)

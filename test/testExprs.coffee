@@ -373,6 +373,26 @@ add({
   }
 }, ["a", "c"])
 
+# is latest
+sampleRows = [
+  makeRow(id: "1", a: "x", b: true, ordering: 3)
+  makeRow(id: "2", a: "y", b: true, ordering: 4)
+  makeRow(id: "3", a: "x", b: false, ordering: 1)
+  makeRow(id: "4", a: "y", b: false, ordering: 2)
+]
+
+add({ type: "op", op: "is latest", table: "t1", exprs: [{ type: "field", table: "t1", column: "a" }] }, true, { row: sampleRows[0], rows: sampleRows })
+add({ type: "op", op: "is latest", table: "t1", exprs: [{ type: "field", table: "t1", column: "a" }] }, true, { row: sampleRows[1], rows: sampleRows })
+add({ type: "op", op: "is latest", table: "t1", exprs: [{ type: "field", table: "t1", column: "a" }] }, false, { row: sampleRows[2], rows: sampleRows })
+add({ type: "op", op: "is latest", table: "t1", exprs: [{ type: "field", table: "t1", column: "a" }] }, false, { row: sampleRows[3], rows: sampleRows })
+
+# expression columns
+add({ type: "field", table: "t1", column: "expr_number" }, 4, { row: makeRow(number: 4) })
+
+
+
+
+
 #   describe "scalar", ->
 #     it "n-1 scalar", ->
 #       @check({ type: "scalar", joins: ['x'], expr: { type: "field", table: "t2", column: "y" }}, { x: { getField: (col) -> (if col == "y" then 4) }}, 4)
