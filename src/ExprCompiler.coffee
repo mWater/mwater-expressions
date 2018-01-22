@@ -1291,6 +1291,68 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when 'is latest'
+        lhsCompiled = @compileExpr(expr: expr.exprs[0], tableAlias: "innerrn")
+        if not lhsCompiled
+          return null
+
+        filterCompiled = @compileExpr(expr: expr.exprs[1], tableAlias: "innerrn")
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table).ordering
+        if not ordering
+          throw new Error("No ordering defined")
+
+        # order descending
+        orderBy = [{ expr: @compileColumnRef(ordering, "innerrn"), direction: "desc" }]
+
+        # _id in (select outerrn.id from (select innerrn.id, row_number() over (partition by EXPR1 order by ORDERING desc) as rn from the_table as innerrn where filter) as outerrn where outerrn.rn = 1)
+
+        # Create innerrn query
+        innerrnQuery = {
+          type: "query"
+          selects: [
+            { type: "select", expr: @compileExpr(expr: { type: "id", table: expr.table }, tableAlias: "innerrn" ), alias: "id" }
+            { 
+              type: "select"
+              expr: {
+                type: "op"
+                op: "row_number"
+                exprs: []
+                over: {
+                  partitionBy: [lhsCompiled]
+                  orderBy: orderBy
+                }
+              }
+              alias: "rn" 
+            }
+          ]
+          from: { type: "table", table: expr.table, alias: "innerrn" }
+        }
+        if filterCompiled
+          innerrnQuery.where = filterCompiled
+
+        # Wrap in outer query
+        outerrnQuery = {
+          type: "scalar"
+          expr: { type: "field", tableAlias: "outerrn", column: "id" }
+          from: {
+            type: "subquery"
+            query: innerrnQuery
+            alias: "outerrn"
+          }
+          where: { type: "op", op: "=", exprs: [{ type: "field", tableAlias: "outerrn", column: "rn" }, 1]}
+        }
+
+        return {
+          type: "op"
+          op: "in"
+          exprs: [
+            @compileExpr(expr: { type: "id", table: expr.table }, tableAlias: options.tableAlias)
+            outerrnQuery
+          ]
+        }
+
       else
         throw new Error("Unknown op #{expr.op}")
 

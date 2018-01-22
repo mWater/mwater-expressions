@@ -68,7 +68,13 @@ module.exports = class ExprEvaluator
   evaluateOp: (op, exprs, context, callback) ->
     # If aggregate op
     if ExprUtils.isOpAggr(op)
-      return @evaluteAggrOp(op, exprs, context, callback)
+      @evaluteAggrOp(op, exprs, context, callback)
+      return
+
+    # is latest is special case for window-like function
+    if op == "is latest"
+      @evaluateIsLatest(exprs, context, callback)
+      return
     
     # Evaluate exprs
     async.map exprs, ((expr, cb) => @evaluate(expr, context, cb)), (error, values) =>
@@ -594,6 +600,49 @@ module.exports = class ExprEvaluator
           result.push(valuePair[0])
 
       callback(null, result)
+
+  evaluateIsLatest: (exprs, context, callback) ->
+    # Evaluate lhs (value to group by) for all rows
+    async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, lhss) =>
+      if error
+        return callback(error)
+
+      # Evaluate pk for all rows
+      async.map context.rows, ((row, cb) => row.getPrimaryKey(cb)), (error, pks) =>
+        if error
+          return callback(error)
+
+        # Evaluate ordering for all rows
+        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, orderings) =>
+          if error
+            return callback(error)
+
+          # Evaluate filter value for all rows if present
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, filters) =>
+            if error
+              return callback(error)
+
+            items = _.map lhss, (lhs, index) => { lhs: lhs, pk: pks[index], ordering: orderings[index], filter: filters[index] }
+
+            # Filter
+            if exprs[1]
+              items = _.filter(items, (item) -> item.filter)
+
+            # Group by lhs
+            groups = _.groupBy(items, "lhs")
+
+            # Keep latest of each group
+            latests = []
+            for lhs, items of groups
+              latests.push(_.max(items, "ordering"))
+
+            # Get pk of row
+            context.row.getPrimaryKey (error, pk) =>
+              if error
+                return callback(error)
+
+              # See if match
+              callback(null, pk in _.pluck(latests, "pk"))
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->
