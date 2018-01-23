@@ -244,7 +244,9 @@ module.exports = class ExprCleaner
         # If ambiguous, just clean subexprs and return
         if opItems.length > 1
           return _.extend({}, expr, { exprs: _.map(expr.exprs, (e, i) =>
-            @cleanExpr(e, table: expr.table, aggrStatuses: innerAggrStatuses)
+            # Determine all possible types (union of all op items types)
+            types = _.uniq(_.compact(_.flatten(_.map(opItems, (opItem) -> opItem.exprTypes[i]))))
+            @cleanExpr(e, table: expr.table, aggrStatuses: innerAggrStatuses, types: (if types.length > 0 then types))
           )})
 
         # If not found, default opItem
