@@ -63,6 +63,34 @@ describe "ExprValidator", ->
     exprValidator = new ExprValidator(schema)
     assert exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" })
 
+  describe "scalar", ->
+    it "valid", ->
+      expr = { 
+        type: "scalar"
+        table: "t2"
+        joins: ["2-1"]
+        expr: { type: "field", table: "t1", column: "number" }
+      }
+      @isValid(expr)
+
+    it "bad join", ->
+      expr = { 
+        type: "scalar"
+        table: "t2"
+        joins: ["xyz"]
+        expr: { type: "field", table: "t1", column: "number" }
+      }
+      @notValid(expr)
+
+    it "bad expr", ->
+      expr = { 
+        type: "scalar"
+        table: "t2"
+        joins: ["2-1"]
+        expr: { type: "field", table: "t1", column: "xyz" }
+      }
+      @notValid(expr)
+
   describe "op", ->
     it "invalid if mixed aggregate and individual"
 

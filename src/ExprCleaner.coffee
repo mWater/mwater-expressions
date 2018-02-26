@@ -280,18 +280,6 @@ module.exports = class ExprCleaner
 
         return expr
 
-  # Determines if an set of joins are valid
-  areJoinsValid: (table, joins) ->
-    t = table
-    for j in joins
-      joinCol = @schema.getColumn(t, j)
-      if not joinCol 
-        return false
-
-      t = joinCol.join.toTable
-
-    return true
-
   # Strips/defaults invalid aggr and where of a scalar expression
   cleanScalarExpr: (expr, options) ->
     if expr.joins.length == 0

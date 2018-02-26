@@ -68,6 +68,16 @@ module.exports = class ExprValidator
         if opItems.length == 0
           return "No matching op"
 
+      when "scalar"
+        # Validate joins
+        if not @exprUtils.areJoinsValid(expr.table, expr.joins)
+          return "Invalid joins"
+
+        exprTable = @exprUtils.followJoins(expr.table, expr.joins)
+        error = @validateExpr(expr.expr, _.extend({}, options, table: exprTable))
+        if error
+          return error
+
       when "case"
         # Validate cases
         for cse in expr.cases
