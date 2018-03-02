@@ -10,6 +10,7 @@ module.exports = class MWaterDataSource extends DataSource
   # localCaching allows local MRU cache. default true
   # imageApiUrl: overrides apiUrl for images
   constructor: (apiUrl, client, options = {}) ->
+    super()
     @apiUrl = apiUrl
     @client = client
 
