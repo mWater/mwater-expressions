@@ -1438,6 +1438,10 @@ module.exports = class ExprCompiler
 
     expr = options.expr
 
+    # Handle empty case
+    if _.keys(expr.values).length == 0
+      return null
+
     return {
       type: "scalar"
       expr: {
