@@ -413,6 +413,7 @@ module.exports = class ExprUtils
         str += @localizeString(joinCol.name, locale) + " > "
       else
         str += "NOT FOUND > "
+        break
       t = joinCol.join.toTable
 
     # Special case for id type to be rendered as {last join name}
