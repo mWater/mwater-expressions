@@ -37,7 +37,7 @@ _base is optional.
 
 `jsonql`: Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server. 
 
-`sql`: sql expression that gets the table. Usually just name of the table. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
+`sql`: sql expression that gets the table. Usually just name of the table. *Note*: this is only for when using a schema file for Water.org's visualization server
 
 ### content
 
@@ -69,14 +69,12 @@ Either a section, join or column.
 
 `jsonql`: Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr`
 
-`sql`: sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
-
+`sql`: sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when using a schema file for Water.org's visualization server
 
 ## Column types
 
 joins and columns can be nested within sections for organizational purposes.
 
-* `id`: an id column. Ignored. *Note*: this is only for when sharing a schema file with [LookupSchemaMap](https://github.com/mWater/jsonql/blob/master/src/LookupSchemaMap.coffee)
 * `text`: strings. e.g. "apple"
 * `number`: e.g 1.34, 2, 5
 * `boolean`: true or false
@@ -88,6 +86,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `text[]`: ordered array of text values
 * `image`: TODO
 * `imagelist`: TODO
+* `id`: an id column. Requires `idTable`
 * `id[]`: array of primary keys of another table. Include `idTable` field
 
 Special column types:
