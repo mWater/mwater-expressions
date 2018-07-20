@@ -1554,6 +1554,9 @@ module.exports = class ExprCompiler
   # Compiles a table, substituting with custom jsonql if required
   compileTable: (tableId, alias) ->
     table = @schema.getTable(tableId)
+    if not table
+      throw new Error("Table #{tableId} not found")
+      
     if not table.jsonql
       return { type: "table", table: tableId, alias: alias }
     else
