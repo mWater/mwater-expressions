@@ -6,7 +6,12 @@
   "repository": "git@github.com:mWater/mwater-expressions.git",
   "main": "lib/index.js",
   "scripts": {
-    "test": "karma start"
+    "test": "mocha --require coffeescript/register --recursive \"test/**/*Tests.coffee\""
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
   },
   "browserify": {
     "transform": [
@@ -34,10 +39,7 @@
     "gulp-concat": "^2.6.0",
     "gulp-rework": "^1.0.3",
     "gulp-util": "^3.0.7",
-    "karma": "^0.13.14",
-    "karma-browserify": "^4.4.0",
-    "karma-chrome-launcher": "^0.2.1",
-    "karma-mocha": "^0.2.0",
+    "husky": "^1.0.0-rc.13",
     "mocha": "^2.3.3",
     "rework-npm": "^1.0.0",
     "sinon": "^1.17.3",
