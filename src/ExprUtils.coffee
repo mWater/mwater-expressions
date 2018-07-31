@@ -41,7 +41,7 @@ module.exports = class ExprUtils
 
   # Determine if op is aggregate
   @isOpAggr: (op) ->
-    return aggrOpItems[op] or false
+    return _.findWhere(opItems, op: op, aggr: true)?
 
   # Determine if op is prefix
   @isOpPrefix: (op) ->
@@ -227,10 +227,6 @@ module.exports = class ExprUtils
   # literal (which is neither, just a number or text). 
   # Invisible second parameter is depth to prevent infinite recursion
   getExprAggrStatus: (expr) ->
-    depth = (arguments[1] or 0)
-    if depth > 100
-      throw new Error("Infinite recursion")
-
     if not expr? or not expr.type
       return null
 
@@ -238,15 +234,15 @@ module.exports = class ExprUtils
     getListAggrStatus = (exprs) =>
       # Get highest type
       for subExpr in exprs
-        if @getExprAggrStatus(subExpr, depth + 1) == "aggregate"
+        if @getExprAggrStatus(subExpr) == "aggregate"
           return "aggregate"
 
       for subExpr in exprs
-        if @getExprAggrStatus(subExpr, depth + 1) == "individual"
+        if @getExprAggrStatus(subExpr) == "individual"
           return "individual"
 
       for subExpr in exprs
-        if @getExprAggrStatus(subExpr, depth + 1) == "literal"
+        if @getExprAggrStatus(subExpr) == "literal"
           return "literal"
 
       return null
@@ -257,11 +253,15 @@ module.exports = class ExprUtils
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
         if column?.expr
+          depth = (arguments[1] or 0) + 1
+          if depth > 100
+            throw new Error("Infinite recursion")
+            
           return @getExprAggrStatus(column.expr, depth + 1)
         return "individual"
       when "op"
         # If aggregate op
-        if ExprUtils.isOpAggr(op)
+        if @findMatchingOpItems(op: expr.op, aggr: true)[0]
           return "aggregate"
 
         return getListAggrStatus(expr.exprs)
@@ -274,7 +274,7 @@ module.exports = class ExprUtils
         exprs = exprs.concat(_.map(expr.cases, (cs) -> cs.then))
         return getListAggrStatus(exprs)
       when "score"
-        return @getExprAggrStatus(expr.input, depth + 1)
+        return @getExprAggrStatus(expr.input)
       when "build enumset"
         # Gather all exprs
         exprs = _.values(expr.values)
@@ -639,15 +639,10 @@ module.exports = class ExprUtils
 # rhsPlaceholder: placeholder for rhs expression
 opItems = []
 
-# Which op items are aggregate (key = op, value = true)
-aggrOpItems = {}
-
 # Adds an op item (particular combination of operands types with an operator)
 # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
 addOpItem = (item) =>
   opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true, aggr: false, ordered: false }))
-  if item.aggr
-    aggrOpItems[item.op] = true
 
 # TODO n?
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["text", "text[]"])
