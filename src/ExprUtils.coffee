@@ -10,13 +10,16 @@ module.exports = class ExprUtils
   # If prefix, only prefix
   # Results are array of opItems.
   findMatchingOpItems: (search) ->
-    return _.filter opItems, (opItem) =>
+    # Narrow list if op specified
+    if search.op
+      items = groupedOpItems[search.op] or []
+    else
+      items = opItems
+
+    return _.filter items, (opItem) =>
       if search.resultTypes
         if opItem.resultType not in search.resultTypes
           return false
-
-      if search.op and opItem.op != search.op
-        return false
 
       if search.aggr? and opItem.aggr != search.aggr
         return false
@@ -637,12 +640,20 @@ opItems = []
 # Which op items are aggregate (key = op, value = true)
 aggrOpItems = {}
 
+# opItems grouped by op
+groupedOpItems = {}
+
 # Adds an op item (particular combination of operands types with an operator)
 # exprTypes is a list of types for expressions. moreExprType is the type of further N expressions, if allowed
 addOpItem = (item) =>
   opItems.push(_.defaults(item, { prefix: false, rhsLiteral: true, aggr: false, ordered: false }))
   if item.aggr
     aggrOpItems[item.op] = true
+
+  list = groupedOpItems[item.op] or []
+  list.push(item)
+  groupedOpItems[item.op] = list
+
 
 # TODO n?
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["text", "text[]"])
