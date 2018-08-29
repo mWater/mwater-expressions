@@ -21,7 +21,19 @@ module.exports = class ExprEvaluator
     @schema = schema
     @locale = locale
 
+  # Evaluate an expression
   evaluate: (expr, context, callback) ->
+    # Handle promise case
+    if not callback
+      return new Promise((resolve, reject) =>
+        @evaluate(expr, context, (error, result) =>
+          if error
+            reject(error)
+          else
+            resolve(result)
+          )
+        )
+
     if not expr?
       return callback(null, null)
 
