@@ -12,11 +12,10 @@ ExprUtils = require './ExprUtils'
 # a row is a plain object that has the following functions as properties:
 #  getPrimaryKey(callback) : gets primary key of row. callback is called with (error, value)
 #  getField(columnId, callback) : gets the value of a column. callback is called with (error, value)
-#  getOrdering(callback) : gets the ordering of a row if they are ordered. Otherwise, not defined
 #
 # For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
 module.exports = class ExprEvaluator
-  # Schema is optional and used for "to text" function and expression columns
+  # Schema is optional and used for ordering, "to text" function and expression columns
   constructor: (schema, locale) ->
     @schema = schema
     @locale = locale
@@ -63,7 +62,7 @@ module.exports = class ExprEvaluator
       when "literal"
         callback(null, expr.value)
       when "op"
-        @evaluateOp(expr.op, expr.exprs, context, callback)
+        @evaluateOp(expr.table, expr.op, expr.exprs, context, callback)
       when "id"
         context.row.getPrimaryKey(callback)
       when "case"
@@ -77,15 +76,15 @@ module.exports = class ExprEvaluator
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
-  evaluateOp: (op, exprs, context, callback) ->
+  evaluateOp: (table, op, exprs, context, callback) ->
     # If aggregate op
     if ExprUtils.isOpAggr(op)
-      @evaluteAggrOp(op, exprs, context, callback)
+      @evaluteAggrOp(table, op, exprs, context, callback)
       return
 
     # is latest is special case for window-like function
     if op == "is latest"
-      @evaluateIsLatest(exprs, context, callback)
+      @evaluateIsLatest(table, exprs, context, callback)
       return
     
     # Evaluate exprs
@@ -344,7 +343,7 @@ module.exports = class ExprEvaluator
       else
         throw new Error("Unknown op #{op}")
 
-  evaluteAggrOp: (op, exprs, context, callback) ->
+  evaluteAggrOp: (table, op, exprs, context, callback) ->
     switch op
       when "count"
         callback(null, context.rows.length)
@@ -386,8 +385,13 @@ module.exports = class ExprEvaluator
           callback(null, _.max(values))
 
       when "last"
+        # Fail quietly if no ordering or no schema
+        if not @schema or not @schema.getTable(table).ordering
+          console.warn("last does not work without schema and ordering")
+          return callback(null, null)
+
         # Evaluate all rows by ordering
-        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, orderValues) =>
+        async.map context.rows, ((row, cb) => row.getField(@schema.getTable(table).ordering, cb)), (error, orderValues) =>
           if error
             return callback(error)
 
@@ -411,8 +415,13 @@ module.exports = class ExprEvaluator
             callback(null, null)
 
       when "last where"
+        # Fail quietly if no ordering or no schema
+        if not @schema or not @schema.getTable(table).ordering
+          console.warn("last where does not work without schema and ordering")
+          return callback(null, null)
+
         # Evaluate all rows by ordering
-        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, ordering) =>
+        async.map context.rows, ((row, cb) => row.getField(@schema.getTable(table).ordering, cb)), (error, orderValues) =>
           if error
             return callback(error)
   
@@ -427,15 +436,15 @@ module.exports = class ExprEvaluator
                 return callback(error)
 
               # Find largest
-              if ordering.length == 0
+              if orderValues.length == 0
                 return callback(null, null)
 
               index = -1
               largest = null
               for row, i in context.rows
-                if (wheres[i] or not exprs[1]) and (index == -1 or ordering[i] > largest) and values[i]?
+                if (wheres[i] or not exprs[1]) and (index == -1 or orderValues[i] > largest) and values[i]?
                   index = i
-                  largest = ordering[i]
+                  largest = orderValues[i]
     
               if index >= 0
                 callback(null, values[index])
@@ -613,7 +622,12 @@ module.exports = class ExprEvaluator
 
       callback(null, result)
 
-  evaluateIsLatest: (exprs, context, callback) ->
+  evaluateIsLatest: (table, exprs, context, callback) ->
+    # Fail quietly if no ordering or no schema
+    if not @schema or not @schema.getTable(table).ordering
+      console.warn("evaluateIsLatest does not work without schema and ordering")
+      return callback(null, false)
+
     # Evaluate lhs (value to group by) for all rows
     async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, lhss) =>
       if error
@@ -625,7 +639,7 @@ module.exports = class ExprEvaluator
           return callback(error)
 
         # Evaluate ordering for all rows
-        async.map context.rows, ((row, cb) => row.getOrdering(cb)), (error, orderings) =>
+        async.map context.rows, ((row, cb) => row.getField(@schema.getTable(table).ordering, cb)), (error, orderValues) =>
           if error
             return callback(error)
 
@@ -634,7 +648,7 @@ module.exports = class ExprEvaluator
             if error
               return callback(error)
 
-            items = _.map lhss, (lhs, index) => { lhs: lhs, pk: pks[index], ordering: orderings[index], filter: filters[index] }
+            items = _.map lhss, (lhs, index) => { lhs: lhs, pk: pks[index], ordering: orderValues[index], filter: filters[index] }
 
             # Filter
             if exprs[1]

@@ -17,7 +17,6 @@ makeRow = (data) ->
   return {
     getPrimaryKey: (callback) -> callback(null, data.id)
     getField: (columnId, callback) -> callback(null, data[columnId])
-    getOrdering: (callback) -> callback(null, data.ordering)
   }
 
 # Null

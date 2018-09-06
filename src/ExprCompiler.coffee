@@ -178,7 +178,7 @@ module.exports = class ExprCompiler
             throw new Error("No ordering defined")
 
           # order descending
-          orderBy = [{ expr: @compileColumnRef(ordering, tableAlias), direction: "desc" }]
+          orderBy = [{ expr: @compileFieldExpr(expr: { type: "field", table: table, column: ordering}, tableAlias: tableAlias), direction: "desc" }]
         when "sum", "count", "avg", "max", "min", "stdev", "stdevp"
           # Don't include scalarExpr if null
           if not scalarExpr
@@ -304,7 +304,7 @@ module.exports = class ExprCompiler
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "desc", nulls: "last" }] }
             1
           ]
         }
@@ -326,7 +326,7 @@ module.exports = class ExprCompiler
             type: "op"
             op: "[]"
             exprs: [
-              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
+              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "desc", nulls: "last" }] }
               1
             ]
           }
@@ -346,7 +346,7 @@ module.exports = class ExprCompiler
               ]
               orderBy: [
                 { expr: { type: "case", cases: [{ when: compiledExprs[1], then: 0 }], else: 1 } }
-                { expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }
+                { expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "desc", nulls: "last" }
               ] 
             }
             1
@@ -368,7 +368,7 @@ module.exports = class ExprCompiler
           type: "op"
           op: "[]"
           exprs: [
-            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileColumnRef(ordering, options.tableAlias), direction: "desc", nulls: "last" }] }
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering }, tableAlias: options.tableAlias), direction: "desc", nulls: "last" }] }
             2
           ]
         }
@@ -1304,7 +1304,7 @@ module.exports = class ExprCompiler
           throw new Error("No ordering defined")
 
         # order descending
-        orderBy = [{ expr: @compileColumnRef(ordering, "innerrn"), direction: "desc" }]
+        orderBy = [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: "innerrn"), direction: "desc" }]
 
         # _id in (select outerrn.id from (select innerrn.id, row_number() over (partition by EXPR1 order by ORDERING desc) as rn from the_table as innerrn where filter) as outerrn where outerrn.rn = 1)
 

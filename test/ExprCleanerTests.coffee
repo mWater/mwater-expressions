@@ -67,7 +67,7 @@ describe "ExprCleaner", ->
         field = { type: "field", table: "t1", column: "number" }
         compare(@exprCleaner.cleanExpr(field, aggrStatuses: ['aggregate']), {
           type: "op"
-          op: "sum"
+          op: "last"
           table: "t1"
           exprs: [field]
           })

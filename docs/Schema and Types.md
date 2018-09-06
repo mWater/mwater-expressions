@@ -19,9 +19,9 @@ _base is optional.
 
 `code`: non-localized short code for a table (optional)
 
-`primaryKey`: column with primary key (optional). Can be JsonQL expression with `{alias}` for table alias 
+`primaryKey`: column of database (not schema column) with primary key (optional). Can be JsonQL expression with `{alias}` for table alias 
 
-`ordering`: column with natural ordering (optional). Can be JsonQL expression with `{alias}` for table alias
+`ordering`: column in schema with natural ordering (optional).
 
 `ancestryTable`: table with "ancestor" and "descendant". Faster than ancestry and ancestryText
 
@@ -90,7 +90,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `id[]`: array of primary keys of another table. Include `idTable` field
 
 Special column types:
-* `join`: not a columns per se, but link to one or N rows in another table
+* `join`: not a column per se, but link to one or N rows in another table
 * `section`: has contents which is list of other columns/sections
 * `expr`: DEPRECATED. Use expr field but set to actual type. Can be aggregate or individual expression
 
