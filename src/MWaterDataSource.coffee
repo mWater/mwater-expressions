@@ -97,3 +97,6 @@ module.exports = class MWaterDataSource extends DataSource
       url += "?" + querystring.stringify(query)
 
     return url
+
+# Make ES6 compatible
+MWaterDataSource.default = MWaterDataSource
