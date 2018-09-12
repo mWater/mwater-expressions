@@ -2,6 +2,7 @@ _ = require 'lodash'
 DataSource = require './DataSource'
 LRU = require("lru-cache")
 querystring = require 'querystring'
+$ = require 'jquery'
 
 # Caching data source for mWater. Requires jQuery. require explicitly: require('mwater-expressions/lib/MWaterDataSource')
 module.exports = class MWaterDataSource extends DataSource
