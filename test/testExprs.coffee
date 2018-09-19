@@ -43,6 +43,7 @@ addOp(null, "/", literal(6, "number"), literal(0, "number"))
 # === and or not
 addOp(true, "and", literal(true, "boolean"), literal(true, "boolean"), literal(true, "boolean"))
 addOp(false, "and", literal(true, "boolean"), literal(true, "boolean"), literal(false, "boolean"))
+addOp(null, "and")
 
 # Null handling matches SQL
 addOp(null, "and", literal(true, "boolean"), literal(true, "boolean"), literal(null, "boolean"))
@@ -50,6 +51,7 @@ addOp(false, "and", literal(false, "boolean"), literal(true, "boolean"), literal
 
 addOp(true, "or", literal(true, "boolean"), literal(true, "boolean"), literal(false, "boolean"))
 addOp(false, "or", literal(false, "boolean"), literal(false, "boolean"), literal(false, "boolean"))
+addOp(null, "or")
 
 # Null handling matches SQL
 addOp(null, "or", literal(false, "boolean"), literal(null, "boolean"))

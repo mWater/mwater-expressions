@@ -121,8 +121,12 @@ module.exports = class ExprEvaluator
           return null
         return values[0] / values[1]
       when "and"
+        if values.length == 0
+          return null
         return _.reduce(values, (acc, value) -> acc and value)
       when "or"
+        if values.length == 0
+          return null
         return _.reduce(values, (acc, value) -> acc or value)
       when "not"
         if hasNull
