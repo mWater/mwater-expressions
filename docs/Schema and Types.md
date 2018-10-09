@@ -102,6 +102,7 @@ Enum values are represented by an array of objects e.g. `{ id: some id, code: op
 
 `type`: "1-n", "n-1", "n-n" or "1-1"
 `toTable`: table to end join at
+`inverse`: optional column that is the inverse join in the toTable of this join
 
 `jsonql`: jsonql expression with aliases {from} and {to}
 

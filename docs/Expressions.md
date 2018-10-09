@@ -34,7 +34,7 @@ Gets a single value given a row of a table.
 - `joins`: Array of join columns to follow to get to table of expr. All must be `join` type
 - `expr`: Expression from final table to get value
 - `aggr`: Aggregation function to use if any join is multiple, null/undefined if not needed (DEPRECATED: use aggr expressions in `expr`)
-- `where`: optional logical expression to filter aggregation
+- `where`: optional logical expression to filter aggregation (DEPRECATED: use aggr expressions in `expr`)
 
 #### Aggr values
 
