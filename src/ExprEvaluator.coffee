@@ -16,9 +16,11 @@ ExprUtils = require './ExprUtils'
 # For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
 module.exports = class ExprEvaluator
   # Schema is optional and used for ordering, "to text" function and expression columns
-  constructor: (schema, locale) ->
+  constructor: (schema, locale, variables = [], variableValues = {}) ->
     @schema = schema
     @locale = locale
+    @variables = variables
+    @variableValues = variableValues
 
   # Evaluate an expression
   evaluate: (expr, context, callback) ->
@@ -73,6 +75,8 @@ module.exports = class ExprEvaluator
         @evaluateScore(expr, context, callback)
       when "build enumset"
         @evaluateBuildEnumset(expr, context, callback)
+      when "variable"
+        @evaluateVariable(expr, context, callback)
       else
         throw new Error("Unsupported expression type #{expr.type}")
 
@@ -673,6 +677,24 @@ module.exports = class ExprEvaluator
 
               # See if match
               callback(null, pk in _.pluck(latests, "pk"))
+
+  evaluateVariable: (expr, context, callback) ->
+    console.log(@variables)
+    # Get variable
+    variable = _.findWhere(@variables, id: expr.variableId)
+    if not variable
+      throw new Error("Variable #{expr.variableId} not found")
+
+    # Get value
+    value = @variableValues[variable.id]
+    if value == undefined
+      throw new Error("Variable #{expr.variableId} has no value")
+
+    # If expression, compile
+    if variable.table
+      return @evaluate(value, context, callback)
+    else 
+      callback(null, value)
 
 # From http://www.movable-type.co.uk/scripts/latlong.html
 getDistanceFromLatLngInM = (lat1, lng1, lat2, lng2) ->

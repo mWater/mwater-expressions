@@ -3,9 +3,10 @@ ExprUtils = require './ExprUtils'
 
 # Validates expressions. If an expression has been cleaned, it will always be valid
 module.exports = class ExprValidator
-  constructor: (schema) ->
+  constructor: (schema, variables = []) ->
     @schema = schema
-    @exprUtils = new ExprUtils(schema)
+    @variables = variables
+    @exprUtils = new ExprUtils(schema, variables)
 
   # Validates an expression, returning null if it is valid, otherwise return an error string
   # options are:
@@ -31,7 +32,7 @@ module.exports = class ExprValidator
       return "Circular reference"
 
     # Check table if not literal
-    if expr.type != "literal"
+    if expr.type != "literal" and (expr.type != "variable" or not expr.table)
       if options.table and expr.table != options.table 
         return "Wrong table #{expr.table} (expected #{options.table})"
 
@@ -119,7 +120,12 @@ module.exports = class ExprValidator
           error = @validateExpr(value, _.extend({}, options, types: ["boolean"]))
           if error
             return error
-      
+
+      when "variable"
+        # Get variable
+        variable = _.findWhere(@variables, id: expr.variableId)
+        if not variable
+          return "Missing variable #{expr.variableId}"
 
     # Validate table
     if options.idTable and @exprUtils.getExprIdTable(expr) and @exprUtils.getExprIdTable(expr) != options.idTable

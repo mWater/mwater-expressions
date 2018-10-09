@@ -5,6 +5,7 @@
   "description": "Expression library",
   "repository": "git@github.com:mWater/mwater-expressions.git",
   "main": "lib/index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "mocha --require coffeescript/register --recursive \"test/**/*Tests.coffee\""
   },

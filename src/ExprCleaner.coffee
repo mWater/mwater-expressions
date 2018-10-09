@@ -4,9 +4,10 @@ ExprValidator = require './ExprValidator'
 
 # Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
 module.exports = class ExprCleaner
-  constructor: (schema) ->
+  constructor: (schema, variables = []) ->
     @schema = schema
-    @exprUtils = new ExprUtils(schema)
+    @variables = variables
+    @exprUtils = new ExprUtils(schema, variables)
 
   # Clean an expression, returning null if completely invalid, otherwise removing
   # invalid parts. Attempts to correct invalid types by wrapping in other expressions.
@@ -40,11 +41,11 @@ module.exports = class ExprCleaner
       expr = { type: "literal", valueType: "enumset", value: expr.value }
 
     # Strip if wrong table 
-    if options.table and expr.type != "literal" and expr.table != options.table
+    if options.table and expr.type != "literal" and expr.type != "variable" and expr.table != options.table
       return null
 
     # Strip if no table
-    if not expr.table and expr.type != "literal" 
+    if not expr.table and expr.type != "literal" and expr.type != "variable"
       return null
 
     # Strip if non-existent table
@@ -142,6 +143,8 @@ module.exports = class ExprCleaner
         return @cleanScoreExpr(expr, options)
       when "build enumset"
         return @cleanBuildEnumsetExpr(expr, options)
+      when "variable"
+        return @cleanVariableExpr(expr, options)
       else
         throw new Error("Unknown expression type #{expr.type}")
 
@@ -439,3 +442,10 @@ module.exports = class ExprCleaner
     newExpr = { type: "id", table: expr.table }
     return @cleanExpr(newExpr, options)
 
+  cleanVariableExpr: (expr, options) =>
+    # Get variable
+    variable = _.findWhere(@variables, id: expr.variableId)
+    if not variable
+      return null
+
+    return expr

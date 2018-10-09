@@ -7,12 +7,18 @@ Schema = require '../src/Schema'
 
 canonical = require 'canonical-json'
 
+variables = [
+  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
+  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+  { id: "varidexpr", name: { _base: "en", en: "Varidexpr" }, type: "id", table: "t1", idTable: "t2" }
+]
+
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
 
 describe "ExprUtils", ->
   beforeEach ->
-    @exprUtils = new ExprUtils(fixtures.simpleSchema())
+    @exprUtils = new ExprUtils(fixtures.simpleSchema(), variables)
 
   it "determines if multiple joins", ->
     assert.isTrue @exprUtils.isMultipleJoins("t1", ["1-2"])
@@ -46,6 +52,9 @@ describe "ExprUtils", ->
     it "gets for scalar", ->
       assert.equal @exprUtils.getExprIdTable({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "t1"
 
+    it "gets for variable", ->
+      assert.equal @exprUtils.getExprIdTable({ type: "variable", table: "t1", variableId: "varidexpr" }), "t2"
+
   describe "getExprAggrStatus", ->
     it "gets for literal", ->
       assert.equal @exprUtils.getExprAggrStatus({ type: "literal", valueType: "id", idTable: "xyz", value: "123" }), "literal"
@@ -70,6 +79,12 @@ describe "ExprUtils", ->
 
     it "gets for scalar", ->
       assert.equal @exprUtils.getExprAggrStatus({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "individual"
+
+    it "gets for literal variable", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "variable", variableId: "varnumber" }), "literal"
+
+    it "gets for individual variable", ->
+      assert.equal @exprUtils.getExprAggrStatus({ type: "variable", table: "t1", variableId: "varidexpr" }), "individual"
 
   describe "findMatchingOpItems", ->
     it "finds = for number", ->
@@ -160,6 +175,9 @@ describe "ExprUtils", ->
 
     it "number type if number + number", ->
       assert.equal @exprUtils.getExprType({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]}), "number"
+    
+    it "variable type", ->
+      assert.equal @exprUtils.getExprType({ type: "variable", variableId: "varnumber" }), "number"
 
   describe "summarizeExpr", ->
     it "summarizes null", ->
@@ -250,6 +268,10 @@ describe "ExprUtils", ->
     it "summarizes date ops", ->
       expr = { type: "op", op: "thisyear", table: "t1", exprs: [{ type: "field", table: "t1", column: "date" }] }
       assert.equal @exprUtils.summarizeExpr(expr), "Date is this year"
+
+    it "summarizes variable", ->
+      expr = { type: "variable", variableId: "varnumber" }
+      assert.equal @exprUtils.summarizeExpr(expr), "Varnumber"
 
     # TODO readd
     # it "uses named expression when matching one present", ->
@@ -355,6 +377,9 @@ describe "ExprUtils", ->
         { id: "11", name: { en: "November" } }
         { id: "12", name: { en: "December" } }
       ]
+
+    it "finds in field", ->
+      assert.deepEqual @exprUtils.getExprEnumValues({ type: "variable", variableId: "varenum" }), [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}]
 
   describe "getReferencedFields", ->
     it "gets field", ->

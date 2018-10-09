@@ -390,8 +390,8 @@ add({ type: "op", op: "is latest", table: "t1", exprs: [{ type: "field", table: 
 # expression columns
 add({ type: "field", table: "t1", column: "expr_number" }, 4, { row: makeRow(number: 4) })
 
-
-
+# variable values
+add({ type: "variable", variableId: "varnumber" }, 123, { row: makeRow(number: 4) })
 
 
 #   describe "scalar", ->

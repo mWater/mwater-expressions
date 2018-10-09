@@ -11,10 +11,25 @@ ColumnNotFoundException = require '../src/ColumnNotFoundException'
 
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
- 
+
+variables = [
+  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
+  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
+]
+
+variableValues = {
+  varenum: "a"
+  varnumber: 123
+  varnumberexpr: { type: "op", op: "+", table: "t1", exprs: [
+    { type: "field", table: "t1", column: "number" }
+    { type: "literal", valueType: "number", value: 2 }
+  ]}
+}
+
 describe "ExprCompiler", ->
   beforeEach ->
-    @ec = new ExprCompiler(fixtures.simpleSchema())
+    @ec = new ExprCompiler(fixtures.simpleSchema(), variables, variableValues)
     @compile = (expr, expected) =>
       jsonql = @ec.compileExpr(expr: expr, tableAlias: "T1")
       compare(jsonql, expected)
@@ -2302,5 +2317,19 @@ describe "ExprCompiler", ->
           ]
         }
       )
+       
+  describe "variable", ->
+    it "compiles literal", ->
+      expr = { type: "variable", variableId: "varnumber" }
+      @compile(expr, { type: "literal", value: 123 })
 
-        
+    it "compiles expression", ->
+      expr = { type: "variable", variableId: "varnumberexpr", table: "t1" }
+      @compile(expr, {
+        type: "op"
+        op: "+"
+        exprs: [
+          { type: "op", op: "coalesce", exprs:[{ type: "field", tableAlias: "T1", column: "number" }, 0] }
+          { type: "op", op: "coalesce", exprs:[{ type: "literal", value: 2 }, 0] }
+        ]
+      })

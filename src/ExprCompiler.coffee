@@ -7,8 +7,11 @@ ColumnNotFoundException = require './ColumnNotFoundException'
 
 # Compiles expressions to JsonQL
 module.exports = class ExprCompiler 
-  constructor: (schema) ->
+  # Variable values are lookup of id to variable value
+  constructor: (schema, variables = [], variableValues = {}) ->
     @schema = schema
+    @variables = variables
+    @variableValues = variableValues
 
   # Compile an expression. Pass expr and tableAlias.
   compileExpr: (options) =>
@@ -38,6 +41,8 @@ module.exports = class ExprCompiler
         compiledExpr = @compileScoreExpr(options)
       when "build enumset"
         compiledExpr = @compileBuildEnumsetExpr(options)
+      when "variable"
+        compiledExpr = @compileVariableExpr(options)
       when "count" # DEPRECATED
         compiledExpr = null
       when "comparison" # DEPRECATED
@@ -1561,3 +1566,22 @@ module.exports = class ExprCompiler
       return { type: "table", table: tableId, alias: alias }
     else
       return { type: "subquery", query: table.jsonql, alias: alias }
+
+  compileVariableExpr: (options) ->
+    # Get variable
+    variable = _.findWhere(@variables, id: options.expr.variableId)
+    if not variable
+      throw new Error("Variable #{options.expr.variableId} not found")
+
+    # Get value
+    value = @variableValues[variable.id]
+    if value == undefined
+      throw new Error("Variable #{expr.variableId} has no value")
+
+    # If expression, compile
+    if variable.table
+      return @compileExpr({ expr: value, tableAlias: options.tableAlias })
+    else if value?
+      return { type: "literal", value: value }
+    else
+      return null

@@ -6,10 +6,16 @@ fixtures = require './fixtures'
 
 canonical = require 'canonical-json'
 
+variables = [
+  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
+  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
+]
+
 describe "ExprValidator", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
-    @exprValidator = new ExprValidator(@schema)
+    @exprValidator = new ExprValidator(@schema, variables)
     @isValid = (expr, options) =>
       assert.isNull @exprValidator.validateExpr(expr, options), "Expected to be valid"
 
@@ -194,4 +200,11 @@ describe "ExprValidator", ->
         } 
       }
       @notValid(expr)
+
+  describe "variable", -> 
+    it "fails if non-existent", ->
+      @notValid({ type: "variable", variableId: "varxyz" })
+
+    it "success if exists", ->
+      @isValid({ type: "variable", variableId: "varnumber" })
 

@@ -2,8 +2,9 @@ _ = require 'lodash'
 moment = require 'moment'
 
 module.exports = class ExprUtils
-  constructor: (schema) ->
+  constructor: (schema, variables = []) ->
     @schema = schema
+    @variables = variables
 
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # If search ordered is not true, excludes ordered ones
@@ -134,6 +135,9 @@ module.exports = class ExprUtils
           return enumValues
       return @getExprEnumValues(expr.else)
 
+    if expr.type == "variable"
+      return _.findWhere(@variables, id: expr.variableId)?.enumValues
+
   # gets the id table of an expression of type id
   getExprIdTable: (expr) ->
     if not expr
@@ -163,6 +167,9 @@ module.exports = class ExprUtils
         return column.idTable
 
       return null
+    
+    if expr.type == "variable"
+      return _.findWhere(@variables, id: expr.variableId)?.idTable
 
   # Gets the type of an expression
   getExprType: (expr) ->
@@ -222,6 +229,11 @@ module.exports = class ExprUtils
         return "number"
       when "count" # Deprecated
         return "count"
+      when "variable"
+        variable = _.findWhere(@variables, id: expr.variableId)
+        if not variable
+          return null
+        return variable.type
       else
         throw new Error("Not implemented for #{expr.type}")
 
@@ -279,6 +291,13 @@ module.exports = class ExprUtils
         return getListAggrStatus(exprs)
       when "count", "comparison", "logical" # Deprecated
         return "individual"
+      when "variable"
+        variable = _.findWhere(@variables, id: expr.variableId)
+        if not variable
+          return "literal" # To prevent crash in cleaning, return something
+        if variable.table
+          return "individual"
+        return "literal"
       else
         throw new Error("Not implemented for #{expr.type}")
 
@@ -395,6 +414,9 @@ module.exports = class ExprUtils
         return "Build Enumset"
       when "count"
         return "Count" # Deprecated
+      when "variable"
+        variable = _.findWhere(@variables, id: expr.variableId)
+        return @localizeString(variable?.name, locale)
       else
         throw new Error("Unsupported type #{expr.type}")
 
