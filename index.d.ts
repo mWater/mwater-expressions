@@ -277,7 +277,7 @@ export class DataSource {
 export type AggrStatus = "individual" | "literal" | "aggregate"
 
 export class ExprUtils {
-  constructor(schema: Schema)
+  constructor(schema: Schema, variables?: Variable[])
 
   summarizeExpr(expr: Expr, locale?: string): string
 
