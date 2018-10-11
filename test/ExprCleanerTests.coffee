@@ -13,6 +13,7 @@ variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
   { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
+  { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t1" }
 ]
 
 describe "ExprCleaner", ->
@@ -48,6 +49,10 @@ describe "ExprCleaner", ->
     it "nulls if missing variable", ->
       assert.isNotNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varnumber" }, table: "t2")
       assert.isNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varxyz" }, table: "t2")
+
+    it "allows variable if right id table", ->
+      assert.isNotNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
+      assert.isNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
 
     it "nulls recursive field expr", ->
       table = @schema.getTable("t1")

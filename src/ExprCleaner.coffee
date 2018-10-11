@@ -448,4 +448,8 @@ module.exports = class ExprCleaner
     if not variable
       return null
 
+    # Check id table
+    if options.idTable and variable.type == "id" and variable.idTable != options.idTable
+      return null
+
     return expr
