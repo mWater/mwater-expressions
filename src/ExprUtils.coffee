@@ -388,6 +388,10 @@ module.exports = class ExprUtils
         if expr.op == "=" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enum" 
           return @summarizeExpr(expr.exprs[0], locale) + " is " + @stringifyLiteralValue("enum", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
+        # Special case for <> with literal RHS
+        if expr.op == "<>" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enum" 
+          return @summarizeExpr(expr.exprs[0], locale) + " is not " + @stringifyLiteralValue("enum", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
+
         # Special case for count
         if expr.op == "count"
           return "Number of " + @localizeString(@schema.getTable(expr.table).name, locale)
