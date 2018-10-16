@@ -271,7 +271,7 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: _.map(compiledExprs, (e) -> { type: "op", op: "coalesce", exprs: [e, 0] })
         }
-      when "-", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp"
+      when "-", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp", "array_agg"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null

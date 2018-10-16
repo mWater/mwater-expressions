@@ -805,6 +805,8 @@ addOpItem(op: "within any", name: "is within any of", resultType: "boolean", exp
   return false
 )
 
+addOpItem(op: "array_agg", name: "Make list of", desc: "Aggregates results into a list", resultType: "text[]", exprTypes: ["text"], prefix: true, aggr: true)
+
 addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
 
 addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"])

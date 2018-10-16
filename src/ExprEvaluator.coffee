@@ -524,6 +524,15 @@ module.exports = class ExprEvaluator
 
           return callback(null, count)
 
+      when "array_agg"
+        # Evaluate all rows
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          callback(null, values)
+
+
       else      
         callback(new Error("Unknown op #{op}"))
 

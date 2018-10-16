@@ -266,6 +266,8 @@ add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", tab
 
 add({ type: "op", table: "t1", op: "count distinct", exprs: [{ type: "field", table: "t1", column: "e" }] }, 3, { rows: sampleRows })
 
+add({ type: "op", table: "t1", op: "array_agg", exprs: [{ type: "field", table: "t1", column: "e" }] }, ["x", "y", "z", "z"], { rows: sampleRows })
+
 # Row with join
 singleJoinRow = makeRow(j: makeRow(id: "j1", a:1, b:2))
 

@@ -840,6 +840,20 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles array_agg", ->
+      @compile(
+        {
+          type: "op"
+          op: "array_agg"
+          exprs: [@text1]
+        }
+        {
+          type: "op"
+          op: "array_agg"
+          exprs: [@text1JsonQL]
+        }
+      )
+
     it "compiles last", ->
       text = { type: "field", table: "t2", column: "text" }
       textJsonQL = { type: "field", tableAlias: "T1", column: "text" }

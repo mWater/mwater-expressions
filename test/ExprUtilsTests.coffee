@@ -119,7 +119,7 @@ describe "ExprUtils", ->
 
       field = { type: "field", table: "b", column: "x" }
       types = @exprUtils.getAggrTypes(field)
-      assert.deepEqual types, ['number']
+      assert.deepEqual types, ["text[]", 'number']
  
   describe "getExprType", ->
     it 'gets field type', ->
