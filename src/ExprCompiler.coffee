@@ -1575,8 +1575,6 @@ module.exports = class ExprCompiler
 
     # Get value
     value = @variableValues[variable.id]
-    if value == undefined
-      throw new Error("Variable #{expr.variableId} has no value")
 
     # If expression, compile
     if variable.table
