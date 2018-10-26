@@ -67,7 +67,7 @@ export interface Column {
   /**  optional non-localized code of item */
   code?: string
   
-  /** type of content item. `id`, `text`, `number`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `geometry`, `text[]`, `image`, `imagelist`, `join`, `section`, `expr`. */
+  /** type of content item. `id`, `text`, `number`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `geometry`, `text[]`, `image`, `imagelist`, `join`, `section`, `expr`. `expr` is deprecated! */
   type: LiteralType | "join" | "section" | "expr"
   
   /**  Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value */
@@ -264,14 +264,12 @@ export class DataSource {
   */
   getImageUrl(imageId: string, height: number): string
 
-  // # Clears the cache if possible with this data source
-  // clearCache: ->
-  //   throw new Error("Not implemented")
+  // Clears the cache if possible with this data source
+  clearCache(): void
 
-  // # Get the cache expiry time in ms from epoch. No cached items before this time will be used. 0 for no cache limit.
-  // # Useful for knowing when cache has been cleared, as it will be set to time of clearing.
-  // getCacheExpiry: -> 
-  //   throw new Error("Not implemented")
+  // Get the cache expiry time in ms from epoch. No cached items before this time will be used. 0 for no cache limit.
+  // Useful for knowing when cache has been cleared, as it will be set to time of clearing.
+  getCacheExpiry(): number
 }
 
 export type AggrStatus = "individual" | "literal" | "aggregate"
