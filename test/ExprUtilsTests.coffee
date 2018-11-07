@@ -429,13 +429,13 @@ describe "ExprUtils", ->
 
   describe "andExprs", ->
     it "handles trivial case", ->
-      assert.isNull ExprUtils.andExprs()
-      assert.isNull ExprUtils.andExprs(null)
-      assert.isNull ExprUtils.andExprs(null, null)
+      assert.isNull ExprUtils.andExprs("xyz")
+      assert.isNull ExprUtils.andExprs("xyz", null)
+      assert.isNull ExprUtils.andExprs("xyz", null, null)
 
     it "denests", ->
-      compare(ExprUtils.andExprs({ type: "field", table: "t1", column: "b1" }, { type: "op", op: "and", exprs: [{ type: "field", table: "t1", column: "b2" }, { type: "field", table: "t1", column: "b3" }] }),
-        { type: "op", op: "and", exprs: [
+      compare(ExprUtils.andExprs("t1", { type: "field", table: "t1", column: "b1" }, { type: "op", op: "and", exprs: [{ type: "field", table: "t1", column: "b2" }, { type: "field", table: "t1", column: "b3" }] }),
+        { type: "op", op: "and", table: "t1", exprs: [
           { type: "field", table: "t1", column: "b1" }
           { type: "field", table: "t1", column: "b2" }
           { type: "field", table: "t1", column: "b3" }
