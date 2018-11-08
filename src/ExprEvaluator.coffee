@@ -220,6 +220,11 @@ module.exports = class ExprEvaluator
           return null
         return (Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1) + "" # Make string
 
+      when "dayofmonth"
+        if hasNull
+          return null
+        return moment(values[0], moment.ISO_8601).format("DD")
+
       when "month"
         if hasNull
           return null
@@ -513,6 +518,44 @@ module.exports = class ExprEvaluator
               callback(null, null)
             else
               callback(null, sum/count * 100)
+
+      when "min where"
+        # Evaluate all rows
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          # Evaluate all rows by where
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, wheres) =>
+            if error
+              return callback(error)
+
+            items = []
+            for row, i in context.rows
+              if wheres[i] == true
+                items.push(values[i])
+            value = _.min(items)
+
+            callback(null, if value? then value else null)
+
+      when "max where"
+        # Evaluate all rows
+        async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+          if error
+            return callback(error)
+
+          # Evaluate all rows by where
+          async.map context.rows, ((row, cb) => @evaluate(exprs[1], { row: row }, cb)), (error, wheres) =>
+            if error
+              return callback(error)
+
+            items = []
+            for row, i in context.rows
+              if wheres[i] == true
+                items.push(values[i])
+            value = _.max(items)
+
+            callback(null, if value? then value else null)
 
       when "count distinct"
         # Evaluate all rows 

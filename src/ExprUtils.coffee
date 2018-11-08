@@ -110,6 +110,42 @@ module.exports = class ExprUtils
         { id: "5", name: { en: "5" }}
       ]
 
+    # Days of month has predefined values (01-31 as text)
+    if expr.type == "op" and expr.op == "dayofmonth"
+      return [
+        { id: "01", name: { en: "01" }}
+        { id: "02", name: { en: "02" }}
+        { id: "03", name: { en: "03" }}
+        { id: "04", name: { en: "04" }}
+        { id: "05", name: { en: "05" }}
+        { id: "06", name: { en: "06" }}
+        { id: "07", name: { en: "07" }}
+        { id: "08", name: { en: "08" }}
+        { id: "09", name: { en: "09" }}
+        { id: "10", name: { en: "10" }}
+        { id: "11", name: { en: "11" }}
+        { id: "12", name: { en: "12" }}
+        { id: "13", name: { en: "13" }}
+        { id: "14", name: { en: "14" }}
+        { id: "15", name: { en: "15" }}
+        { id: "16", name: { en: "16" }}
+        { id: "17", name: { en: "17" }}
+        { id: "18", name: { en: "18" }}
+        { id: "19", name: { en: "19" }}
+        { id: "20", name: { en: "20" }}
+        { id: "21", name: { en: "21" }}
+        { id: "22", name: { en: "22" }}
+        { id: "23", name: { en: "23" }}
+        { id: "24", name: { en: "24" }}
+        { id: "25", name: { en: "25" }}
+        { id: "26", name: { en: "26" }}
+        { id: "27", name: { en: "27" }}
+        { id: "28", name: { en: "28" }}
+        { id: "29", name: { en: "29" }}
+        { id: "30", name: { en: "30" }}
+        { id: "31", name: { en: "31" }}
+      ]
+
     # Month has predefined values
     if expr.type == "op" and expr.op == "month"
       return [
@@ -775,6 +811,9 @@ addOpItem(op: "year", name: "Year", desc: "Date of start of year", resultType: "
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
+addOpItem(op: "dayofmonth", name: "Day of month", desc: "Day within the month (1-31)", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
+addOpItem(op: "dayofmonth", name: "Day of month", desc: "Day within the month (1-31)", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
+
 for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
   addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
@@ -785,7 +824,10 @@ addOpItem(op: "avg", name: "Average", desc: "Average all values together", resul
 
 for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", desc: "Get smallest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+  addOpItem(op: "min where", name: "Minimum where", desc: "Get smallest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+
   addOpItem(op: "max", name: "Maximum", desc: "Get largest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
+  addOpItem(op: "max where", name: "Maximum where", desc: "Get largest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
 addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of items that match a condition", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)

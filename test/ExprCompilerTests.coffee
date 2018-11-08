@@ -1118,6 +1118,68 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles min where", ->
+      value = { type: "field", table: "t1", column: "number" }
+      valueJsonQL = { type: "field", tableAlias: "T1", column: "number" }
+
+      cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
+      condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
+
+      # Compiles as min(case when cond then 1 else null end)
+      @compile(
+        {
+          type: "op"
+          op: "min where"
+          table: "t2"
+          exprs: [value, cond]
+        }
+        {
+          type: "op"
+          op: "min"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: condJsonQL
+                then: valueJsonQL
+              ]
+              else: null
+            }
+          ]
+        }
+      )
+
+    it "compiles max where", ->
+      value = { type: "field", table: "t1", column: "number" }
+      valueJsonQL = { type: "field", tableAlias: "T1", column: "number" }
+
+      cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
+      condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
+
+      # Compiles as max(case when cond then 1 else null end)
+      @compile(
+        {
+          type: "op"
+          op: "max where"
+          table: "t2"
+          exprs: [value, cond]
+        }
+        {
+          type: "op"
+          op: "max"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: condJsonQL
+                then: valueJsonQL
+              ]
+              else: null
+            }
+          ]
+        }
+      )
+
     it "compiles count distinct", ->
       # Compiles as count(distinct value)
       value = { type: "field", table: "t1", column: "text" }
@@ -1563,6 +1625,22 @@ describe "ExprCompiler", ->
             { type: "field", tableAlias: "T1", column: "date" }
           ]}
           "W"
+        ]}
+      )
+
+    it "compiles dayofmonth", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "dayofmonth"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        { type: "op", op: "to_char", exprs: [
+          { type: "op", op: "::timestamp", exprs: [
+            { type: "field", tableAlias: "T1", column: "date" }
+          ]}
+          "DD"
         ]}
       )
 

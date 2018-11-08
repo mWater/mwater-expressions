@@ -218,6 +218,9 @@ addOp("2", "weekofmonth", literal("2015-05-08", "date"))
 addOp("1", "weekofmonth", literal("2015-05-07", "datetime"))
 addOp("2", "weekofmonth", literal("2015-05-08", "datetime"))
 
+addOp("07", "dayofmonth", literal("2015-05-07", "date"))
+addOp("08", "dayofmonth", literal("2015-05-08", "datetime"))
+
 addOp("05", "month", literal("2015-05-08", "date"))
 addOp("05", "month", literal("2015-05-08", "datetime"))
 
@@ -260,6 +263,10 @@ add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table:
 add({ type: "op", table: "t1", op: "count where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 2, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "sum where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 4, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "min where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 1, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "max where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 3, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 50, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "percent where", exprs: [{ type: "field", table: "t1", column: "c" }, { type: "field", table: "t1", column: "d" }] }, ((v) -> Math.abs(v- 200/3) < 0.1), { rows: sampleRows })

@@ -625,6 +625,62 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "min where"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        # Simple min if not specified where
+        if not compiledExprs[1]
+          return {
+            type: "op"
+            op: "min"
+            exprs: [compiledExprs[0]]
+          }
+
+        return {
+          type: "op"
+          op: "min"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: compiledExprs[1]
+                then: compiledExprs[0]
+              ]
+              else: null
+            }
+          ]
+        }
+
+      when "max where"
+        # Null if not present
+        if not compiledExprs[0] 
+          return null
+
+        # Simple max if not specified where
+        if not compiledExprs[1]
+          return {
+            type: "op"
+            op: "max"
+            exprs: [compiledExprs[0]]
+          }
+
+        return {
+          type: "op"
+          op: "max"
+          exprs: [
+            { 
+              type: "case"
+              cases: [
+                when: compiledExprs[1]
+                then: compiledExprs[0]
+              ]
+              else: null
+            }
+          ]
+        }
+
       when "count distinct"
         # Null if not present
         if not compiledExprs[0] 
@@ -942,6 +998,19 @@ module.exports = class ExprCompiler
           exprs: [
             { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }
             "W"
+          ]
+        }
+
+      when 'dayofmonth'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }
+            "DD"
           ]
         }
 
