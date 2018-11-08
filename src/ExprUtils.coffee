@@ -435,7 +435,14 @@ module.exports = class ExprUtils
         opItem = @findMatchingOpItems(op: expr.op)[0]
         if opItem
           if opItem.prefix
-            return opItem.name + " " + _.map(expr.exprs, (e) => @summarizeExpr(e, locale)).join(", ")
+            return (opItem.prefixLabel or opItem.name) + " " + 
+              _.map(expr.exprs, (e, index) => 
+                # Only use rhs placeholder if > 0
+                if index == 0 
+                  return if e then @summarizeExpr(e, locale) else opItem.lhsPlaceholder or "None" 
+                else 
+                  return if e then @summarizeExpr(e, locale) else opItem.rhsPlaceholder or "None"
+              ).join(if opItem.joiner then " #{opItem.joiner} " else ", ")
 
           if expr.exprs.length == 1
             return @summarizeExpr(expr.exprs[0], locale) + " " + opItem.name 
@@ -824,10 +831,10 @@ addOpItem(op: "avg", name: "Average", desc: "Average all values together", resul
 
 for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", desc: "Get smallest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-  addOpItem(op: "min where", name: "Minimum where", desc: "Get smallest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Minimum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+  addOpItem(op: "min where", name: "Minimum where", desc: "Get smallest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Minimum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
   addOpItem(op: "max", name: "Maximum", desc: "Get largest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-  addOpItem(op: "max where", name: "Maximum where", desc: "Get largest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Maximum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+  addOpItem(op: "max where", name: "Maximum where", desc: "Get largest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Maximum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
 addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of items that match a condition", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
