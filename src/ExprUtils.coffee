@@ -824,10 +824,10 @@ addOpItem(op: "avg", name: "Average", desc: "Average all values together", resul
 
 for type in ['number', 'date', 'datetime']
   addOpItem(op: "min", name: "Minimum", desc: "Get smallest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-  addOpItem(op: "min where", name: "Minimum where", desc: "Get smallest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+  addOpItem(op: "min where", name: "Minimum where", desc: "Get smallest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Minimum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
   addOpItem(op: "max", name: "Maximum", desc: "Get largest value", resultType: type, exprTypes: [type], prefix: true, aggr: true)
-  addOpItem(op: "max where", name: "Maximum where", desc: "Get largest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
+  addOpItem(op: "max where", name: "Maximum where", desc: "Get largest value that matches a condition", resultType: "number", exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Maximum", aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 
 addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of items that match a condition", resultType: "number", exprTypes: ["boolean", "boolean"], prefix: true, aggr: true, rhsLiteral: false, joiner: "of", rhsPlaceholder: "All")
 addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
