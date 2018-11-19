@@ -871,7 +871,7 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
   addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
   addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 
-for type in ['id', 'text']
+for type in ['id', 'text', 'date']
   addOpItem(op: "count distinct", name: "Number of unique", desc: "Count number of unique values", resultType: "number", exprTypes: [type], prefix: true, aggr: true)
 
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of values selected in a multi-choice field", resultType: "number", exprTypes: ["enumset"], prefix: true)
