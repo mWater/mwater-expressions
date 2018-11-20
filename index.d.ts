@@ -285,6 +285,9 @@ export class ExprUtils {
 
   getExprEnumValues(expr: Expr): EnumValue[] | null
 
+  /** Gets the id table of an expression of type id */
+  getExprIdTable(expr: Expr): string | null
+
   /** Converts a literal value related to an expression to a string, using name of enums. preferEnumCodes tries to use code over name */
   stringifyExprLiteral(expr: Expr, literal: any, locale?: string, preferEnumCodes?: boolean): string
 }
