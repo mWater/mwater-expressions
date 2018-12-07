@@ -1368,11 +1368,18 @@ describe "ExprCompiler", ->
             { type: "field", table: "t1", column: "enumset" } 
           ]
         }
-        {
+        { 
           type: "op"
-          op: "jsonb_array_length"
+          op: "coalesce"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+            {
+              type: "op"
+              op: "jsonb_array_length"
+              exprs: [
+                { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+              ]
+            }
+            0
           ]
         }
       )

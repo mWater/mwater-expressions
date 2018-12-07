@@ -483,16 +483,23 @@ module.exports = class ExprCompiler
         }
 
       when "length"
-        # Null if not present
-        if not compiledExprs[0] 
-          return null
+        # 0 if null
+        if not compiledExprs[0]?
+          return 0
 
-        # Cast both to jsonb and use jsonb_array_length. Also convert both to json first to handle literal arrays
+        # Cast both to jsonb and use jsonb_array_length. Also convert both to json first to handle literal arrays. Coalesce to 0 so that null is 0
         return {
           type: "op"
-          op: "jsonb_array_length"
+          op: "coalesce",
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+            {
+              type: "op"
+              op: "jsonb_array_length"
+              exprs: [
+                { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+              ]
+            }
+            0
           ]
         }
 

@@ -135,8 +135,9 @@ addOp(null, "contains", literal(null, "enumset"), literal(["c", "b"], "enumset")
 addOp(true, "intersects", literal(["a", "b", "c"], "enumset"), literal(["a", "x"], "enumset"))
 addOp(false, "intersects", literal(["a", "b", "c"], "enumset"), literal(["d"], "enumset"))
 
+# Length of null returns 0 as enumsets are not stored as [] when empty, but rather as null
 addOp(2, "length", literal(["a", "b"], "enumset"))
-addOp(null, "length", literal(null, "enumset"))
+addOp(0, "length", literal(null, "enumset"))
 
 sampleRow = makeRow({ enum: "a" })
 add({ type: "op", table: "t1", op: "to text", exprs: [{ type: "field", table: "t1", column: "enum" }] }, "A", { row: sampleRow })

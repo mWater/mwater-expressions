@@ -186,7 +186,7 @@ module.exports = class ExprEvaluator
         return _.intersection(values[0], values[1]).length > 0
       when "length"
         if hasNull
-          return null
+          return 0
         return values[0].length
       when "between"
         if hasNull
