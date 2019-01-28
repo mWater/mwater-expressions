@@ -354,3 +354,5 @@ export class ExprEvaluator {
   evaluate(expr: Expr, context: ExprEvaluatorContext, callback: (error: any, value?: any) => void): void
 }
 
+/** Recursively inject table alias tableAlias for `{alias}` */
+export function injectTableAlias(jsonql: JsonQL, tableAlias: string): JsonQL
