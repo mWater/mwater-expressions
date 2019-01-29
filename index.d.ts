@@ -225,9 +225,9 @@ export interface JsonQLQuery {
   type: "query"
   selects: JsonQLSelect[]
   from: JsonQLFrom
-  where: JsonQLExpr
-  orderBy: any // TODO
-  groupBy: any // TODO
+  where?: JsonQLExpr
+  orderBy?: any // TODO
+  groupBy?: any // TODO
   limit?: number
 }
 
@@ -237,7 +237,16 @@ export interface JsonQLExpr {
   [other: string]: any
 }
 
-export type JsonQLFrom = JsonQLTableFrom
+export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom
+
+export interface JsonQLJoinFrom {
+  type: "join", 
+  left: JsonQLFrom 
+  right: JsonQLFrom
+  kind: "inner" | "left" | "right"
+  /** Expression to join on */
+  on: JsonQLExpr
+}
 
 export interface JsonQLTableFrom {
   type: "table"
@@ -246,7 +255,8 @@ export interface JsonQLTableFrom {
 }
 
 export interface JsonQLSelect {
-  expr: Expr
+  type: "select"
+  expr: JsonQLExpr
   alias: string
 }
 
