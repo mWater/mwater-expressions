@@ -237,7 +237,7 @@ export interface JsonQLExpr {
   [other: string]: any
 }
 
-export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom
+export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom | JsonQLSubqueryFrom
 
 export interface JsonQLJoinFrom {
   type: "join", 
@@ -251,6 +251,13 @@ export interface JsonQLJoinFrom {
 export interface JsonQLTableFrom {
   type: "table"
   table: string
+  alias: string
+}
+
+/** Subquery aliased */
+export interface JsonQLSubqueryFrom {
+  type: "subquery"
+  query: JsonQLQuery
   alias: string
 }
 
