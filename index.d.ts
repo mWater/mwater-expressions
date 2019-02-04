@@ -237,7 +237,7 @@ export interface JsonQLExpr {
   [other: string]: any
 }
 
-export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom | JsonQLSubqueryFrom
+export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom | JsonQLSubqueryFrom | JsonQLSubexprFrom
 
 export interface JsonQLJoinFrom {
   type: "join", 
@@ -258,6 +258,13 @@ export interface JsonQLTableFrom {
 export interface JsonQLSubqueryFrom {
   type: "subquery"
   query: JsonQLQuery
+  alias: string
+}
+
+/** Subexpression is a from that is an expression, as in select * from someexpression as somealias */
+export interface JsonQLSubexprFrom {
+  type: "subexpr"
+  expr: JsonQLExpr
   alias: string
 }
 
