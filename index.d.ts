@@ -314,6 +314,12 @@ export class ExprUtils {
 
   /** Converts a literal value related to an expression to a string, using name of enums. preferEnumCodes tries to use code over name */
   stringifyExprLiteral(expr: Expr, literal: any, locale?: string, preferEnumCodes?: boolean): string
+
+  /** Localize a localized string */
+  static localizeString(str: LocalizedString, locale?: string): string
+
+  /** Localize a localized string */
+  localizeString(str: LocalizedString, locale?: string): string
 }
 
 /** Validates expressions. If an expression has been cleaned, it will always be valid */
