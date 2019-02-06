@@ -316,10 +316,10 @@ export class ExprUtils {
   stringifyExprLiteral(expr: Expr, literal: any, locale?: string, preferEnumCodes?: boolean): string
 
   /** Localize a localized string */
-  static localizeString(str: LocalizedString, locale?: string): string
+  static localizeString(str?: LocalizedString | null, locale?: string): string
 
   /** Localize a localized string */
-  localizeString(str: LocalizedString, locale?: string): string
+  localizeString(str?: LocalizedString | null, locale?: string): string
 }
 
 /** Validates expressions. If an expression has been cleaned, it will always be valid */
