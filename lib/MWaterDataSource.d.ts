@@ -8,5 +8,5 @@ export default class MWaterDataSource extends DataSource {
    * localCaching allows local MRU cache. default true
    * imageApiUrl: overrides apiUrl for images
    */
-  constructor(apiUrl: string, options: { serverCaching?: boolean, localCaching?: boolean, imageApiUrl?: string })
+  constructor(apiUrl: string, client?: string | null, options?: { serverCaching?: boolean, localCaching?: boolean, imageApiUrl?: string })
 }
