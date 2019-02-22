@@ -51,7 +51,7 @@ Either a section, join or column.
 
 `code`: optional non-localized code of item
 
-`type`: type of content item. `id`, `text`, `number`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `geometry`, `text[]`, `image`, `imagelist`, `join`, `section`, `expr`.
+`type`: type of content item. `id`, `text`, `number`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `geometry`, `text[]`, `image`, `imagelist`, `join`, `section`, `expr` (obsolete).
 
 `enumValues`: Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value
 
@@ -62,6 +62,8 @@ Either a section, join or column.
 `deprecated`: true if column is deprecated. Do not show unless already selected
 
 `expr`: set to expression if the column is an mwater-expression to be evaluated
+
+`conditionExpr`: optional condition in which column is relevant. Not for sections. 
 
 `confidential`: true if column contains confidential data and should be not displayed by default
 
