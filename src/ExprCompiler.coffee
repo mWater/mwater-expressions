@@ -871,7 +871,9 @@ module.exports = class ExprCompiler
           type: "op"
           op: "ST_Y"
           exprs: [
-            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+            { type: "op", op: "ST_Centroid", exprs: [
+              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+            ] }
           ]
         }
 
@@ -883,7 +885,9 @@ module.exports = class ExprCompiler
           type: "op"
           op: "ST_X"
           exprs: [
-            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+            { type: "op", op: "ST_Centroid", exprs: [
+              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+            ] }
           ]
         }
 

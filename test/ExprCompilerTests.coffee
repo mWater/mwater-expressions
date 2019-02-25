@@ -1397,10 +1397,16 @@ describe "ExprCompiler", ->
           exprs: [
             { 
               type: "op"
-              op: "ST_Transform"
+              op: "ST_Centroid"
               exprs: [
-                { type: "field", tableAlias: "T1", column: "geometry" }
-                4326
+                { 
+                  type: "op"
+                  op: "ST_Transform"
+                  exprs: [
+                    { type: "field", tableAlias: "T1", column: "geometry" }
+                    4326
+                  ]
+                }
               ]
             }
           ]
@@ -1420,10 +1426,16 @@ describe "ExprCompiler", ->
           exprs: [
             { 
               type: "op"
-              op: "ST_Transform"
+              op: "ST_Centroid"
               exprs: [
-                { type: "field", tableAlias: "T1", column: "geometry" }
-                4326
+                { 
+                  type: "op"
+                  op: "ST_Transform"
+                  exprs: [
+                    { type: "field", tableAlias: "T1", column: "geometry" }
+                    4326
+                  ]
+                }
               ]
             }
           ]
