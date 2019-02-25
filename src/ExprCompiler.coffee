@@ -249,7 +249,7 @@ module.exports = class ExprCompiler
 
     # Handle multi
     switch expr.op
-      when "and", "or", "*"
+      when "and", "or"
         # Strip nulls
         compiledExprs = _.compact(compiledExprs)
         if compiledExprs.length == 0
@@ -260,18 +260,42 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
+      when "*"
+        # Strip nulls
+        compiledExprs = _.compact(compiledExprs)
+        if compiledExprs.length == 0
+          return null
+
+        # Cast to decimal before multiplying to prevent integer overflow
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "::decimal", exprs: [e] })
+        }
       when "+"
         # Strip nulls
         compiledExprs = _.compact(compiledExprs)
         if compiledExprs.length == 0
           return null
 
+        # Cast to decimal before adding to prevent integer overflow
         return { 
           type: "op"
           op: expr.op
-          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "coalesce", exprs: [e, 0] })
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs: [e, 0] }] })
         }
-      when "-", ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp", "array_agg"
+      when "-"
+        # Null if any not present
+        if _.any(compiledExprs, (ce) -> not ce?)
+          return null
+
+        # Cast to decimal before subtracting to prevent integer overflow
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "::decimal", exprs: [e] })
+        }
+      when ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp", "array_agg"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
@@ -286,12 +310,13 @@ module.exports = class ExprCompiler
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
 
+        # Cast to decimal before dividing to prevent integer math
         return { 
           type: "op"
           op: expr.op
           exprs: [
             compiledExprs[0]
-            { type: "op", op: "nullif", exprs: [compiledExprs[1], 0] }
+            { type: "op", op: "::decimal", exprs: [{ type: "op", op: "nullif", exprs: [compiledExprs[1], 0] }] }
           ]
         }
       when "last"
