@@ -618,8 +618,14 @@ module.exports = class ExprUtils
 
   # Get a list of fields that are referenced in a an expression
   # Useful to know which fields and joins are used. Includes joins as fields
+  # Invisible second parameter is depth to prevent infinite recursion
   getReferencedFields: (expr) ->
     cols = []
+
+    depth = (arguments[1] or 0)
+    if depth > 100
+      console.error("Skipped infinite recursion")
+      return cols
 
     if not expr
       return cols
@@ -629,15 +635,15 @@ module.exports = class ExprUtils
         cols.push(expr)
         column = @schema.getColumn(expr.table, expr.column)
         if column?.expr
-          cols = cols.concat(@getReferencedFields(column.expr))
+          cols = cols.concat(@getReferencedFields(column.expr, depth + 1))
       when "op"
         for subexpr in expr.exprs
-          cols = cols.concat(@getReferencedFields(subexpr))
+          cols = cols.concat(@getReferencedFields(subexpr, depth + 1))
       when "case"
         for subcase in expr.cases
-          cols = cols.concat(@getReferencedFields(subcase.when))
-          cols = cols.concat(@getReferencedFields(subcase.then))
-        cols = cols.concat(@getReferencedFields(expr.else))
+          cols = cols.concat(@getReferencedFields(subcase.when, depth + 1))
+          cols = cols.concat(@getReferencedFields(subcase.then, depth + 1))
+        cols = cols.concat(@getReferencedFields(expr.else, depth + 1))
       when "scalar"
         table = expr.table
         for join in expr.joins
@@ -649,16 +655,16 @@ module.exports = class ExprUtils
 
           table = column.join.toTable
 
-        cols = cols.concat(@getReferencedFields(expr.expr))
+        cols = cols.concat(@getReferencedFields(expr.expr, depth + 1))
 
       when "score"
-        cols = cols.concat(@getReferencedFields(expr.input))
+        cols = cols.concat(@getReferencedFields(expr.input, depth + 1))
         for value in _.values(expr.scores)
-          cols = cols.concat(@getReferencedFields(value))
+          cols = cols.concat(@getReferencedFields(value, depth + 1))
 
       when "build enumset"
         for value in _.values(expr.values)
-          cols = cols.concat(@getReferencedFields(value))
+          cols = cols.concat(@getReferencedFields(value, depth + 1))
 
     return _.uniq(cols, (col) -> col.table + "/" + col.column)
 
