@@ -874,7 +874,7 @@ module.exports = class ExprCompiler
                 type: "op"
                 op: "?|"
                 exprs: [
-                  { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestry }
+                  { type: "field", tableAlias: "subwithin", column: @schema.getTable(idTable).ancestryText or @schema.getTable(idTable).ancestry }
                   { type: "literal", value: _.map(compiledExprs[1].value, (value) => 
                     if _.isNumber(value)
                       return "" + value
