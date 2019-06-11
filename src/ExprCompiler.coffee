@@ -141,7 +141,7 @@ module.exports = class ExprCompiler
       for i in [1...expr.joins.length]
         joinColumn = @schema.getColumn(table, expr.joins[i])
         if not joinColumn
-          throw new ColumnNotFoundException("Join column #{expr.table}:#{expr.joins[0]} not found")
+          throw new ColumnNotFoundException("Join column #{table}:#{expr.joins[i]} not found")
         join = joinColumn.join
 
         # Generate a consistent, semi-unique alias
