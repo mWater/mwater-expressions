@@ -7,7 +7,8 @@
   "main": "lib/index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "mocha --require coffeescript/register --recursive \"test/**/*Tests.coffee\""
+    "test": "mocha --require coffeescript/register --recursive \"test/**/*Tests.coffee\"",
+    "build": "gulp"
   },
   "husky": {
     "hooks": {

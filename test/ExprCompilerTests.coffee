@@ -626,9 +626,9 @@ describe "ExprCompiler", ->
           type: "op"
           op: "+"
           exprs: [
-            { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs:[@number1JsonQL, 0] }]}
-            { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs:[@number2JsonQL, 0] }]}
-            { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs:[@number1JsonQL, 0] }]}
+            { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [@number1JsonQL] }, 0] }
+            { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [@number2JsonQL] }, 0] }
+            { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [@number1JsonQL] }, 0] }
           ]
         }
       )
@@ -2440,7 +2440,7 @@ describe "ExprCompiler", ->
         type: "op"
         op: "+"
         exprs: [
-          { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs:[{ type: "field", tableAlias: "T1", column: "number" }, 0] }] }
-          { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs:[{ type: "literal", value: 2 }, 0] }] }
+          { type: "op", op: "coalesce", exprs:[{ type: "op", op: "::decimal", exprs: [{ type: "field", tableAlias: "T1", column: "number" }]}, 0] }
+          { type: "op", op: "coalesce", exprs:[{ type: "op", op: "::decimal", exprs: [{ type: "literal", value: 2 }]}, 0] }
         ]
       })

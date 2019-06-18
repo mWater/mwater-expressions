@@ -278,11 +278,11 @@ module.exports = class ExprCompiler
         if compiledExprs.length == 0
           return null
 
-        # Cast to decimal before adding to prevent integer overflow
+        # Cast to decimal before adding to prevent integer overflow. Do cast on internal expr to prevent coalesce mismatch
         return { 
           type: "op"
           op: expr.op
-          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "::decimal", exprs: [{ type: "op", op: "coalesce", exprs: [e, 0] }] })
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [e] }, 0] })
         }
       when "-"
         # Null if any not present
