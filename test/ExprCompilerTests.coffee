@@ -2160,6 +2160,34 @@ describe "ExprCompiler", ->
           }
         )
 
+      it "future", ->
+        @compile(
+          {
+            type: "op"
+            op: "future"
+            exprs: [@datetime1]
+          }
+          { 
+            type: "op", 
+            op: ">", 
+            exprs: [@datetime1JsonQL, moment().toISOString()]
+          }
+        )
+
+      it "notfuture", ->
+        @compile(
+          {
+            type: "op"
+            op: "notfuture"
+            exprs: [@datetime1]
+          }
+          { 
+            type: "op", 
+            op: "<=", 
+            exprs: [@datetime1JsonQL, moment().toISOString()]
+          }
+        )
+
     it "distance", ->
       @compile(
         {

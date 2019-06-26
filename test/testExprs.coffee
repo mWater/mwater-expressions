@@ -213,6 +213,18 @@ addOp(false, "last3months", literal(moment().subtract(1, "minutes").add(3, "days
 addOp(false, "last3months", literal(moment().subtract(1, "minutes").subtract(3, "months").toISOString(), "datetime"))
 addOp(true, "last3months", literal(moment().subtract(1, "minutes").subtract(3, "days").toISOString(), "datetime"))
 
+addOp(true, "future", literal(moment().add(1, "minutes").toISOString(), "datetime"))
+addOp(false, "future", literal(moment().subtract(1, "minutes").toISOString(), "datetime"))
+
+addOp(false, "notfuture", literal(moment().add(1, "minutes").toISOString(), "datetime"))
+addOp(true, "notfuture", literal(moment().subtract(1, "minutes").toISOString(), "datetime"))
+
+addOp(true, "future", literal(moment().add(1, "days").format("YYYY-MM-DD"), "date"))
+addOp(false, "future", literal(moment().format("YYYY-MM-DD"), "date"))
+
+addOp(false, "notfuture", literal(moment().add(1, "days").format("YYYY-MM-DD"), "date"))
+addOp(true, "notfuture", literal(moment().format("YYYY-MM-DD"), "date"))
+
 addOp("1", "weekofmonth", literal("2015-05-07", "date"))
 addOp("2", "weekofmonth", literal("2015-05-08", "date"))
 

@@ -746,6 +746,8 @@ relativeDateOps = [
   ['last3months', 'is in last 3 months']
   ['last6months', 'is in last 6 months']
   ['last12months', 'is in last 12 months']
+  ['future', 'is in the future']
+  ['notfuture', 'is not in the future']
 ]
 for relativeDateOp in relativeDateOps
   addOpItem(op: relativeDateOp[0], name: relativeDateOp[1], resultType: "boolean", exprTypes: ['date'])

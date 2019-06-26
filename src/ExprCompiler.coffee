@@ -1388,6 +1388,46 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'future'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op", 
+              op: ">", 
+              exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] 
+            }
+          when "datetime"
+           return { 
+             type: "op", 
+             op: ">", 
+             exprs: [compiledExprs[0], moment().toISOString() ] 
+           }
+          else
+            return null
+
+      when 'notfuture'
+        if not compiledExprs[0]
+          return null
+
+        switch expr0Type
+          when "date"
+            return { 
+              type: "op", 
+              op: "<=", 
+              exprs: [compiledExprs[0], moment().format("YYYY-MM-DD") ] 
+            }
+          when "datetime"
+           return { 
+             type: "op", 
+             op: "<=", 
+             exprs: [compiledExprs[0], moment().toISOString() ] 
+           }
+          else
+            return null
+
       when 'distance'
         if not compiledExprs[0] or not compiledExprs[1]
           return null
