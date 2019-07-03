@@ -869,7 +869,7 @@ addOpItem(op: "percent", name: "Percent of Total", desc: "Percent of all items",
 
 addOpItem(op: "~*", name: "matches", resultType: "boolean", exprTypes: ["text", "text"])
 addOpItem(op: "not", name: "Not", desc: "Opposite of a value", resultType: "boolean", exprTypes: ["boolean"], prefix: true)
-for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'image', 'imagelist', 'id']
+for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'image', 'imagelist', 'id', 'json']
   addOpItem(op: "is null", name: "is blank", resultType: "boolean", exprTypes: [type])
   addOpItem(op: "is not null", name: "is not blank", resultType: "boolean", exprTypes: [type])
 

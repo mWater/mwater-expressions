@@ -52,7 +52,12 @@ export interface EnumValue {
   code?: string
 }
 
-export type LiteralType = "id" | "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "geometry" | "text[]" | "image" | "imagelist"
+/**
+ * image: { id: id of image, caption: optional caption } 
+ * imagelist: an array of images 
+ * json: arbitrary json
+ */
+export type LiteralType = "id" | "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "geometry" | "text[]" | "image" | "imagelist" | "json"
 
 export interface Column {
   /** table-unique id of item */
@@ -67,7 +72,7 @@ export interface Column {
   /**  optional non-localized code of item */
   code?: string
   
-  /** type of content item. `id`, `text`, `number`, `enum`, `enumset`, `boolean`, `date`, `datetime`, `geometry`, `text[]`, `image`, `imagelist`, `join`, `section`, `expr`. `expr` is deprecated! */
+  /** type of content item. Literal type or `join`, `section`, `expr`. `expr` is deprecated! */
   type: LiteralType | "join" | "section" | "expr"
   
   /**  Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value */
