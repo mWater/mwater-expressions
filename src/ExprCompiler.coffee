@@ -5,6 +5,37 @@ ExprUtils = require './ExprUtils'
 moment = require 'moment'
 ColumnNotFoundException = require './ColumnNotFoundException'
 
+# now expression: (to_json(now() at time zone 'UTC')#>>'{}')
+nowExpr = {
+  type: "op"
+  op: "#>>"
+  exprs: [
+    { type: "op", op: "to_json", exprs: [
+      { type: "op", op: "at time zone", exprs: [
+        { type: "op", op: "now", exprs: [] }
+        "UTC"
+      ]}
+    ]}
+    "{}"
+  ]
+}
+
+# now 24 hours ago: (to_json((now() - interval '24 hour') at time zone 'UTC')#>>'{}')
+nowMinus24HoursExpr = {
+  type: "op"
+  op: "#>>"
+  exprs: [
+    { type: "op", op: "to_json", exprs: [
+      { type: "op", op: "at time zone", exprs: [
+        { type: "op", op: "-", exprs: [{ type: "op", op: "now", exprs: [] }, { type: "literal", value: "24 hour" }] }
+        "UTC"
+      ]}
+    ]}
+    "{}"
+  ]
+}
+
+
 # Compiles expressions to JsonQL
 module.exports = class ExprCompiler 
   # Variable values are lookup of id to variable value
@@ -972,7 +1003,7 @@ module.exports = class ExprCompiler
                   type: "op"
                   op: "-"
                   exprs: [
-                    { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [moment().toISOString()] }] }
+                    { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [nowExpr] }] }
                     { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }] }
                   ]
                 }
@@ -1225,8 +1256,8 @@ module.exports = class ExprCompiler
               type: "op"
               op: "and"
               exprs: [
-                { type: "op", op: ">=", exprs: [compiledExprs[0], moment().subtract(24, 'hours').toISOString() ] }
-                { type: "op", op: "<=", exprs: [compiledExprs[0], moment().toISOString() ] }
+                { type: "op", op: ">=", exprs: [compiledExprs[0], nowMinus24HoursExpr] }
+                { type: "op", op: "<=", exprs: [compiledExprs[0], nowExpr] }
               ]
             }
           else
@@ -1403,7 +1434,7 @@ module.exports = class ExprCompiler
            return { 
              type: "op", 
              op: ">", 
-             exprs: [compiledExprs[0], moment().toISOString() ] 
+             exprs: [compiledExprs[0], nowExpr] 
            }
           else
             return null
@@ -1423,7 +1454,7 @@ module.exports = class ExprCompiler
            return { 
              type: "op", 
              op: "<=", 
-             exprs: [compiledExprs[0], moment().toISOString() ] 
+             exprs: [compiledExprs[0], nowExpr] 
            }
           else
             return null

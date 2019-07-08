@@ -12,6 +12,36 @@ ColumnNotFoundException = require '../src/ColumnNotFoundException'
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
 
+# now expression (to_json(now() at time zone 'UTC')#>>'{}') as timestamp
+nowExpr = {
+  type: "op"
+  op: "#>>"
+  exprs: [
+    { type: "op", op: "to_json", exprs: [
+      { type: "op", op: "at time zone", exprs: [
+        { type: "op", op: "now", exprs: [] }
+        "UTC"
+      ]}
+    ]}
+    "{}"
+  ]
+}
+
+# to_json((now() - interval '24 hour') at time zone 'UTC')#>>'{}'
+nowMinus24HoursExpr = {
+  type: "op"
+  op: "#>>"
+  exprs: [
+    { type: "op", op: "to_json", exprs: [
+      { type: "op", op: "at time zone", exprs: [
+        { type: "op", op: "-", exprs: [{ type: "op", op: "now", exprs: [] }, { type: "literal", value: "24 hour" }] }
+        "UTC"
+      ]}
+    ]}
+    "{}"
+  ]
+}
+
 variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
@@ -2028,8 +2058,8 @@ describe "ExprCompiler", ->
             type: "op"
             op: "and"
             exprs: [
-              { type: "op", op: ">=", exprs: [@datetime1JsonQL, moment().subtract(24, "hours").toISOString()]}
-              { type: "op", op: "<=", exprs: [@datetime1JsonQL, moment().toISOString()]}
+              { type: "op", op: ">=", exprs: [@datetime1JsonQL, nowMinus24HoursExpr]}
+              { type: "op", op: "<=", exprs: [@datetime1JsonQL, nowExpr]}
             ]
           }
         )
@@ -2151,7 +2181,7 @@ describe "ExprCompiler", ->
                 type: "op"
                 op: "-"
                 exprs: [
-                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [moment().toISOString()] }]}
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [nowExpr] }]}
                   { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
                 ]
               }
@@ -2170,7 +2200,7 @@ describe "ExprCompiler", ->
           { 
             type: "op", 
             op: ">", 
-            exprs: [@datetime1JsonQL, moment().toISOString()]
+            exprs: [@datetime1JsonQL, nowExpr]
           }
         )
 
@@ -2184,7 +2214,7 @@ describe "ExprCompiler", ->
           { 
             type: "op", 
             op: "<=", 
-            exprs: [@datetime1JsonQL, moment().toISOString()]
+            exprs: [@datetime1JsonQL, nowExpr]
           }
         )
 
