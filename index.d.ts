@@ -72,8 +72,8 @@ export interface Column {
   /**  optional non-localized code of item */
   code?: string
   
-  /** type of content item. Literal type or `join`, `section`, `expr`. `expr` is deprecated! */
-  type: LiteralType | "join" | "section" | "expr"
+  /** type of content item. Literal type or `join`, `expr`. `expr` is deprecated! */
+  type: LiteralType | "join" | "expr"
   
   /**  Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value */
   enumValues?: EnumValue[]
