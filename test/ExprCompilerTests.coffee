@@ -1415,6 +1415,7 @@ describe "ExprCompiler", ->
       )
 
     it "compiles line length", ->
+      # ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]')
       @compile(
         { 
           type: "op"
@@ -1425,15 +1426,17 @@ describe "ExprCompiler", ->
         }
         { 
           type: "op"
-          op: "ST_Length"
+          op: "ST_Length_Spheroid"
           exprs: [
             {
               type: "op"
-              op: "::geography"
+              op: "ST_Transform"
               exprs: [
                 { type: "field", tableAlias: "T1", column: "geometry" }
+                4326
               ]
             }
+            'SPHEROID["GRS_1980",6378137,298.257222101]'
           ]
         }
       )

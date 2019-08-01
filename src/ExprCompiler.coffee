@@ -564,16 +564,17 @@ module.exports = class ExprCompiler
         if not compiledExprs[0]?
           return null
 
-        # Cast to geography and then st_length
+        # ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]')
         return {
           type: "op"
-          op: "ST_Length",
+          op: "ST_Length_Spheroid",
           exprs: [
             {
               type: "op"
-              op: "::geography"
-              exprs: [compiledExprs[0]]
+              op: "ST_Transform"
+              exprs: [compiledExprs[0], 4326]
             }
+            'SPHEROID["GRS_1980",6378137,298.257222101]'
           ]
         }
 
