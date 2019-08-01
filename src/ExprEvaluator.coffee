@@ -357,6 +357,20 @@ module.exports = class ExprEvaluator
         if point1?.type == "Point" and point2?.type == "Point"
           return getDistanceFromLatLngInM(point1.coordinates[1], point1.coordinates[0], point2.coordinates[1], point2.coordinates[0])
 
+      when "line length"
+        if hasNull
+          return null
+
+        if values[0].type != "LineString"
+          return 0
+
+        total = 0
+        coords = values[0].coordinates
+        for i in [0...coords.length - 1]
+          total += getDistanceFromLatLngInM(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0])
+
+        return total
+
       when "to text"
         if hasNull
           return null

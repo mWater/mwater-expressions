@@ -1414,6 +1414,30 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles line length", ->
+      @compile(
+        { 
+          type: "op"
+          op: "line length", 
+          exprs: [
+            { type: "field", table: "t1", column: "geometry" } 
+          ]
+        }
+        { 
+          type: "op"
+          op: "ST_Length"
+          exprs: [
+            {
+              type: "op"
+              op: "::geography"
+              exprs: [
+                { type: "field", tableAlias: "T1", column: "geometry" }
+              ]
+            }
+          ]
+        }
+      )
+
     it "compiles latitude", ->
       @compile(
         {

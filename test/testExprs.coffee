@@ -118,6 +118,8 @@ addOp(4, "ceiling", literal(3.6, "number"))
 addOp(2, "latitude", literal({ type: "Point", coordinates: [1, 2]}, "geometry")) 
 addOp(1, "longitude", literal({ type: "Point", coordinates: [1, 2]}, "geometry")) 
 
+addOp(((v) -> v > 310000 and v < 320000), "line length", literal({ type: "LineString", coordinates: [[1, 2], [3,4]]}, "geometry")) 
+
 addOp(0, "distance", literal({ type: "Point", coordinates: [1, 2]}, "geometry"), literal({ type: "Point", coordinates: [1, 2]}, "geometry"))
 addOp(((v) -> v > 310000 and v < 320000), "distance", literal({ type: "Point", coordinates: [1, 2]}, "geometry"), literal({ type: "Point", coordinates: [3, 4]}, "geometry"))
 

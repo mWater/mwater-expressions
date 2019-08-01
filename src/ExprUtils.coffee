@@ -880,6 +880,8 @@ addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of 
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of images present", resultType: "number", exprTypes: ["imagelist"], prefix: true)
 addOpItem(op: "length", name: "Number of values in", desc: "Advanced: number of items present in a text list", resultType: "number", exprTypes: ["text[]"], prefix: true)
 
+addOpItem(op: "line length", name: "Length of line", desc: "Length of a line shape in meters", resultType: "number", exprTypes: ["geometry"], prefix: true)
+
 for type in ['id']
   addOpItem(op: "is latest", name: "Is latest for each", desc: "Only include latest item for each of something", resultType: "boolean", exprTypes: [type, "boolean"], prefix: true, ordered: true, aggr: false, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 

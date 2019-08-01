@@ -559,6 +559,24 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "line length"
+        # null if null
+        if not compiledExprs[0]?
+          return null
+
+        # Cast to geography and then st_length
+        return {
+          type: "op"
+          op: "ST_Length",
+          exprs: [
+            {
+              type: "op"
+              op: "::geography"
+              exprs: [compiledExprs[0]]
+            }
+          ]
+        }
+
       when "to text"
         # Null if not present
         if not compiledExprs[0]
