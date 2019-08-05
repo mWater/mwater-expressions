@@ -1433,7 +1433,7 @@ describe "ExprCompiler", ->
               op: "ST_Transform"
               exprs: [
                 { type: "field", tableAlias: "T1", column: "geometry" }
-                4326
+                { type: "op", op: "::integer", exprs: [4326] }
               ]
             }
             'SPHEROID["GRS_1980",6378137,298.257222101]'
@@ -1461,7 +1461,7 @@ describe "ExprCompiler", ->
                   op: "ST_Transform"
                   exprs: [
                     { type: "field", tableAlias: "T1", column: "geometry" }
-                    4326
+                    { type: "op", op: "::integer", exprs: [4326] }
                   ]
                 }
               ]
@@ -1490,7 +1490,7 @@ describe "ExprCompiler", ->
                   op: "ST_Transform"
                   exprs: [
                     { type: "field", tableAlias: "T1", column: "geometry" }
-                    4326
+                    { type: "op", op: "::integer", exprs: [4326] }
                   ]
                 }
               ]
@@ -2252,13 +2252,13 @@ describe "ExprCompiler", ->
           op: "distance"
           exprs: [@geometry, @geometry]
         }
-        # ST_DistanceSphere(ST_Transform(x, 4326), ST_Transform(y, 4326))
+        # ST_DistanceSphere(ST_Transform(x, 4326::integer), ST_Transform(y, 4326::integer))
         {
           type: "op"
           op: "ST_DistanceSphere"
           exprs: [
-            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
-            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, 4326] }
+            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, { type: "op", op: "::integer", exprs: [4326] }] }
+            { type: "op", op: "ST_Transform", exprs: [@geometryJsonQL, { type: "op", op: "::integer", exprs: [4326] }] }
           ]
         }
       )

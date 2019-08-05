@@ -564,7 +564,7 @@ module.exports = class ExprCompiler
         if not compiledExprs[0]?
           return null
 
-        # ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]')
+        # ST_Length_Spheroid(ST_Transform(location,4326::integer), 'SPHEROID["GRS_1980",6378137,298.257222101]')
         return {
           type: "op"
           op: "ST_Length_Spheroid",
@@ -572,7 +572,7 @@ module.exports = class ExprCompiler
             {
               type: "op"
               op: "ST_Transform"
-              exprs: [compiledExprs[0], 4326]
+              exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }]
             }
             'SPHEROID["GRS_1980",6378137,298.257222101]'
           ]
@@ -947,7 +947,7 @@ module.exports = class ExprCompiler
           op: "ST_Y"
           exprs: [
             { type: "op", op: "ST_Centroid", exprs: [
-              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }] }
             ] }
           ]
         }
@@ -961,7 +961,7 @@ module.exports = class ExprCompiler
           op: "ST_X"
           exprs: [
             { type: "op", op: "ST_Centroid", exprs: [
-              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
+              { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }] }
             ] }
           ]
         }
@@ -1486,8 +1486,8 @@ module.exports = class ExprCompiler
           type: "op"
           op: "ST_DistanceSphere"
           exprs: [
-            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], 4326] }
-            { type: "op", op: "ST_Transform", exprs: [compiledExprs[1], 4326] }
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }] }
+            { type: "op", op: "ST_Transform", exprs: [compiledExprs[1], { type: "op", op: "::integer", exprs: [4326] }] }
           ]
         }
 
