@@ -34,7 +34,7 @@ nowMinus24HoursExpr = {
   exprs: [
     { type: "op", op: "to_json", exprs: [
       { type: "op", op: "at time zone", exprs: [
-        { type: "op", op: "-", exprs: [{ type: "op", op: "now", exprs: [] }, { type: "literal", value: "24 hour" }] }
+        { type: "op", op: "-", exprs: [{ type: "op", op: "now", exprs: [] }, { type: "op", op: "interval", exprs: [{ type: "literal", value: "24 hour" }] }] }
         "UTC"
       ]}
     ]}
