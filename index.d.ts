@@ -1,3 +1,5 @@
+import { JsonQL, JsonQLExpr, JsonQLFrom } from "jsonql"
+
 export interface LocalizedString {
   _base: string,
   [language: string]: string  // Localizations
@@ -219,64 +221,6 @@ export interface ScalarExpr {
   
   /** Expression from final table to get value */
   expr: Expr
-}
-
-export interface JsonQL {
-  type: string
-  [other: string]: any
-}
-
-export interface JsonQLQuery {
-  type: "query"
-  selects: JsonQLSelect[]
-  from: JsonQLFrom
-  where?: JsonQLExpr
-  orderBy?: any // TODO
-  groupBy?: any // TODO
-  limit?: number
-}
-
-export interface JsonQLExpr {
-  // TODO
-  type: string
-  [other: string]: any
-}
-
-export type JsonQLFrom = JsonQLTableFrom | JsonQLJoinFrom | JsonQLSubqueryFrom | JsonQLSubexprFrom
-
-export interface JsonQLJoinFrom {
-  type: "join", 
-  left: JsonQLFrom 
-  right: JsonQLFrom
-  kind: "inner" | "left" | "right"
-  /** Expression to join on */
-  on: JsonQLExpr
-}
-
-export interface JsonQLTableFrom {
-  type: "table"
-  table: string
-  alias: string
-}
-
-/** Subquery aliased */
-export interface JsonQLSubqueryFrom {
-  type: "subquery"
-  query: JsonQLQuery
-  alias: string
-}
-
-/** Subexpression is a from that is an expression, as in select * from someexpression as somealias */
-export interface JsonQLSubexprFrom {
-  type: "subexpr"
-  expr: JsonQLExpr
-  alias: string
-}
-
-export interface JsonQLSelect {
-  type: "select"
-  expr: JsonQLExpr
-  alias: string
 }
 
 export interface Row {
