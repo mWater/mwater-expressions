@@ -1478,6 +1478,12 @@ module.exports = class ExprCompiler
           else
             return null
 
+      when 'current date'
+        return { type: "literal", value: moment().format("YYYY-MM-DD") }
+
+      when 'current datetime'
+        return { type: "literal", value: moment().toISOString() }
+
       when 'distance'
         if not compiledExprs[0] or not compiledExprs[1]
           return null

@@ -885,5 +885,9 @@ addOpItem(op: "line length", name: "Length of line", desc: "Length of a line sha
 for type in ['id']
   addOpItem(op: "is latest", name: "Is latest for each", desc: "Only include latest item for each of something", resultType: "boolean", exprTypes: [type, "boolean"], prefix: true, ordered: true, aggr: false, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
+addOpItem(op: "current date", name: "Today", desc: "Advanced: current date. Do not use in comparisons", resultType: "date", exprTypes: [], prefix: true)
+addOpItem(op: "current datetime", name: "Now", desc: "Advanced: current datetime. Do not use in comparisons", resultType: "datetime", exprTypes: [], prefix: true)
+
 addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true)
 addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["number"], prefix: true)
+

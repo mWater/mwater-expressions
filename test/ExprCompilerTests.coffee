@@ -1555,6 +1555,23 @@ describe "ExprCompiler", ->
         }
       ) 
 
+    it "compiles current date", ->
+      @compile(
+        {
+          type: "op"
+          op: "current date"
+          exprs: []
+        }
+        {
+          type: "literal"
+          value: moment().format("YYYY-MM-DD")
+        }
+      )
+
+    it "compiles current datetime", ->
+      jsonql = @ec.compileExpr(expr: { type: "op", op: "current datetime", exprs: [] }, tableAlias: "T1")
+      assert.equal jsonql.type, "literal"
+
     # # DEPRECATED. Use ancestryTable
     # it "compiles within", ->
     #   @compile(

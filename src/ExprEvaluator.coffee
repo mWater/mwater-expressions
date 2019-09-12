@@ -332,6 +332,12 @@ module.exports = class ExprEvaluator
         
         return not moment(date, moment.ISO_8601).isAfter(moment())
 
+      when "current date"
+        return moment().format("YYYY-MM-DD")
+
+      when "current datetime"
+        return moment().toISOString()
+
       when "latitude"
         if hasNull
           return null
