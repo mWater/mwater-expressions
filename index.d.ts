@@ -59,7 +59,7 @@ export interface EnumValue {
  * imagelist: an array of images 
  * json: arbitrary json
  */
-export type LiteralType = "id" | "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "geometry" | "text[]" | "image" | "imagelist" | "json"
+export type LiteralType = "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "id" | "id[]" | "geometry" | "text[]" | "image" | "imagelist" | "json"
 
 export interface Column {
   /** table-unique id of item */
