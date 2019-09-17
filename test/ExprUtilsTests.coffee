@@ -93,8 +93,8 @@ describe "ExprUtils", ->
     it "finds = for expr number", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "field", table: "t1", column: "expr_number" })[0].op, "="
 
-    it "first = any for id type non-hierarchical", ->
-      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "= any"
+    it "first = for id type non-hierarchical", ->
+      assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "t1" })[0].op, "="
 
     it "first within for id type hierarchical", ->
       assert.equal @exprUtils.findMatchingOpItems(lhsExpr: { type: "id", table: "thier" })[0].op, "within"
