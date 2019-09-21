@@ -1,4 +1,4 @@
-import { DataSource } from '../index'
+import { DataSource } from "./DataSource";
 
 /** Caching data source for mWater. Requires jQuery. require explicitly: require('mwater-expressions/lib/MWaterDataSource') */
 export default class MWaterDataSource extends DataSource {
