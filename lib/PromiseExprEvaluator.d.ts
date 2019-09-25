@@ -1,5 +1,5 @@
-import { default as ExprEvaluator } from "./ExprEvaluator";
-import { Expr } from "./Expr";
+import ExprEvaluator from "./ExprEvaluator";
+import { Expr } from "./types";
 /** Represents a row to be evaluated */
 export interface PromiseExprEvaluatorRow {
     /** gets primary key of row */

@@ -1,6 +1,6 @@
 import _ from "lodash"
-import { default as ExprEvaluator, ExprEvaluatorContext, ExprEvaluatorRow } from "./ExprEvaluator"
-import { Expr } from "./Expr"
+import ExprEvaluator from "./ExprEvaluator"
+import { Expr, ExprEvaluatorContext, ExprEvaluatorRow } from "./types"
 
 /** Represents a row to be evaluated */
 export interface PromiseExprEvaluatorRow {

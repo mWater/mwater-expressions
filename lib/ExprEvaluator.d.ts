@@ -1,23 +1,5 @@
-import { Schema } from "./Schema";
-import { Variable, Expr } from "./Expr";
-
-/** a row is a plain object that has the following functions as properties */
-export interface ExprEvaluatorRow {
-  /** gets primary key of row. callback is called with (error, value) */
-  getPrimaryKey(callback: (error: any, value?: any) => void): void
-
-  /** gets the value of a column. callback is called with (error, value) 
-   * For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
-   */
-  getField(columnId: string, callback: (error: any, value?: any) => void): void
-}
-
-export interface ExprEvaluatorContext {
-  /** current row. Optional for aggr expressions */
-  row?: ExprEvaluatorRow
-  /** array of rows (for aggregate expressions) */
-  rows?: ExprEvaluatorRow[]
-}
+import { ExprEvaluatorContext, Variable, Expr } from "./types"
+import Schema from "./Schema";
 
 /**
  * Evaluates an expression given a context.

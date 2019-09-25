@@ -1,6 +1,7 @@
 import { JsonQL } from "jsonql";
+import { Row } from "./types";
 
-export class DataSource {
+export default class DataSource {
   /** Performs a single query. Calls cb with (error, rows) */
   performQuery(query: JsonQL, cb: (error: any, rows: Row[]) => void): void
 
@@ -17,8 +18,3 @@ export class DataSource {
   // Useful for knowing when cache has been cleared, as it will be set to time of clearing.
   getCacheExpiry(): number
 }
-
-export interface Row {
-  [alias: string]: any 
-}
-  

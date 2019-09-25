@@ -1,5 +1,5 @@
-import { Schema } from "./Schema";
-import { Variable, Expr, AggrStatus } from "./Expr";
+import Schema from "./Schema";
+import { Variable, Expr, AggrStatus } from "./types";
 
 /** Validates expressions. If an expression has been cleaned, it will always be valid */
 export default class ExprValidator {
