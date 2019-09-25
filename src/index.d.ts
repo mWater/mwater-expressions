@@ -2,12 +2,12 @@ import { JsonQL, JsonQLExpr, JsonQLFrom } from "jsonql"
 import Schema from "./Schema"
 import { Variable, Expr, AggrStatus, LocalizedString, EnumValue } from "./types"
 
+export * from './types'
 export { default as DataSource } from './DataSource'
 export { default as ExprEvaluator } from './ExprEvaluator'
 export { default as ExprValidator } from './ExprValidator'
+export { default as Schema } from './Schema'
 export * from './PromiseExprEvaluator'
-export * from './Schema'
-export * from './types'
 
 export class ExprUtils {
   constructor(schema: Schema, variables?: Variable[])
