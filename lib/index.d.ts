@@ -1,6 +1,6 @@
 import { JsonQL, JsonQLExpr, JsonQLFrom } from "jsonql"
 import Schema from "./Schema"
-import { Variable, Expr, AggrStatus } from "./types"
+import { Variable, Expr, AggrStatus, LocalizedString, EnumValue } from "./types"
 
 export { default as DataSource } from './DataSource'
 export { default as ExprEvaluator } from './ExprEvaluator'
@@ -8,6 +8,30 @@ export { default as ExprValidator } from './ExprValidator'
 export * from './PromiseExprEvaluator'
 export * from './Schema'
 export * from './types'
+
+export class ExprUtils {
+  constructor(schema: Schema, variables?: Variable[])
+
+  summarizeExpr(expr: Expr, locale?: string): string
+
+  getExprType(expr: Expr): string | null
+
+  getExprAggrStatus(expr: Expr): AggrStatus | null
+
+  getExprEnumValues(expr: Expr): EnumValue[] | null
+
+  /** Gets the id table of an expression of type id */
+  getExprIdTable(expr: Expr): string | null
+
+  /** Converts a literal value related to an expression to a string, using name of enums. preferEnumCodes tries to use code over name */
+  stringifyExprLiteral(expr: Expr, literal: any, locale?: string, preferEnumCodes?: boolean): string
+
+  /** Localize a localized string */
+  static localizeString(str?: LocalizedString | null, locale?: string): string
+
+  /** Localize a localized string */
+  localizeString(str?: LocalizedString | null, locale?: string): string
+}
 
 export class ExprCompiler {
   constructor(schema: Schema, variables?: Variable[], variableValues?: { [variableId: string]: any })
