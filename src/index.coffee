@@ -13,3 +13,5 @@ exports.OldExprEvaluator = require './OldExprEvaluator'
 exports.injectTableAlias = require './injectTableAlias'
 exports.injectTableAliases = require './injectTableAliases'
 exports.ColumnNotFoundException = require './ColumnNotFoundException'
+
+exports.PromiseExprEvaluator = require('./PromiseExprEvaluator').PromiseExprEvaluator
