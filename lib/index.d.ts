@@ -1,6 +1,6 @@
 import { JsonQL, JsonQLExpr, JsonQLFrom } from "jsonql"
 import Schema from "./Schema"
-import { Variable, Expr, AggrStatus, LocalizedString, EnumValue } from "./types"
+import { Variable, Expr, AggrStatus, LocalizedString, EnumValue, FieldExpr } from "./types"
 
 export * from './types'
 export { default as DataSource } from './DataSource'
@@ -31,6 +31,10 @@ export class ExprUtils {
 
   /** Localize a localized string */
   localizeString(str?: LocalizedString | null, locale?: string): string
+
+  /** Get a list of fields that are referenced in a an expression
+   * Useful to know which fields and joins are used. Includes joins as fields */
+  getReferencedFields(expr: Expr): FieldExpr[]
 }
 
 export class ExprCompiler {
