@@ -823,7 +823,18 @@ addOpItem(op: "weekofmonth", name: "Week of month", desc: "Week within the month
 addOpItem(op: "dayofmonth", name: "Day of month", desc: "Day within the month (1-31)", resultType: "enum", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "dayofmonth", name: "Day of month", desc: "Day within the month (1-31)", resultType: "enum", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 
-for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry']
+addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
+  lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
+  if lhsIdTable
+    return exprUtils.schema.getTable(lhsIdTable).ancestry? or exprUtils.schema.getTable(lhsIdTable).ancestryTable?
+  return false
+)
+
+addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
+addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
+addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
+
+for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime', 'geometry', 'id']
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
   addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
   addOpItem(op: "previous", name: "Previous", desc: "Get 2nd latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
@@ -842,13 +853,6 @@ addOpItem(op: "percent where", name: "Percent where", desc: "Get percent of item
 addOpItem(op: "count where", name: "Number where", desc: "Get number of items that match a condition", resultType: "number", exprTypes: ["boolean"], prefix: true, aggr: true)
 addOpItem(op: "sum where", name: "Total where", desc: "Add together only values that match a condition", resultType: "number", exprTypes: ["number", "boolean"], prefix: true, prefixLabel: "Total", aggr: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
-addOpItem(op: "within", name: "is within", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
-  lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
-  if lhsIdTable
-    return exprUtils.schema.getTable(lhsIdTable).ancestry? or exprUtils.schema.getTable(lhsIdTable).ancestryTable?
-  return false
-)
-
 addOpItem(op: "within any", name: "is within any of", resultType: "boolean", exprTypes: ["id", "id[]"], lhsCond: (lhsExpr, exprUtils) => 
   lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
   if lhsIdTable
@@ -857,10 +861,6 @@ addOpItem(op: "within any", name: "is within any of", resultType: "boolean", exp
 )
 
 addOpItem(op: "array_agg", name: "Make list of", desc: "Aggregates results into a list", resultType: "text[]", exprTypes: ["text"], prefix: true, aggr: true)
-
-addOpItem(op: "=", name: "is", resultType: "boolean", exprTypes: ["id", "id"])
-addOpItem(op: "<>", name: "is not", resultType: "boolean", exprTypes: ["id", "id"])
-addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["id", "id[]"])
 
 addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"])
 
