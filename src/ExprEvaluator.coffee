@@ -648,7 +648,7 @@ module.exports = class ExprEvaluator
             return cb(error)
 
           if results
-            cb(null, { rows: _.flatten(results) })
+            cb(null, { rows: _.compact(_.flatten(results)) })
       else if memo.row
         # Single row
         memo.row.getField(join, (error, result) =>
@@ -656,7 +656,7 @@ module.exports = class ExprEvaluator
             return cb(error)
 
           if _.isArray(result)
-            cb(null, { rows: result })
+            cb(null, { rows: _.compact(result) })
           else
             cb(null, { row: result })
         )
