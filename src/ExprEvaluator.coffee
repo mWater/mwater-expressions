@@ -639,7 +639,7 @@ module.exports = class ExprEvaluator
       return callback(null, null)
 
     # Follow joins
-    async.reduce expr.joins, context, (memo, join, cb) =>
+    async.reduce expr.joins, { row: context.row }, (memo, join, cb) =>
       # Memo is the context to apply the join to 
       # If multiple rows, get join for each and flatten
       if memo.rows
