@@ -522,7 +522,7 @@ module.exports = class ExprEvaluator
 
             # Take second non-null
             values = _.filter(values, (v) => v?)
-            if values[1]
+            if values[1]?
               callback(null, values[1])
               return
 
