@@ -498,6 +498,36 @@ module.exports = class ExprEvaluator
               else
                 callback(null, null)
 
+      when "previous"
+        # Fail quietly if no ordering or no schema
+        if not @schema or not @schema.getTable(table).ordering
+          console.warn("last does not work without schema and ordering")
+          return callback(null, null)
+
+        # Evaluate all rows by ordering
+        async.map context.rows, ((row, cb) => row.getField(@schema.getTable(table).ordering, cb)), (error, orderValues) =>
+          if error
+            return callback(error)
+
+          # Evaluate all rows
+          async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, values) =>
+            if error
+              return callback(error)
+
+            zipped = _.zip(values, orderValues)
+
+            # Sort by ordering reverse
+            zipped = _.sortByOrder(zipped, [(entry) => entry[1]], ["desc"])
+            values = _.map(zipped, (entry) -> entry[0])
+
+            # Take second non-null
+            values = _.filter(values, (v) => v?)
+            if values[1]
+              callback(null, values[1])
+              return
+
+            callback(null, null)
+
       when "count where"
         # Evaluate all rows by where
         async.map context.rows, ((row, cb) => @evaluate(exprs[0], { row: row }, cb)), (error, wheres) =>
@@ -720,6 +750,11 @@ module.exports = class ExprEvaluator
     # Fail quietly if no ordering or no schema
     if not @schema or not @schema.getTable(table).ordering
       console.warn("evaluateIsLatest does not work without schema and ordering")
+      return callback(null, false)
+
+    # Fail quietly if no rows
+    if not context.rows
+      console.warn("evaluateIsLatest does not work without rows context")
       return callback(null, false)
 
     # Evaluate lhs (value to group by) for all rows

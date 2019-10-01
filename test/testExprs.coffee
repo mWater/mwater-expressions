@@ -274,6 +274,8 @@ add({ type: "op", table: "t1", op: "percent", exprs: [] }, 100, { rows: sampleRo
 add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "a" }] }, 2, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last", exprs: [{ type: "field", table: "t1", column: "f" }] }, 1, { rows: sampleRows })
 
+add({ type: "op", table: "t1", op: "previous", exprs: [{ type: "field", table: "t1", column: "a" }] }, 1, { rows: sampleRows })
+
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 1, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, null] }, 2, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "f" }, null] }, 1, { rows: sampleRows })
