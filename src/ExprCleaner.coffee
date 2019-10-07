@@ -41,11 +41,11 @@ module.exports = class ExprCleaner
       expr = { type: "literal", valueType: "enumset", value: expr.value }
 
     # Strip if wrong table 
-    if options.table and expr.type != "literal" and expr.type != "variable" and expr.table != options.table
+    if options.table and expr.table and expr.table != options.table
       return null
 
     # Strip if no table
-    if not expr.table and expr.type != "literal" and expr.type != "variable"
+    if not expr.table and expr.type == "field"
       return null
 
     # Strip if non-existent table
