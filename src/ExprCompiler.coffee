@@ -999,6 +999,46 @@ module.exports = class ExprCompiler
 
         return null
 
+      when 'months difference'
+        if not compiledExprs[0] or not compiledExprs[1]
+          return null
+
+        if exprUtils.getExprType(expr.exprs[0]) == "date"
+          return {
+            type: "op"
+            op: "/"
+            exprs: [
+              {
+                type: "op"
+                op: "-"
+                exprs: [
+                  { type: "op", op: "::date", exprs: [compiledExprs[0]] }
+                  { type: "op", op: "::date", exprs: [compiledExprs[1]] }
+                ]
+              }
+              30.5
+            ]
+          }
+
+        if exprUtils.getExprType(expr.exprs[0]) == "datetime"
+          return {
+            type: "op"
+            op: "/"
+            exprs: [
+              {
+                type: "op"
+                op: "-"
+                exprs: [
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[0]] }] }
+                  { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [compiledExprs[1]] }] }
+                ]
+              }
+              86400 * 30.5
+            ]
+          }
+
+        return null
+
       when 'days since'
         if not compiledExprs[0]
           return null

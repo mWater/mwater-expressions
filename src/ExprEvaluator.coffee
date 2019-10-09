@@ -210,6 +210,11 @@ module.exports = class ExprEvaluator
           return null
         return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601))/24/3600/1000
 
+      when "months difference"
+        if hasNull
+          return null
+        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601))/24/3600/1000/30.5
+
       when "days since"
         if hasNull
           return null

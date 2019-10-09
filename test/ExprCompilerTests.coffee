@@ -1673,6 +1673,54 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles months difference (date)", ->
+      @compile(
+        {
+          type: "op"
+          op: "months difference"
+          exprs: [@date1, @date2]
+        }
+        {
+          type: "op"
+          op: "/"
+          exprs: [
+            {
+              type: "op"
+              op: "-"
+              exprs: [
+                { type: "op", op: "::date", exprs: [@date1JsonQL]}
+                { type: "op", op: "::date", exprs: [@date2JsonQL]}
+              ]
+            }
+            30.5
+          ]
+        }
+      )
+
+    it "compiles months difference (datetime)", ->
+      @compile(
+        {
+          type: "op"
+          op: "months difference"
+          exprs: [@datetime1, @datetime2]
+        }
+        {
+          type: "op"
+          op: "/"
+          exprs: [
+            {
+              type: "op"
+              op: "-"
+              exprs: [
+                { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime1JsonQL] }]}
+                { type: "op", op: "date_part", exprs: ['epoch', { type: "op", op: "::timestamp", exprs: [@datetime2JsonQL] }]}
+              ]
+            }
+            86400 * 30.5
+          ]
+        }
+      )
+
     it "compiles enum to text", ->
       @compile(
         {
