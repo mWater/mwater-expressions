@@ -808,6 +808,9 @@ addOpItem(op: "days difference", name: "Days between", desc: "Get the number of 
 addOpItem(op: "months difference", name: "Months between", desc: "Get the number of months between two dates", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
 addOpItem(op: "months difference", name: "Months between", desc: "Get the number of months between two dates", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
 
+addOpItem(op: "years difference", name: "Years between", desc: "Get the number of years between two dates", resultType: "number", exprTypes: ["date", "date"], prefix: true, rhsLiteral: false, joiner: "and")
+addOpItem(op: "years difference", name: "Years between", desc: "Get the number of years between two dates", resultType: "number", exprTypes: ["datetime", "datetime"], prefix: true, rhsLiteral: false, joiner: "and")
+
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["date"], prefix: true, rhsLiteral: false)
 addOpItem(op: "days since", name: "Days since", desc: "Get number of days from a date to the present", resultType: "number", exprTypes: ["datetime"], prefix: true, rhsLiteral: false)
 

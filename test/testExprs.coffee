@@ -131,6 +131,10 @@ addOp(30/30.5, "months difference", literal("2015-12-31", "date"), literal("2015
 addOp(30/30.5, "months difference", literal('2016-07-22T05:36:51.412Z', "datetime"), literal('2016-06-22T05:36:51.412Z', "datetime"))
 addOp(null, "months difference", literal('2016-06-23T17:36:51.412Z', "datetime"), literal(null, "datetime"))
 
+addOp(1, "years difference", literal("2015-12-01", "date"), literal("2014-12-01", "date"))
+addOp(1, "years difference", literal('2015-07-22T05:36:51.412Z', "datetime"), literal('2014-07-22T05:36:51.412Z', "datetime"))
+addOp(null, "years difference", literal('2016-06-23T17:36:51.412Z', "datetime"), literal(null, "datetime"))
+
 addOp(((v) -> v > 0.9 and v < 1.1), "days since", literal(moment().subtract(1, "days").toISOString(), "datetime"))
 
 addOp(true, "contains", literal(["a", "b", "c"], "enumset"), literal(["a", "b"], "enumset"))
