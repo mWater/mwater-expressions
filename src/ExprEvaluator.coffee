@@ -115,9 +115,9 @@ module.exports = class ExprEvaluator
           return null
         return _.reduce(values, (acc, value) -> acc * value)
       when "-"
-        if hasNull
+        if not values[0]? and not values[1]?
           return null
-        return values[0] - values[1]
+        return (if values[0]? then values[0] else 0) - (if values[1]? then values[1] else 0)
       when "/"
         if hasNull
           return null

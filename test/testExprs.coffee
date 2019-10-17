@@ -30,7 +30,7 @@ addOp(5, "+", literal(3, "number"), literal(2, "number"))
 addOp(3, "+", literal(3, "number"), literal(null, "number")) # Note that is different from SQL standard in null handling
 
 addOp(2, "-", literal(3, "number"), literal(1, "number"))
-addOp(null, "-", literal(3, "number"), literal(null, "number")) 
+addOp(3, "-", literal(3, "number"), literal(null, "number")) # Note that is different from SQL standard in null handling
 
 addOp(6, "*", literal(3, "number"), literal(2, "number"))
 addOp(null, "*", literal(3, "number"), literal(null, "number"))
