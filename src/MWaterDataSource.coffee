@@ -44,16 +44,19 @@ module.exports = class MWaterDataSource extends DataSource
     else
       method = "POST"
 
-    url = @apiUrl + "jsonql?" + querystring.stringify(queryParams)
-
     # Setup caching
     headers = {}
     if method == "GET"
       if not @options.serverCaching
-        headers['Cache-Control'] = "no-cache"
+        # Using headers forces OPTIONS call, so use timestamp to disable caching
+        # headers['Cache-Control'] = "no-cache"
+        queryParams.ts = Date.now()
       else if @cacheExpiry
         seconds = Math.floor((new Date().getTime() - @cacheExpiry) / 1000)
         headers['Cache-Control'] = "max-age=#{seconds}"
+
+    # Create URL
+    url = @apiUrl + "jsonql?" + querystring.stringify(queryParams)
 
     $.ajax({ 
       dataType: "json"
