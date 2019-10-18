@@ -320,11 +320,11 @@ module.exports = class ExprCompiler
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
 
-        # Cast to decimal before adding to prevent integer overflow. Do cast on internal expr to prevent coalesce mismatch
+        # Cast to decimal before subtracting to prevent integer overflow
         return { 
           type: "op"
           op: expr.op
-          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [e] }, 0] })
+          exprs: _.map(compiledExprs, (e) -> { type: "op", op: "::decimal", exprs: [e] })
         }
       when ">", "<", ">=", "<=", "<>", "=", "~*", "round", "floor", "ceiling", "sum", "avg", "min", "max", "count", "stdev", "stdevp", "var", "varp", "array_agg"
         # Null if any not present

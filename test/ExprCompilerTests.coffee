@@ -691,10 +691,7 @@ describe "ExprCompiler", ->
         {
           type: "op"
           op: "-"
-          exprs: [
-            { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [@number1JsonQL] }, 0] }
-            { type: "op", op: "coalesce", exprs: [{ type: "op", op: "::decimal", exprs: [@number2JsonQL] }, 0] }
-          ]
+          exprs: [{ type: "op", op: "::decimal", exprs: [@number1JsonQL] }, { type: "op", op: "::decimal", exprs: [@number2JsonQL] }]
         }
       )
 
