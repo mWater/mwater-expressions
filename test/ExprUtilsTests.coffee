@@ -439,6 +439,29 @@ describe "ExprUtils", ->
       cols = @exprUtils.getReferencedFields({ type: "op", op: "+", exprs: [{ type: "field", table: "t1", column: "number" }, { type: "field", table: "t1", column: "number" }]})
       compare(cols, [{ type: "field", table: "t1", column: "number" }])
 
+  describe "inlineVariableValues", ->
+    it "inlines literals", ->
+      expr = { type: "op", op: ">", exprs: [
+        { type: "variable", variableId: "varnumber" }
+        { type: "literal", valueType: "number", value: 3 }
+      ]}
+      result = { type: "op", op: ">", exprs: [
+        { type: "literal", valueType: "number", value: 4 }
+        { type: "literal", valueType: "number", value: 3 }
+      ]}
+      compare(@exprUtils.inlineVariableValues(expr, { varnumber: 4 }), result)
+
+    it "nulls entire value if literal null", ->
+      expr = { type: "op", op: ">", exprs: [
+        { type: "variable", variableId: "varnumber" }
+        { type: "literal", valueType: "number", value: 3 }
+      ]}
+      result = { type: "op", op: ">", exprs: [
+        null
+        { type: "literal", valueType: "number", value: 3 }
+      ]}
+      compare(@exprUtils.inlineVariableValues(expr, { varnumber: null }), result)
+
   describe "andExprs", ->
     it "handles trivial case", ->
       assert.isNull ExprUtils.andExprs("xyz")

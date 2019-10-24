@@ -663,6 +663,35 @@ module.exports = class ExprUtils
     return _.uniq(cols, (col) -> col.table + "/" + col.column)
 
 
+  # Replace variables with literal values
+  inlineVariableValues: (expr, variableValues) =>
+    # Replace every part of an object, including array members
+    mapObject = (obj, replacer) ->
+      if not obj  
+        return obj
+      if _.isArray(obj)
+        return _.map(obj, replacer)
+      if _.isObject(obj)
+        return _.mapValues(obj, replacer)
+      return obj
+
+    replacer = (part) => 
+      part = mapObject(part, replacer)
+      if part and part.type == "variable"
+        # Find variable
+        variable = _.findWhere(@variables, id: part.variableId)
+        if not variable
+          throw new Error("Variable #{part.variableId} not found")
+        if variable.table
+          return variableValues[variable.id] or null
+        if variableValues[variable.id]?
+          return { type: "literal", valueType: variable.type, value: variableValues[variable.id] }
+        else  
+          return null
+      return part
+
+    return mapObject(expr, replacer)
+
   # # Get a list of column ids of expression table that are referenced in a an expression
   # # Useful to know which fields and joins are used. Does not follow joins, beyond including 
   # # the first join (which is a column in the start table).

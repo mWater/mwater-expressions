@@ -35,6 +35,9 @@ export class ExprUtils {
   /** Get a list of fields that are referenced in a an expression
    * Useful to know which fields and joins are used. Includes joins as fields */
   getReferencedFields(expr: Expr): FieldExpr[]
+
+  /** Replace variables with literal values */
+  inlineVariableValues(expr: Expr, variableValues: { [variableId: string]: any }): Expr
 }
 
 export class ExprCompiler {
