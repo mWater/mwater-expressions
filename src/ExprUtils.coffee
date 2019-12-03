@@ -663,7 +663,7 @@ module.exports = class ExprUtils
     return _.uniq(cols, (col) -> col.table + "/" + col.column)
 
 
-  # Replace variables with literal values
+  # Replace variables with literal values.
   inlineVariableValues: (expr, variableValues) =>
     # Replace every part of an object, including array members
     mapObject = (obj, replacer) ->

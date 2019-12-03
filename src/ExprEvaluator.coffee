@@ -756,6 +756,8 @@ module.exports = class ExprEvaluator
 
       callback(null, result)
 
+  # NOTE: This is not technically correct. It's not a window function (as window
+  # functions can't be used in where clauses) but rather a special query
   evaluateIsLatest: (table, exprs, context, callback) ->
     # Fail quietly if no ordering or no schema
     if not @schema or not @schema.getTable(table).ordering
