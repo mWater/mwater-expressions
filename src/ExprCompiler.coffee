@@ -514,8 +514,8 @@ module.exports = class ExprCompiler
           type: "op"
           op: "@>"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[1]] }] }
+            convertToJsonB(compiledExprs[0])
+            convertToJsonB(compiledExprs[1])
           ]
         }
 
@@ -533,7 +533,7 @@ module.exports = class ExprCompiler
           type: "op"
           op: "?|"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+            convertToJsonB(compiledExprs[0])
             compiledExprs[1]
           ]
         }
@@ -552,7 +552,7 @@ module.exports = class ExprCompiler
               type: "op"
               op: "jsonb_array_length"
               exprs: [
-                { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExprs[0]] }] }
+                convertToJsonB(compiledExprs[0])
               ]
             }
             0
@@ -1702,8 +1702,8 @@ module.exports = class ExprCompiler
                     type: "op"
                     op: "@>"
                     exprs: [
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [@compileExpr(expr: expr.input, tableAlias: options.tableAlias)] }] }
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "literal", value: [pair[0]] }] }]}
+                      convertToJsonB(@compileExpr(expr: expr.input, tableAlias: options.tableAlias))
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: [pair[0]] }] }
                     ]
                   }
                   then: @compileExpr(expr: pair[1], tableAlias: options.tableAlias) 
@@ -1864,3 +1864,17 @@ module.exports = class ExprCompiler
       return { type: "literal", value: value }
     else
       return null
+
+# Converts a compiled expression to jsonb. Literals cannot use to_json as they will
+# trigger "could not determine polymorphic type because input has type unknown" unless the 
+# SQL is inlined
+convertToJsonB = (compiledExpr) ->
+  if not compiledExpr
+    return compiledExpr
+
+  # Literals are special
+  if compiledExpr.type == "literal"
+    return { type: "op", op: "::jsonb", exprs: [compiledExpr] }
+  
+  # First convert using to_json in case is array
+  return { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExpr] }] }
