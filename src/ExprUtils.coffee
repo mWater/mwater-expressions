@@ -410,14 +410,14 @@ module.exports = class ExprUtils
         return @localizeString(@schema.getTable(expr.table)?.name, locale)
       when "op"
         # Special case for contains/intersects with literal RHS
-        if expr.op == "contains" and expr.exprs[1]?.type == "literal"
+        if expr.op == "contains" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enumset" 
           return @summarizeExpr(expr.exprs[0], locale) + " includes all of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
-        if expr.op == "intersects" and expr.exprs[1]?.type == "literal"
+        if expr.op == "intersects" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enumset" 
           return @summarizeExpr(expr.exprs[0], locale) + " includes any of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
         # Special case for = any with literal RHS
-        if expr.op == "= any" and expr.exprs[1]?.type == "literal"
+        if expr.op == "= any" and expr.exprs[1]?.type == "literal" and expr.exprs[1]?.valueType == "enumset" 
           return @summarizeExpr(expr.exprs[0], locale) + " is any of " + @stringifyLiteralValue("enumset", expr.exprs[1].value, locale, @getExprEnumValues(expr.exprs[0]))
 
         # Special case for = with literal RHS
