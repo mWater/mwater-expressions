@@ -400,7 +400,7 @@ describe "ExprCompiler", ->
                     op: "@>"
                     exprs: [
                       { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["a"] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a"]' }]}
                     ]
                   }
                   then: { type: "literal", value: 3 } 
@@ -417,7 +417,7 @@ describe "ExprCompiler", ->
                     op: "@>"
                     exprs: [
                       { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["b"] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["b"]' }]}
                     ]
                   }
                   then: { type: "literal", value: 4 } 
@@ -511,7 +511,7 @@ describe "ExprCompiler", ->
                     op: "@>"
                     exprs: [
                       { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["a"] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a"]' }]}
                     ]
                   }
                   then: { type: "literal", value: 3 } 
@@ -528,7 +528,7 @@ describe "ExprCompiler", ->
                     op: "@>"
                     exprs: [
                       { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["b"] }]}
+                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["b"]' }]}
                     ]
                   }
                   then: { type: "literal", value: 4 } 
@@ -1338,7 +1338,7 @@ describe "ExprCompiler", ->
           op: "@>"
           exprs: [
             { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
-            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: ["a", "b"] }]}
+            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a","b"]' }]}
           ]
         }
       )

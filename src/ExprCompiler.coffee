@@ -1703,7 +1703,7 @@ module.exports = class ExprCompiler
                     op: "@>"
                     exprs: [
                       convertToJsonB(@compileExpr(expr: expr.input, tableAlias: options.tableAlias))
-                      { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: [pair[0]] }] }
+                      convertToJsonB({ type: "literal", value: [pair[0]] })
                     ]
                   }
                   then: @compileExpr(expr: pair[1], tableAlias: options.tableAlias) 
@@ -1872,9 +1872,9 @@ convertToJsonB = (compiledExpr) ->
   if not compiledExpr
     return compiledExpr
 
-  # Literals are special
+  # Literals are special and are cast to jsonb from a JSON string
   if compiledExpr.type == "literal"
-    return { type: "op", op: "::jsonb", exprs: [compiledExpr] }
+    return { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: JSON.stringify(compiledExpr.value) }] }
   
   # First convert using to_json in case is array
   return { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExpr] }] }
