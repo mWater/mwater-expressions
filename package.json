@@ -27,7 +27,7 @@
     "jsonql": "github:mWater/jsonql",
     "lodash": "^3.10.1",
     "lru-cache": "^4.0.0",
-    "moment": "^2.10.6"
+    "moment": "^2.19.3"
   },
   "devDependencies": {
     "@types/lodash": "^3.10.2",
