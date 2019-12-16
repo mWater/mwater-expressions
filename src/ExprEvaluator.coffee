@@ -812,7 +812,6 @@ module.exports = class ExprEvaluator
               callback(null, pk in _.pluck(latests, "pk"))
 
   evaluateVariable: (expr, context, callback) ->
-    console.log(@variables)
     # Get variable
     variable = _.findWhere(@variables, id: expr.variableId)
     if not variable

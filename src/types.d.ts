@@ -10,7 +10,7 @@ export interface Row {
 }
 
 /** Expression. Can be null */
-export type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | VariableExpr | null
+export type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | null
 
 export interface LiteralExpr {
   type: "literal"
@@ -36,6 +36,37 @@ export interface OpExpr {
   op: string
   exprs: Expr[]
 }
+
+export interface CaseExpr {
+  type: "case"
+  /** Table id of table */
+  table: string
+  /** when is a boolean expr */
+  cases: { when: Expr, then: Expr }[]
+  /** optional else if no cases match */
+  else: Expr
+}
+
+/** Scores an enum or enumset by assigning and summing the scores for each value. */
+export interface ScoreExpr {
+  type: "score"
+  /** Table id of table */
+  table: string
+  /** enum or enumset expression */
+  input: Expr
+  /** map of enum/enumset id to score expression */
+  scores: { [id: string]: Expr }
+}
+
+/** Creates an enumset from a set of boolean expressions for each value */
+export interface BuildEnumsetExpr {
+  type: "build enumset"
+  /** Table id of table */
+  table: string
+  /** map of enumset id to boolean expression. If true, will be included */
+  values: { [id: string]: Expr }
+}
+
 
 /** Expression that references a variable */
 export interface VariableExpr {

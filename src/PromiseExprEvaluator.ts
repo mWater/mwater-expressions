@@ -1,6 +1,8 @@
 import _ from "lodash"
-import ExprEvaluator from "./ExprEvaluator"
-import { Expr, ExprEvaluatorContext, ExprEvaluatorRow } from "./types"
+import { Expr, Variable, CaseExpr, ScalarExpr, VariableExpr, ScoreExpr, BuildEnumsetExpr } from "./types"
+import Schema from "./Schema"
+import ExprUtils from "./ExprUtils"
+import moment from "moment"
 
 /** Represents a row to be evaluated */
 export interface PromiseExprEvaluatorRow {
@@ -8,64 +10,792 @@ export interface PromiseExprEvaluatorRow {
   getPrimaryKey(): Promise<any>
 
   /** gets the value of a column. 
-   * For joins, getField will get array of rows for 1-n and n-n joins and a row for n-1 and 1-1 joins
+   * For joins, getField will get array of primary keys for 1-n and n-n joins and a primary key (or null) for n-1 and 1-1 joins
    */
   getField(columnId: string): Promise<any>
+
+  /** Get row, rows, or null of a join */
+  followJoin(columnId: string): Promise<PromiseExprEvaluatorRow[] | PromiseExprEvaluatorRow | null>
 }
 
 export interface PromiseExprEvaluatorContext {
   /** current row. Optional for aggr expressions */
   row?: PromiseExprEvaluatorRow
+
   /** array of rows (for aggregate expressions) */
   rows?: PromiseExprEvaluatorRow[]
 }
 
 /** Expression evaluator that is promise-based */
 export class PromiseExprEvaluator {
-  private exprEvaluator: ExprEvaluator
+  schema?: Schema
+  locale?: string
+  variables?: Variable[]
+  variableValues?: { [variableId: string]: any }
 
-  constructor(exprEvaluator: ExprEvaluator) {
-    this.exprEvaluator = exprEvaluator
+  constructor(options: { 
+    schema?: Schema
+    locale?: string
+    variables?: Variable[]
+    variableValues?: { [variableId: string]: any }
+  }) {
+    this.schema = options.schema
+    this.locale = options.locale
+    this.variables = options.variables
+    this.variableValues = options.variableValues
   }
 
-  evaluate(expr: Expr, context: PromiseExprEvaluatorContext): Promise<any> {
-    const innerContext: ExprEvaluatorContext = {}
+  /** Evaluate an expression given the context */
+  async evaluate(expr: Expr, context: PromiseExprEvaluatorContext): Promise<any> {
+    if (!expr) {
+      return null
+    }
 
-    const callbackifyRow = (row: PromiseExprEvaluatorRow): ExprEvaluatorRow => {
-      return {
-        getPrimaryKey: (callback: (error: any, value?: any) => void) => {
-          row.getPrimaryKey().then((value) => callback(null, value), (error) => callback(error))
-        },
-        getField: (columnId: string, callback: (error: any, value?: any) => void) => {
-          row.getField(columnId).then((value) => {
-            // If value is row, callbackify
-            if (value && value.getPrimaryKey) {
-              value = callbackifyRow(value)
-            }
-            else if (_.isArray(value) && value.length > 0 && (value[0] as any).getPrimaryKey) {
-              value = (value as any[]).map(r => callbackifyRow(r))
-            }
-            
-            callback(null, value)
-          }, (error) => callback(error))
+    switch (expr.type) {
+      case "field":
+        // If schema is present and column is an expression column, use that
+        if (this.schema && this.schema.getColumn(expr.table, expr.column) && this.schema.getColumn(expr.table, expr.column)!.expr) {
+          return await this.evaluate(this.schema.getColumn(expr.table, expr.column)!.expr!, context)
         }
+        if (!context.row) {
+          return null
+        }
+
+        // Get field from row
+        return context.row.getField(expr.column)
+      case "literal":
+        return expr.value
+      case "op":
+        return await this.evaluateOp(expr.table, expr.op, expr.exprs, context)
+      case "id":
+        if (!context.row) {
+          return null
+        }
+        return context.row.getPrimaryKey()
+      case "case":
+        return await this.evaluateCase(expr, context)
+      case "scalar":
+        return await this.evaluateScalar(expr, context)
+      case "score":
+        return await this.evaluateScore(expr, context)
+      case "build enumset":
+        return await this.evaluateBuildEnumset(expr, context)
+      case "variable":
+        return await this.evaluateVariable(expr, context)
+      default:
+        throw new Error(`Unsupported expression type ${(expr as any).type}`)
+    }
+  }
+
+  async evaluateBuildEnumset(expr: BuildEnumsetExpr, context: PromiseExprEvaluatorContext): Promise<any> {
+    // Evaluate each boolean
+    const result: string[] = []
+
+    for (const key in expr.values) {
+      const val = await this.evaluate(expr.values[key], context)
+      if (val) {
+        result.push(key)
+      }
+    }
+    return result
+  }
+
+  async evaluateScore(expr: ScoreExpr, context: PromiseExprEvaluatorContext): Promise<any> {
+    // Get input value
+    const input = await this.evaluate(expr.input, context)
+    if (!input) {
+      return null
+    }
+
+    if (_.isArray(input)) {
+      let sum = 0
+      for (const inputVal of input) {
+        if (expr.scores[inputVal as any]) {
+          sum += await this.evaluate(expr.scores[inputVal as any], context)
+        }
+      }
+      return sum
+    }
+    else if (expr.scores[input]) {
+      return await this.evaluate(expr.scores[input as any], context)
+    }
+    else {
+      return 0
+    }
+  }
+
+  async evaluateCase(expr: CaseExpr, context: PromiseExprEvaluatorContext): Promise<any> {
+    for (const cs of expr.cases) {
+      const when = await this.evaluate(cs.when, context)
+      if (when) {
+        return await this.evaluate(cs.then, context)
+      }
+    }
+    return await this.evaluate(expr.else, context)
+  }
+
+  async evaluateScalar(expr: ScalarExpr, context: PromiseExprEvaluatorContext): Promise<any> {
+    if (!context.row) {
+      return null
+    }
+
+    // Follow each join, either expanding into array if returns multiple, or single row if one row
+    let state: PromiseExprEvaluatorRow | PromiseExprEvaluatorRow[] | null = context.row
+    for (const join of expr.joins) {
+      // Null or [] is null
+      if (!state || (_.isArray(state) && state.length == 0)) {
+        return null
+      }
+
+      if (_.isArray(state)) {
+        // State is an array of rows. Follow joins and flatten to rows
+        const temp: any = await Promise.all(state.map((st: PromiseExprEvaluatorRow) => st.followJoin(join)))
+        state = _.compact(_.flattenDeep(temp))
+      }
+      else {
+        // State is a single row. Follow
+        state = await state.followJoin(join)
       }
     }
 
-    if (context.row) {
-      innerContext.row = callbackifyRow(context.row)
+    // Evaluate expression on new context
+    if (_.isArray(state)) {
+      return await this.evaluate(expr.expr, { rows: state })
     }
-    if (context.rows) {
-      innerContext.rows = context.rows.map(r => callbackifyRow(r))
+    else {
+      return await this.evaluate(expr.expr, { row: state || undefined })
     }
-    return new Promise((resolve, reject) => {
-      this.exprEvaluator.evaluate(expr, innerContext, (error, value) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve(value)
-      })
-    })
   }
+
+  async evaluateOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
+    // If aggregate op
+    if (ExprUtils.isOpAggr(op)) {
+      return this.evaluteAggrOp(table, op, exprs, context)
+    }
+
+    // is latest is special case for window-like function
+    if (op == "is latest") {
+      return await this.evaluateIsLatest(table, exprs, context)
+    }
+  
+    // Evaluate exprs
+    const values = await Promise.all(exprs.map(expr => this.evaluate(expr, context)))
+    return this.evaluateOpValues(op, exprs, values)
+  }
+
+  /** NOTE: This is not technically correct. It's not a window function (as window
+   * functions can't be used in where clauses) but rather a special query */
+  async evaluateIsLatest(table: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
+    // Fail quietly if no ordering or no schema
+    if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+      console.warn("evaluateIsLatest does not work without schema and ordering")
+      return false
+    }
+  
+    // Fail quietly if no rows
+    if (!context.rows) {
+      console.warn("evaluateIsLatest does not work without rows context")
+      return false
+    }
+
+    // Null if no row
+    if (!context.row) {
+      return null
+    }
+  
+    // Evaluate lhs (value to group by) for all rows
+    const lhss = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row: row })))
+
+    // Evaluate pk for all rows
+    const pks = await Promise.all(context.rows.map(row => row.getPrimaryKey()))
+
+    // Evaluate all rows by ordering
+    const orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+    // Evaluate filter value for all rows if present
+    const filters = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row: row })))
+
+    let items = _.map(lhss, (lhs, index) => ({ lhs: lhs, pk: pks[index], ordering: orderValues[index], filter: filters[index] }))
+  
+    // Filter
+    if (exprs[1]) {
+      items = _.filter(items, item => item.filter)
+    }
+
+    // Group by lhs
+    const groups = _.groupBy(items, "lhs")
+  
+    // Keep latest of each group
+    let latests = []
+    for (const lhs in groups) {
+      const items = groups[lhs]
+      latests.push(_.max(items, "ordering"))
+    }
+
+    // Get pk of row
+    const pk = await context.row.getPrimaryKey()
+    
+    // See if match
+    return _.contains(_.pluck(latests, "pk"), pk)
+  }
+  
+  async evaluteAggrOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
+    if (!context.rows) {
+      return null
+    }
+
+    let values, orderValues, wheres, zipped, sum, ofs, count, items, value
+
+    switch (op) {
+      case "count":
+        return context.rows.length
+      case "sum":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return _.sum(values)
+      case "avg":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return _.sum(values) / values.length
+
+      // TODO. Uses window functions, so returning 100 for now
+      case "percent":
+        return 100
+      case "min":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return _.min(values)
+      case "max":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return _.max(values)
+      case "last":
+        // Fail quietly if no ordering or no schema
+        if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+          console.warn("last does not work without schema and ordering");
+          return null
+        }
+        // Evaluate all rows by ordering
+        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        zipped = _.zip(values, orderValues)
+
+        // Sort by ordering reverse
+        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["desc"])
+        values = _.map(zipped, entry => entry[0])
+        
+        // Take first non-null
+        for (let i = 0 ; i < values.length ; i++) {
+          if (values[i] != null) {
+            return values[i]
+          }
+        }
+        return null
+      case "last where":
+        // Fail quietly if no ordering or no schema
+        if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+          console.warn("last where does not work without schema and ordering");
+          return null
+        }
+        // Evaluate all rows by ordering
+        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+
+        // Find largest
+        if (orderValues.length == 0)
+          return null
+
+        let index = -1
+        let largest: any = null
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if ((wheres[i] || !exprs[1]) && (index == -1 || orderValues[i] > largest) && values[i] != null) {
+            index = i
+            largest = orderValues[i]
+          }
+        }
+
+        if (index >= 0) {
+          return values[index]
+        }
+        else {
+          return null
+        }
+      case "previous":
+        // Fail quietly if no ordering or no schema
+        if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+          console.warn("last where does not work without schema and ordering");
+          return null
+        }
+        // Evaluate all rows by ordering
+        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        zipped = _.zip(values, orderValues)
+
+        // Sort by ordering reverse
+        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["desc"])
+        values = _.map(zipped, entry => entry[0])
+        
+        // Take second non-null
+        values = _.filter(values, v => v != null)
+        if (values[1] != null) {
+          return values[1]
+        }
+        return null
+      case "count where":
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return wheres.filter(w => w === true).length
+      case "sum where":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        sum = 0
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if (wheres[i] === true) {
+            sum += values[i]
+          }
+        }
+        return sum
+      case "percent where":
+        // Evaluate all rows
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        ofs = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        sum = 0
+        count = 0
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if (!exprs[1] || ofs[i] == true) {
+            count++
+            if (wheres[i] === true) {
+              sum += 1
+            }
+          }
+        }
+        if (count === 0) {
+          return null
+        } 
+        else {
+          return sum / count * 100
+        }
+      case "min where":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        items = []
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if (wheres[i] === true) {
+            items.push(values[i]);
+          }
+        }
+        value = _.min(items)
+        return value != null ? value : null
+      case "max where":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        items = []
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if (wheres[i] === true) {
+            items.push(values[i]);
+          }
+        }
+        value = _.max(items)
+        return value != null ? value : null
+      case "count distinct":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return _.uniq(values).length;
+      case "array_agg":
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        return values
+      default:
+        throw new Error(`Unknown op ${op}`)
+    }
+  }
+
+  evaluateOpValues(op: string, exprs: Expr[], values: any[]) {
+    let date, point, point1, point2
+
+    // Check if has null argument
+    const hasNull = _.any(values, v => v == null)
+
+    switch (op) {
+      case "+":
+        return _.reduce(values, function(acc, value) {
+          return acc + (value != null ? value : 0)
+        })
+      case "*":
+        if (hasNull) {
+          return null
+        }
+        return _.reduce(values, function(acc: number, value) {
+          return acc * value
+        })
+      case "-":
+        if (hasNull) {
+          return null
+        }
+        return values[0] - values[1]
+      case "/":
+        if (hasNull) {
+          return null
+        }
+        if (values[1] === 0) {
+          return null
+        }
+        return values[0] / values[1]
+      case "and":
+        if (values.length === 0) {
+          return null
+        }
+        return _.reduce(values, function(acc, value) {
+          return acc && value
+        })
+      case "or":
+        if (values.length === 0) {
+          return null
+        }
+        return _.reduce(values, function(acc, value) {
+          return acc || value
+        })
+      case "not":
+        if (hasNull) {
+          return true
+        }
+        return !values[0]
+      case "=":
+        if (hasNull) {
+          return null
+        }
+        return values[0] === values[1]
+      case "<>":
+        if (hasNull) {
+          return null
+        }
+        return values[0] !== values[1]
+      case ">":
+        if (hasNull) {
+          return null
+        }
+        return values[0] > values[1]
+      case ">=":
+        if (hasNull) {
+          return null
+        }
+        return values[0] >= values[1]
+      case "<":
+        if (hasNull) {
+          return null
+        }
+        return values[0] < values[1]
+      case "<=":
+        if (hasNull) {
+          return null
+        }
+        return values[0] <= values[1]
+      case "= false":
+        if (hasNull) {
+          return null
+        }
+        return values[0] === false
+      case "is null":
+        return values[0] == null
+      case "is not null":
+        return values[0] != null
+      case "~*":
+        if (hasNull) {
+          return null
+        }
+        return values[0].match(new RegExp(values[1], "i")) != null
+      case "= any":
+        if (hasNull) {
+          return null
+        }
+        return _.contains(values[1], values[0])
+      case "contains":
+        if (hasNull) {
+          return null
+        }
+        return _.difference(values[1], values[0]).length === 0
+      case "intersects":
+        if (hasNull) {
+          return null
+        }
+        return _.intersection(values[0], values[1]).length > 0
+      case "length":
+        if (hasNull) {
+          return 0
+        }
+        return values[0].length
+      case "between":
+        if (hasNull) {
+          return null
+        }
+        return values[0] >= values[1] && values[0] <= values[2]
+      case "round":
+        if (hasNull) {
+          return null
+        }
+        return Math.round(values[0])
+      case "floor":
+        if (hasNull) {
+          return null
+        }
+        return Math.floor(values[0])
+      case "ceiling":
+        if (hasNull) {
+          return null
+        }
+        return Math.ceil(values[0])
+      case "days difference":
+        if (hasNull) {
+          return null
+        }
+        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000
+      case "months difference":
+        if (hasNull) {
+          return null
+        }
+        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000 / 30.5
+      case "years difference":
+        if (hasNull) {
+          return null
+        }
+        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000 / 365
+      case "days since":
+        if (hasNull) {
+          return null
+        }
+        return moment().diff(moment(values[0], moment.ISO_8601)) / 24 / 3600 / 1000
+      case "weekofmonth":
+        if (hasNull) {
+          return null
+        }
+        return (Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1) + ""; // Make string
+      case "dayofmonth":
+        if (hasNull) {
+          return null
+        }
+        return moment(values[0], moment.ISO_8601).format("DD")
+      case "month":
+        if (hasNull) {
+          return null
+        }
+        return values[0].substr(5, 2)
+      case "yearmonth":
+        if (hasNull) {
+          return null
+        }
+        return values[0].substr(0, 7) + "-01"
+      case "year":
+        if (hasNull) {
+          return null
+        }
+        return values[0].substr(0, 4) + "-01-01"
+      case "today":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).format("YYYY-MM-DD") === moment().format("YYYY-MM-DD")
+      case "yesterday":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).add(1, "days").format("YYYY-MM-DD") === moment().format("YYYY-MM-DD")
+      case "thismonth":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).format("YYYY-MM") === moment().format("YYYY-MM")
+      case "lastmonth":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).add(1, "months").format("YYYY-MM") === moment().format("YYYY-MM")
+      case "thisyear":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).format("YYYY") === moment().format("YYYY")
+      case "lastyear":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).add(1, "years").format("YYYY") === moment().format("YYYY")
+      case "last24hours":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isSameOrBefore(moment()) && moment(date, moment.ISO_8601).isAfter(moment().subtract(24, "hours"))
+      case "last7days":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(7, "days"))
+      case "last30days":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(30, "days"))
+      case "last365days":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(365, "days"))
+      case "last12months":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(11, "months").startOf('month'))
+      case "last6months":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(5, "months").startOf('month'))
+      case "last3months":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(2, "months").startOf('month'))
+      case "future":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return moment(date, moment.ISO_8601).isAfter(moment())
+      case "notfuture":
+        if (hasNull) {
+          return null
+        }
+        date = values[0]
+        return !moment(date, moment.ISO_8601).isAfter(moment())
+      case "current date":
+        return moment().format("YYYY-MM-DD")
+      case "current datetime":
+        return moment().toISOString()
+      case "latitude":
+        if (hasNull) {
+          return null
+        }
+        point = values[0]
+        if ((point != null ? point.type : void 0) === "Point") {
+          return point.coordinates[1]
+        }
+        break
+      case "longitude":
+        if (hasNull) {
+          return null
+        }
+        point = values[0]
+        if ((point != null ? point.type : void 0) === "Point") {
+          return point.coordinates[0]
+        }
+        break
+      case "distance":
+        if (hasNull) {
+          return null
+        }
+        point1 = values[0]
+        point2 = values[1]
+        if ((point1 != null ? point1.type : void 0) === "Point" && (point2 != null ? point2.type : void 0) === "Point") {
+          return getDistanceFromLatLngInM(point1.coordinates[1], point1.coordinates[0], point2.coordinates[1], point2.coordinates[0])
+        }
+        break
+      case "line length":
+        if (hasNull) {
+          return null
+        }
+        if (values[0].type !== "LineString") {
+          return 0
+        }
+        let total = 0
+        const coords = values[0].coordinates
+        for (let i = 0; i < coords.length - 1; i++) {
+          total += getDistanceFromLatLngInM(coords[i][1], coords[i][0], coords[i + 1][1], coords[i + 1][0])
+        }
+        return total
+      case "to text":
+        if (hasNull) {
+          return null
+        }
+        if (this.schema) {
+          const exprUtils = new ExprUtils(this.schema)
+          return exprUtils.stringifyExprLiteral(exprs[0], values[0], this.locale)
+        } else {
+          return values[0] + ""
+        }
+      default:
+        throw new Error(`Unknown op ${op}`)
+    }
+  }
+
+  async evaluateVariable(expr: VariableExpr, context: PromiseExprEvaluatorContext) {
+    // Get variable
+    const variable = _.findWhere(this.variables || [], {
+      id: expr.variableId
+    })
+    if (!variable) {
+      throw new Error(`Variable ${expr.variableId} not found`)
+    }
+
+    // Get value
+    const value = this.variableValues![variable.id]
+    if (value === undefined) {
+      throw new Error(`Variable ${expr.variableId} has no value`)
+    }
+
+    // If expression, compile
+    if (variable.table) {
+      return await this.evaluate(value, context)
+    } else {
+      return value
+    }
+  }
+}
+
+function getDistanceFromLatLngInM(lat1: number, lng1: number, lat2: number, lng2: number) {
+  var R, a, c, d, dLat, dLng
+  R = 6370986; // Radius of the earth in m
+  dLat = deg2rad(lat2 - lat1); // deg2rad below
+  dLng = deg2rad(lng2 - lng1)
+  a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  d = R * c; // Distance in m
+  return d
+}
+
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180)
 }

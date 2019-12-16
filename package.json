@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^3.10.2",
+    "@types/moment": "^2.13.0",
     "build-library": "github:mWater/build-library",
     "canonical-json": "0.0.4",
     "chai": "^3.4.0",
