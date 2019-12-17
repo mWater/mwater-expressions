@@ -10,12 +10,9 @@ export interface PromiseExprEvaluatorRow {
   getPrimaryKey(): Promise<any>
 
   /** gets the value of a column. 
-   * For joins, getField will get array of primary keys for 1-n and n-n joins and a primary key (or null) for n-1 and 1-1 joins
+   * For joins, getField will get array of rows for 1-n and n-n joins and a row or null for n-1 and 1-1 joins
    */
   getField(columnId: string): Promise<any>
-
-  /** Get row, rows, or null of a join */
-  followJoin(columnId: string): Promise<PromiseExprEvaluatorRow[] | PromiseExprEvaluatorRow | null>
 }
 
 export interface PromiseExprEvaluatorContext {
@@ -62,7 +59,20 @@ export class PromiseExprEvaluator {
         }
 
         // Get field from row
-        return context.row.getField(expr.column)
+        const value = await context.row.getField(expr.column)
+
+        // If it is a row
+        if (value && _.isFunction(value.getPrimaryKey)) {
+          // Get primary key
+          return await value.getPrimaryKey()
+        }
+
+        // If it is rows
+        if (_.isArray(value) && value[0] && _.isFunction((value[0] as PromiseExprEvaluatorRow).getPrimaryKey)) {
+          return await Promise.all(value.map((v: PromiseExprEvaluatorRow) => v.getPrimaryKey()))
+        }
+
+        return value
       case "literal":
         return expr.value
       case "op":
@@ -149,12 +159,12 @@ export class PromiseExprEvaluator {
 
       if (_.isArray(state)) {
         // State is an array of rows. Follow joins and flatten to rows
-        const temp: any = await Promise.all(state.map((st: PromiseExprEvaluatorRow) => st.followJoin(join)))
+        const temp: any = await Promise.all(state.map((st: PromiseExprEvaluatorRow) => st.getField(join)))
         state = _.compact(_.flattenDeep(temp))
       }
       else {
         // State is a single row. Follow
-        state = await state.followJoin(join)
+        state = await state.getField(join)
       }
     }
 
