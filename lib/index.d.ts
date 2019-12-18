@@ -4,7 +4,6 @@ import { Variable, Expr, AggrStatus, LocalizedString, EnumValue, FieldExpr } fro
 
 export * from './types'
 export { default as DataSource } from './DataSource'
-export { default as ExprEvaluator } from './ExprEvaluator'
 export { default as ExprValidator } from './ExprValidator'
 export { default as Schema } from './Schema'
 export * from './PromiseExprEvaluator'
