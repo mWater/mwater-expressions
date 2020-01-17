@@ -32,9 +32,8 @@ module.exports = class ExprValidator
       return "Circular reference"
 
     # Check table if not literal
-    if expr.type != "literal" and (expr.type != "variable" or expr.table)
-      if options.table and expr.table != options.table 
-        return "Wrong table #{expr.table} (expected #{options.table})"
+    if options.table and expr.table and expr.table != options.table 
+      return "Wrong table #{expr.table} (expected #{options.table})"
 
     # Literal is ok if right type
     switch expr.type
