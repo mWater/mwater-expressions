@@ -32,7 +32,7 @@ export interface FieldExpr {
 
 export interface OpExpr {
   type: "op"
-  table: string
+  table?: string
   op: string
   exprs: Expr[]
 }
@@ -40,7 +40,7 @@ export interface OpExpr {
 export interface CaseExpr {
   type: "case"
   /** Table id of table */
-  table: string
+  table?: string
   /** when is a boolean expr */
   cases: { when: Expr, then: Expr }[]
   /** optional else if no cases match */
@@ -51,7 +51,7 @@ export interface CaseExpr {
 export interface ScoreExpr {
   type: "score"
   /** Table id of table */
-  table: string
+  table?: string
   /** enum or enumset expression */
   input: Expr
   /** map of enum/enumset id to score expression */
@@ -62,7 +62,7 @@ export interface ScoreExpr {
 export interface BuildEnumsetExpr {
   type: "build enumset"
   /** Table id of table */
-  table: string
+  table?: string
   /** map of enumset id to boolean expression. If true, will be included */
   values: { [id: string]: Expr }
 }

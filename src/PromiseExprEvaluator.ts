@@ -177,15 +177,15 @@ export class PromiseExprEvaluator {
     }
   }
 
-  async evaluateOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
+  async evaluateOp(table: string | undefined, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
     // If aggregate op
     if (ExprUtils.isOpAggr(op)) {
-      return this.evaluteAggrOp(table, op, exprs, context)
+      return this.evaluteAggrOp(table!, op, exprs, context)
     }
 
     // is latest is special case for window-like function
     if (op == "is latest") {
-      return await this.evaluateIsLatest(table, exprs, context)
+      return await this.evaluateIsLatest(table!, exprs, context)
     }
   
     // Evaluate exprs

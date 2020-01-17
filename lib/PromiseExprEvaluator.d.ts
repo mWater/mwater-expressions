@@ -37,7 +37,7 @@ export declare class PromiseExprEvaluator {
     evaluateScore(expr: ScoreExpr, context: PromiseExprEvaluatorContext): Promise<any>;
     evaluateCase(expr: CaseExpr, context: PromiseExprEvaluatorContext): Promise<any>;
     evaluateScalar(expr: ScalarExpr, context: PromiseExprEvaluatorContext): Promise<any>;
-    evaluateOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext): Promise<any>;
+    evaluateOp(table: string | undefined, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext): Promise<any>;
     /** NOTE: This is not technically correct. It's not a window function (as window
      * functions can't be used in where clauses) but rather a special query */
     evaluateIsLatest(table: string, exprs: Expr[], context: PromiseExprEvaluatorContext): Promise<boolean | null>;
