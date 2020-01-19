@@ -97,6 +97,49 @@ export class PromiseExprEvaluator {
     }
   }
 
+  /** Evaluate an expression synchronously */
+  evaluateSync(expr: Expr): any {
+    if (!expr) {
+      return null
+    }
+
+    switch (expr.type) {
+      case "literal":
+        return expr.value
+      case "op":
+        return this.evaluateOpValues(expr.op, expr.exprs, expr.exprs.map(e => this.evaluateSync(e)))
+      case "case":
+        // TODO
+        throw new Error("Synchronous case not supported")
+      case "score":
+        // TODO
+        throw new Error("Synchronous score not supported")
+      case "build enumset":
+        // TODO
+        throw new Error("Synchronous build enumset not supported")
+      case "variable":
+        if (expr.table) {
+          throw new Error(`Synchronous table variables not supported`)
+        }
+    
+        // Get variable
+        const variable = _.findWhere(this.variables || [], {
+          id: expr.variableId
+        })
+        if (!variable) {
+          throw new Error(`Variable ${expr.variableId} not found`)
+        }
+
+        // Get value
+        if (this.variableValues![variable.id] === undefined) {
+          throw new Error(`Variable ${expr.variableId} has no value`)
+        }
+        return this.variableValues![variable.id]
+      default:
+        throw new Error(`Unsupported expression type ${(expr as any).type}`)
+    }
+  }
+
   async evaluateBuildEnumset(expr: BuildEnumsetExpr, context: PromiseExprEvaluatorContext): Promise<any> {
     // Evaluate each boolean
     const result: string[] = []
@@ -442,6 +485,7 @@ export class PromiseExprEvaluator {
     }
   }
 
+  /** Synchronously evaluate an op when the values are already known */
   evaluateOpValues(op: string, exprs: Expr[], values: any[]) {
     let date, point, point1, point2
 

@@ -39,3 +39,12 @@ describe "PromiseExprEvaluator", ->
           assert.isTrue testExpr.value(value)
         else
           compare(value, testExpr.value)
+
+  it "does simple expressions synchronously", -> 
+    ev = new PromiseExprEvaluator({ schema: fixtures.simpleSchema(), locale: "en", variables: variables, variableValues: variableValues })
+    
+    assert.equal ev.evaluateSync({ type: "literal", valueType: "number", value: 1234 }), 1234
+    
+    assert.equal ev.evaluateSync({ type: "op", op: "+", exprs: [{ type: "literal", valueType: "number", value: 1234 }, { type: "literal", valueType: "number", value: 1 }]}), 1235
+
+    assert.equal ev.evaluateSync({ type: "op", op: "+", exprs: [{ type: "variable", variableId: "varnumber" }, { type: "literal", valueType: "number", value: 1 }]}), 124
