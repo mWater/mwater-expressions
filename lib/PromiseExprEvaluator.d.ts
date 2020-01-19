@@ -33,6 +33,8 @@ export declare class PromiseExprEvaluator {
     });
     /** Evaluate an expression given the context */
     evaluate(expr: Expr, context: PromiseExprEvaluatorContext): Promise<any>;
+    /** Evaluate an expression synchronously */
+    evaluateSync(expr: Expr): any;
     evaluateBuildEnumset(expr: BuildEnumsetExpr, context: PromiseExprEvaluatorContext): Promise<any>;
     evaluateScore(expr: ScoreExpr, context: PromiseExprEvaluatorContext): Promise<any>;
     evaluateCase(expr: CaseExpr, context: PromiseExprEvaluatorContext): Promise<any>;
@@ -42,6 +44,7 @@ export declare class PromiseExprEvaluator {
      * functions can't be used in where clauses) but rather a special query */
     evaluateIsLatest(table: string, exprs: Expr[], context: PromiseExprEvaluatorContext): Promise<boolean | null>;
     evaluteAggrOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext): Promise<any>;
+    /** Synchronously evaluate an op when the values are already known */
     evaluateOpValues(op: string, exprs: Expr[], values: any[]): any;
     evaluateVariable(expr: VariableExpr, context: PromiseExprEvaluatorContext): Promise<any>;
 }
