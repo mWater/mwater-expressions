@@ -131,8 +131,8 @@ export class PromiseExprEvaluator {
         }
 
         // Get value
-        if (this.variableValues![variable.id] === undefined) {
-          throw new Error(`Variable ${expr.variableId} has no value`)
+        if (this.variableValues![variable.id] == null) {
+          return null
         }
         return this.variableValues![variable.id]
       default:
@@ -826,8 +826,8 @@ export class PromiseExprEvaluator {
 
     // Get value
     const value = this.variableValues![variable.id]
-    if (value === undefined) {
-      throw new Error(`Variable ${expr.variableId} has no value`)
+    if (value == null) {
+      return null
     }
 
     // If expression, compile
