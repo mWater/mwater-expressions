@@ -487,7 +487,7 @@ export class PromiseExprEvaluator {
 
   /** Synchronously evaluate an op when the values are already known */
   evaluateOpValues(op: string, exprs: Expr[], values: any[]) {
-    let date, point, point1, point2
+    let date, point, point1, point2, v0, v1
 
     // Check if has null argument
     const hasNull = _.any(values, v => v == null)
@@ -624,17 +624,32 @@ export class PromiseExprEvaluator {
         if (hasNull) {
           return null
         }
-        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000
+
+        // Pad to datetime (to allow date/datetime comparisons)
+        v0 = values[0].length == 10 ? values[0] + "T00:00:00Z" : values[0]
+        v1 = values[1].length == 10 ? values[1] + "T00:00:00Z" : values[1]
+
+        return moment(v0, moment.ISO_8601).diff(moment(v1, moment.ISO_8601)) / 24 / 3600 / 1000
       case "months difference":
         if (hasNull) {
           return null
         }
-        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000 / 30.5
+
+        // Pad to datetime (to allow date/datetime comparisons)
+        v0 = values[0].length == 10 ? values[0] + "T00:00:00Z" : values[0]
+        v1 = values[1].length == 10 ? values[1] + "T00:00:00Z" : values[1]
+
+        return moment(v0, moment.ISO_8601).diff(moment(v1, moment.ISO_8601)) / 24 / 3600 / 1000 / 30.5
       case "years difference":
         if (hasNull) {
           return null
         }
-        return moment(values[0], moment.ISO_8601).diff(moment(values[1], moment.ISO_8601)) / 24 / 3600 / 1000 / 365
+
+        // Pad to datetime (to allow date/datetime comparisons)
+        v0 = values[0].length == 10 ? values[0] + "T00:00:00Z" : values[0]
+        v1 = values[1].length == 10 ? values[1] + "T00:00:00Z" : values[1]
+        
+        return moment(v0, moment.ISO_8601).diff(moment(v1, moment.ISO_8601)) / 24 / 3600 / 1000 / 365
       case "days since":
         if (hasNull) {
           return null

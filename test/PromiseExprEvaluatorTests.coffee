@@ -6,7 +6,7 @@ sinon = require 'sinon'
 fixtures = require './fixtures'
 
 PromiseExprEvaluator = require('../src/PromiseExprEvaluator').PromiseExprEvaluator
-testExprs = require './promiseTestExprs'
+testExprs = require './testExprs'
 
 compare = (actual, expected) ->
   if _.isObject(actual) or _.isArray(actual)

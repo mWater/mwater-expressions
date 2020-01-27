@@ -126,6 +126,8 @@ addOp(((v) -> v > 310000 and v < 320000), "distance", literal({ type: "Point", c
 addOp(30, "days difference", literal("2015-12-31", "date"), literal("2015-12-01", "date"))
 addOp(1.5, "days difference", literal('2016-06-23T17:36:51.412Z', "datetime"), literal('2016-06-22T05:36:51.412Z', "datetime"))
 addOp(null, "days difference", literal('2016-06-23T17:36:51.412Z', "datetime"), literal(null, "datetime"))
+addOp(30, "days difference", literal("2015-12-31T00:00:00Z", "date"), literal("2015-12-01", "date"))
+addOp(30.5, "days difference", literal("2015-12-31T12:00:00Z", "date"), literal("2015-12-01", "date"))
 
 addOp(30/30.5, "months difference", literal("2015-12-31", "date"), literal("2015-12-01", "date"))
 addOp(30/30.5, "months difference", literal('2016-07-22T05:36:51.412Z', "datetime"), literal('2016-06-22T05:36:51.412Z', "datetime"))
