@@ -1,5 +1,5 @@
 import Schema from "./Schema";
-import { Variable, AggrStatus, Expr, LocalizedString, FieldExpr, EnumValue } from "./types";
+import { Variable, AggrStatus, Expr, LocalizedString, FieldExpr, EnumValue, LiteralType } from "./types";
 
 export default class ExprUtils {
   constructor(schema: Schema, variables?: Variable[])
@@ -36,4 +36,50 @@ export default class ExprUtils {
 
   /** Determine if op is prefix */
   static isOpPrefix(op: string): boolean
+
+  /** 
+   * Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
+   * If search ordered is not true, excludes ordered ones
+   * If prefix, only prefix
+   * Results are array of opItems. */
+  findMatchingOpItems(search: {
+    resultTypes?: LiteralType[]
+    lhsExpr?: Expr
+    op?: string
+    ordered?: boolean
+    prefix?: boolean
+    aggr?: boolean
+  }): OpItem[] 
+}
+
+/** opItems are a list of ops for various types */
+interface OpItem {
+  /** e.g. "=" */
+  op: string
+  /** e.g. "is" */
+  name: string
+  /** resulting type from op. e.g. "boolean" */
+  resultType: LiteralType
+  /** array of types of expressions required for arguments */
+  exprTypes: LiteralType[]
+  /** type of n more expressions (like "and" that takes n arguments) */
+  moreExprType?: LiteralType
+  /** true if name goes before LHS value */
+  prefix?: boolean
+  /** overrides name when displayed as prefix */
+  prefixLabel?: string
+  /** optional condition function on LHS expr that tests if applicable (for "within" which only applies to hierarchical tables) */
+  lhsCond?: (lhs: Expr) => boolean
+  /** prefer rhs literal */
+  rhsLiteral?: boolean
+  /** string to put between exprs when prefix type */
+  joiner?: string
+  /** true if aggregating (e.g. sum) */
+  aggr?: boolean
+  /** for aggr = true if table must be have ordering */
+  ordered?: boolean
+  /** placeholder for lhs expression */
+  lhsPlaceholder?: string
+  /** placeholder for rhs expression */
+  rhsPlaceholder?: string
 }
