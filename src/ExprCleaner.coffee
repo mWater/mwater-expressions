@@ -8,6 +8,7 @@ module.exports = class ExprCleaner
     @schema = schema
     @variables = variables
     @exprUtils = new ExprUtils(schema, variables)
+    @exprValidator = new ExprValidator(@schema)
 
   # Clean an expression, returning null if completely invalid, otherwise removing
   # invalid parts. Attempts to correct invalid types by wrapping in other expressions.
@@ -60,18 +61,18 @@ module.exports = class ExprCleaner
       if ex.message == 'Infinite recursion'
         return null
       throw ex
-    
 
     # Default aggregation if needed and not aggregated
-    if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
+    if aggrStatus == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
       aggrOpItems = @exprUtils.findMatchingOpItems(resultTypes: options.types, lhsExpr: expr, aggr: true, ordered: @schema.getTable(expr.table)?.ordering?)
 
       # If aggr is required and there is at least one possible, use it
       if aggrOpItems.length > 0
         expr = { type: "op", op: aggrOpItems[0].op, table: expr.table, exprs: [expr] }
+        aggrStatus = "aggregate"
 
     # Default percent where + booleanization 
-    if @exprUtils.getExprAggrStatus(expr) == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
+    if aggrStatus == "individual" and "individual" not in options.aggrStatuses and "aggregate" in options.aggrStatuses
       # Only if result types include number
       if not options.types or "number" in options.types
         # Find op item that matches
@@ -89,9 +90,10 @@ module.exports = class ExprCleaner
             expr.exprs.push(null)
 
           expr = { type: "op", op: "percent where", table: expr.table, exprs: [expr] }
+          aggrStatus = "aggregate"
 
     # Strip if wrong aggregation status
-    if @exprUtils.getExprAggrStatus(expr) and @exprUtils.getExprAggrStatus(expr) not in options.aggrStatuses
+    if aggrStatus and aggrStatus not in options.aggrStatuses
       return null
 
     # Get type
@@ -165,7 +167,7 @@ module.exports = class ExprCleaner
 
     # Invalid expr
     if column.expr
-      if new ExprValidator(@schema).validateExpr(column.expr, options)
+      if @exprValidator.validateExpr(column.expr, options)
         return null
 
     # Invalid enums
