@@ -3,7 +3,7 @@ exports.DataSource = require './DataSource'
 exports.PriorityDataQueue = require './PriorityDataQueue'
 exports.NullDataSource = require './NullDataSource'
 
-exports.ExprCleaner = require './ExprCleaner'
+exports.ExprCleaner = require('./ExprCleaner').default
 exports.ExprValidator = require './ExprValidator'
 exports.ExprUtils = require './ExprUtils'
 exports.ExprCompiler = require './ExprCompiler'

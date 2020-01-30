@@ -6,7 +6,7 @@ export default class ExprUtils {
 
   summarizeExpr(expr: Expr, locale?: string): string
 
-  getExprType(expr: Expr): string | null
+  getExprType(expr: Expr): LiteralType | null
 
   getExprAggrStatus(expr: Expr): AggrStatus | null
 
@@ -36,6 +36,15 @@ export default class ExprUtils {
 
   /** Determine if op is prefix */
   static isOpPrefix(op: string): boolean
+
+  /** Follows a list of joins to determine final table */
+  followJoins(startTable: string, joins: string[]): string
+
+  /** Determines if an set of joins contains a multiple */
+  isMultipleJoins(table: string, joins: string[]): boolean
+
+  /** Determines if an set of joins are valid */
+  areJoinsValid(table: string, joins: string[]): boolean
 
   /** 
    * Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
