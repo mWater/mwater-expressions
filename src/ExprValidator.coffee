@@ -1,5 +1,9 @@
 _ = require 'lodash'
 ExprUtils = require './ExprUtils'
+WeakCache = require('./WeakCache').WeakCache
+
+# Weak cache is global to allow validator to be created and destroyed
+weakCache = new WeakCache()
 
 # Validates expressions. If an expression has been cleaned, it will always be valid
 module.exports = class ExprValidator
@@ -16,9 +20,20 @@ module.exports = class ExprValidator
   #   idTable: table that type of id must be from
   #   aggrStatuses: statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"]
   validateExpr: (expr, options={}) ->
-    _.defaults(options, {
-      aggrStatuses: ["individual", "literal"]
-      })
+    if not expr
+      return null
+
+    if not @schema 
+      return weakCache.cacheFunction([expr], [@variables, options], () => 
+        return @validateExprInternal(expr, options)
+      )
+
+    return weakCache.cacheFunction([@schema, expr], [@variables, options], () => 
+      return @validateExprInternal(expr, options)
+    )
+
+  validateExprInternal: (expr, options) =>
+    aggrStatuses = options.aggrStatuses or aggrStatuses: ["individual", "literal"]
 
     if not expr
       return null
@@ -52,14 +67,14 @@ module.exports = class ExprValidator
         # Validate expression
         if column.expr
           # Use depth to prevent infinite recursion
-          error = @validateExpr(column.expr, _.extend({}, options, depth: (options.depth or 0) + 1))
+          error = @validateExprInternal(column.expr, _.extend({}, options, depth: (options.depth or 0) + 1))
           if error
             return error
 
       when "op"
         # Validate exprs
         for subexpr in expr.exprs
-          error = @validateExpr(subexpr, _.omit(options, "types", "enumValueIds", "idTable"))
+          error = @validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"))
           if error
             return error
 
@@ -74,27 +89,27 @@ module.exports = class ExprValidator
           return "Invalid joins"
 
         exprTable = @exprUtils.followJoins(expr.table, expr.joins)
-        error = @validateExpr(expr.expr, _.extend({}, options, table: exprTable))
+        error = @validateExprInternal(expr.expr, _.extend({}, options, table: exprTable))
         if error
           return error
 
       when "case"
         # Validate cases
         for cse in expr.cases
-          error = @validateExpr(cse.when, _.extend({}, options, types: ["boolean"]))
+          error = @validateExprInternal(cse.when, _.extend({}, options, types: ["boolean"]))
           if error
             return error
 
-          error = @validateExpr(cse.then, options)
+          error = @validateExprInternal(cse.then, options)
           if error
             return error
 
-        error = @validateExpr(expr.else, options)
+        error = @validateExprInternal(expr.else, options)
         if error
           return error
 
       when "score"
-        error = @validateExpr(expr.input, _.extend({}, options, types: ["enum", "enumset"]))
+        error = @validateExprInternal(expr.input, _.extend({}, options, types: ["enum", "enumset"]))
         if error
           return error
 
@@ -107,7 +122,7 @@ module.exports = class ExprValidator
           if enumValueIds and key not in enumValueIds
             return "Invalid score enum"
 
-          error = @validateExpr(value, _.extend({}, options, types: ["number"]))
+          error = @validateExprInternal(value, _.extend({}, options, types: ["number"]))
           if error
             return error
 
@@ -116,7 +131,7 @@ module.exports = class ExprValidator
           if options.enumValueIds and key not in options.enumValueIds
             return "Invalid score enum"
 
-          error = @validateExpr(value, _.extend({}, options, types: ["boolean"]))
+          error = @validateExprInternal(value, _.extend({}, options, types: ["boolean"]))
           if error
             return error
 

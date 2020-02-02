@@ -10,6 +10,8 @@ export * from './PromiseExprEvaluator'
 
 export { default as ExprUtils } from './ExprUtils'
 
+export { WeakCache } from './WeakCache'
+
 export class ExprCompiler {
   constructor(schema: Schema, variables?: Variable[], variableValues?: { [variableId: string]: any })
 

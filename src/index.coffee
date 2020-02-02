@@ -13,3 +13,5 @@ exports.injectTableAliases = require './injectTableAliases'
 exports.ColumnNotFoundException = require './ColumnNotFoundException'
 
 exports.PromiseExprEvaluator = require('./PromiseExprEvaluator').PromiseExprEvaluator
+
+exports.WeakCache = require('./WeakCache').WeakCache

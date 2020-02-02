@@ -138,6 +138,7 @@ describe "ExprValidator", ->
       }
       @isValid(expr)
 
+      expr = _.cloneDeep(expr)
       expr.else = { type: "field", table: "t1", column: "xyz" }
       @notValid(expr)
 
@@ -150,6 +151,7 @@ describe "ExprValidator", ->
       }
       @isValid(expr)
 
+      expr = _.cloneDeep(expr)
       expr.cases[0].when = { type: "field", table: "t1", column: "text" }
       @notValid(expr)
 
@@ -162,6 +164,7 @@ describe "ExprValidator", ->
       }
       @isValid(expr)
 
+      expr = _.cloneDeep(expr)
       expr.cases[0].then = { type: "field", table: "t1", column: "xyz" }
       @notValid(expr)
 
