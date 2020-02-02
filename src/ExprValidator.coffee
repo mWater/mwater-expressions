@@ -13,6 +13,8 @@ module.exports = class ExprValidator
     @exprUtils = new ExprUtils(schema, variables)
 
   # Validates an expression, returning null if it is valid, otherwise return an error string
+  # NOTE: This uses global weak caching and assumes that expressions are never mutated after
+  # having been validated!
   # options are:
   #   table: optional current table. expression must be related to this table or will be stripped
   #   types: optional types to limit to
