@@ -1,5 +1,9 @@
 _ = require 'lodash'
 moment = require 'moment'
+WeakCache = require('./WeakCache').WeakCache
+
+# exprAggrStatus Weak cache is global to allow validator to be created and destroyed
+exprAggrStatusWeakCache = new WeakCache()
 
 module.exports = class ExprUtils
   constructor: (schema, variables = []) ->
@@ -303,7 +307,12 @@ module.exports = class ExprUtils
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
         if column?.expr
-          return @getExprAggrStatus(column.expr, depth + 1)
+          # This is a slow operation for complex columns. Use weak cache
+          # to cache column expression aggregate status
+          return exprAggrStatusWeakCache.cacheFunction([@schema, column.expr], [@variables], () =>
+            return @getExprAggrStatus(column.expr, depth + 1)
+          )
+          
         return "individual"
       when "op"
         # If aggregate op
