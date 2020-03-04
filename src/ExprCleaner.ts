@@ -2,7 +2,7 @@ import _ from 'lodash'
 import ExprUtils from './ExprUtils'
 import ExprValidator from './ExprValidator'
 import { Schema } from '.'
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr } from './types'
+import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
 import produce from 'immer'
 
 interface CleanExprOptions {
@@ -70,6 +70,16 @@ export default class ExprCleaner {
     if (_.isEmpty(expr)) {
       return expr
     }
+
+    // Handle upgrades from old version
+    if (expr.type == "comparison")
+      return this.cleanComparisonExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "logical")
+      return this.cleanLogicalExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "count")
+      return this.cleanCountExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "literal" && expr.valueType == "enum[]")
+      expr = { type: "literal", valueType: "enumset", value: expr.value }
 
     // Strip if wrong table 
     if (expr.type != "literal") {
@@ -418,14 +428,14 @@ export default class ExprCleaner {
       return this.cleanExpr(expr.expr, options)
     }
 
-    // // Fix legacy entity joins (accidentally had entities.<tablename>. prepended)
-    // const joins = _.map(expr.joins, j => {
-    //   if (j.match(/^entities\.[a-z_0-9]+\./)) {
-    //     return j.split(".")[2]
-    //   }
-    //   return j
-    // })
-    // expr = _.extend({}, expr, {joins})
+    // Fix legacy entity joins (accidentally had entities.<tablename>. prepended)
+    const joins = _.map(expr.joins, j => {
+      if (j.match(/^entities\.[a-z_0-9]+\./)) {
+        return j.split(".")[2]
+      }
+      return j
+    })
+    expr = _.extend({}, expr, {joins})
 
     if (!this.exprUtils.areJoinsValid(expr.table, expr.joins)) {
       return null
@@ -434,10 +444,10 @@ export default class ExprCleaner {
     const innerTable = this.exprUtils.followJoins(expr.table, expr.joins)
 
     // LEGACY
-    // // Move aggr to inner expression
-    // if (expr.aggr) {
-    //   expr = _.extend({}, _.omit(expr, "aggr"), {expr: { type: "op", table: innerTable, op: expr.aggr, exprs: [expr.expr] }})
-    // }
+    // Move aggr to inner expression
+    if ((expr as any).aggr) {
+      expr = _.extend({}, _.omit(expr, "aggr"), {expr: { type: "op", table: innerTable, op: (expr as any).aggr, exprs: [expr.expr] }})
+    }
 
     // // Clean where
     // if (expr.where) {
@@ -463,10 +473,10 @@ export default class ExprCleaner {
   }
 
   cleanLiteralExpr(expr: LiteralExpr, options: CleanExprOptions) {
-    // // Convert old types
-    // if (['decimal', 'integer'].includes(expr.valueType)) {
-    //   expr = _.extend({}, expr, { valueType: "number"})
-    // }
+    // Convert old types
+    if (['decimal', 'integer'].includes(expr.valueType)) {
+      expr = _.extend({}, expr, { valueType: "number"})
+    }
 
     // TODO strip if no value?
 
@@ -581,48 +591,48 @@ export default class ExprCleaner {
     return expr
   }
 
-  // cleanComparisonExpr(expr, options) {
-  //   // Upgrade to op
-  //   let newExpr = { type: "op", table: expr.table, op: expr.op, exprs: [expr.lhs] }
-  //   if (expr.rhs) {
-  //     newExpr.exprs.push(expr.rhs)
-  //   }
+  cleanComparisonExpr(expr: LegacyComparisonExpr, options: CleanExprOptions) {
+    // Upgrade to op
+    let newExpr: Expr = { type: "op", table: expr.table, op: expr.op, exprs: [expr.lhs] }
+    if (expr.rhs) {
+      newExpr.exprs.push(expr.rhs)
+    }
 
-  //   // Clean sub-expressions to handle legacy literals
-  //   newExpr.exprs = _.map(newExpr.exprs, e => this.cleanExpr(e))
+    // Clean sub-expressions to handle legacy literals
+    newExpr.exprs = _.map(newExpr.exprs, e => this.cleanExpr(e))
 
-  //   // If = true
-  //   if (expr.op === "= true") {
-  //     newExpr = expr.lhs
-  //   }
+    // If = true
+    if (expr.op === "= true") {
+      newExpr = expr.lhs
+    }
 
-  //   if (expr.op === "= false") {
-  //     newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
-  //   }
+    if (expr.op === "= false") {
+      newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
+    }
 
-  //   if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "daterange")) {
-  //     newExpr.exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0] }, { type: "literal", valueType: "date", value: expr.rhs.value[1] }]
-  //   }
+    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "daterange")) {
+      (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0] }, { type: "literal", valueType: "date", value: expr.rhs.value[1] }]
+    }
 
-  //   if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "datetimerange")) {
-  //     // If date, convert datetime to date
-  //     if (this.exprUtils.getExprType(expr.lhs) === "date") {
-  //       newExpr.exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) }, { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }]
-  //     } else {        
-  //       newExpr.exprs = [expr.lhs, { type: "literal", valueType: "datetime", value: expr.rhs.value[0] }, { type: "literal", valueType: "datetime", value: expr.rhs.value[1] }]
-  //     }
-  //   }
+    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "datetimerange")) {
+      // If date, convert datetime to date
+      if (this.exprUtils.getExprType(expr.lhs) === "date") {
+        (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) }, { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }]
+      } else {        
+        (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "datetime", value: expr.rhs.value[0] }, { type: "literal", valueType: "datetime", value: expr.rhs.value[1] }]
+      }
+    }
 
-  //   return this.cleanExpr(newExpr, options)
-  // }
+    return this.cleanExpr(newExpr, options)
+  }
 
-  // cleanLogicalExpr(expr, options) {
-  //   const newExpr = { type: "op", op: expr.op, table: expr.table, exprs: expr.exprs }
-  //   return this.cleanExpr(newExpr, options)
-  // }
+  cleanLogicalExpr(expr: LegacyLogicalExpr, options: CleanExprOptions) {
+    const newExpr: OpExpr = { type: "op", op: expr.op, table: expr.table, exprs: expr.exprs }
+    return this.cleanExpr(newExpr, options)
+  }
 
-  // cleanCountExpr(expr, options) {
-  //   const newExpr = { type: "id", table: expr.table }
-  //   return this.cleanExpr(newExpr, options)
-  // }
+  cleanCountExpr(expr: LegacyCountExpr, options: CleanExprOptions) {
+    const newExpr: IdExpr = { type: "id", table: expr.table }
+    return this.cleanExpr(newExpr, options)
+  }
 }

@@ -10,7 +10,7 @@ export interface Row {
 }
 
 /** Expression. Can be null */
-export type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | null
+export type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | LegacyExpr | null 
 
 export interface LiteralExpr {
   type: "literal"
@@ -113,6 +113,28 @@ export interface ScalarExpr {
   
   /** Expression from final table to get value */
   expr: Expr
+}
+
+export type LegacyExpr = LegacyComparisonExpr | LegacyLogicalExpr | LegacyCountExpr
+
+export interface LegacyComparisonExpr {
+  type: "comparison"
+  op: string
+  table: string
+  lhs: Expr
+  rhs: Expr
+}
+
+export interface LegacyLogicalExpr {
+  type: "logical"
+  op: string
+  table: string
+  exprs: Expr[]
+}
+
+export interface LegacyCountExpr {
+  type: "count"
+  table: string
 }
 
 export type AggrStatus = "individual" | "literal" | "aggregate"

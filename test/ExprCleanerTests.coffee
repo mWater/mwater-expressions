@@ -399,11 +399,11 @@ describe "ExprCleaner", ->
 
         compare(scalarExpr, @exprCleaner.cleanExpr(scalarExpr))
 
-      # it "moves aggr to expr", ->
-      #   fieldExpr = { type: "field", table: "t2", column: "number" }
-      #   scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
-      #   scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
-      #   compare(scalarExpr, { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "op", op: "sum", table: "t2", exprs: [fieldExpr] }})
+      it "moves aggr to expr", ->
+        fieldExpr = { type: "field", table: "t2", column: "number" }
+        scalarExpr = { type: "scalar", table: "t1", joins: ['1-2'], expr: fieldExpr, aggr: "sum" }
+        scalarExpr = @exprCleaner.cleanExpr(scalarExpr)
+        compare(scalarExpr, { type: "scalar", table: "t1", joins: ['1-2'], expr: { type: "op", op: "sum", table: "t2", exprs: [fieldExpr] }})
 
       it "defaults aggr if needed", ->
         fieldExpr = { type: "field", table: "t2", column: "text" }
@@ -438,172 +438,172 @@ describe "ExprCleaner", ->
         compare(expr, { type: "field", table: "t1", column: "1-2" })
 
 
-  # # Version 1 expression should be upgraded to version 2
-  # describe "upgrade", ->
-  #   it "count becomes id", ->
-  #     @clean(
-  #       { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
-  #       { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", op: "count", table: "t2", exprs: [] } }
-  #     )
+  # Version 1 expression should be upgraded to version 2
+  describe "upgrade", ->
+    it "count becomes id", ->
+      @clean(
+        { type: "scalar", table: "t1", aggr: "count", joins: ["1-2"], expr: { type: "count", table: "t2" } }
+        { type: "scalar", table: "t1", joins: ["1-2"], expr: { type: "op", op: "count", table: "t2", exprs: [] } }
+      )
 
-  #   it "scalar count becomes id", ->
-  #     @clean(
-  #       { type: "scalar", table: "t1", expr: { type: "count", table: "t1" }, joins: [] }
-  #       { type: "id", table: "t1" }
-  #     )
+    it "scalar count becomes id", ->
+      @clean(
+        { type: "scalar", table: "t1", expr: { type: "count", table: "t1" }, joins: [] }
+        { type: "id", table: "t1" }
+      )
 
-  #   it "scalar is simplified", ->
-  #     @clean(
-  #       { type: "scalar", table: "t1", joins: [], expr: { type: "field", table: "t1", column: "number" } }
-  #       { type: "field", table: "t1", column: "number" }
-  #     )
+    it "scalar is simplified", ->
+      @clean(
+        { type: "scalar", table: "t1", joins: [], expr: { type: "field", table: "t1", column: "number" } }
+        { type: "field", table: "t1", column: "number" }
+      )
 
-  #   it "logical becomes op", ->
-  #     @clean(
-  #       { type: "logical", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }
-  #       { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }        
-  #     )
+    it "logical becomes op", ->
+      @clean(
+        { type: "logical", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }
+        { type: "op", op: "and", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }, { type: "field", table: "t1", column: "boolean" }] }        
+      )
 
-  #   it "comparison becomes op", ->
-  #     @clean(
-  #       { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
-  #       { type: "op", op: "~*", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "literal", valueType: "text", value: "x" }] }        
-  #     )
+    it "comparison becomes op", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "text" }, op: "~*", rhs: { type: "literal", valueType: "text", value: "x" } }
+        { type: "op", op: "~*", table: "t1", exprs: [{ type: "field", table: "t1", column: "text" }, { type: "literal", valueType: "text", value: "x" }] }        
+      )
 
-  #   it "= true is simplified", ->
-  #     @clean(
-  #       { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= true" }
-  #       { type: "field", table: "t1", column: "boolean" }
-  #     )
+    it "= true is simplified", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= true" }
+        { type: "field", table: "t1", column: "boolean" }
+      )
 
-  #   it "= false becomes 'not'", ->
-  #     @clean(
-  #       { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= false" }
-  #       { type: "op", op: "not", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }] }
-  #     )
+    it "= false becomes 'not'", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "boolean" }, op: "= false" }
+        { type: "op", op: "not", table: "t1", exprs: [{ type: "field", table: "t1", column: "boolean" }] }
+      )
 
-  #   it "enum[] becomes enumset", ->
-  #     @clean(
-  #       { type: "literal", valueType: "enum[]", value: ["a", "b"] }
-  #       { type: "literal", valueType: "enumset", value: ["a", "b"] }
-  #     )
+    it "enum[] becomes enumset", ->
+      @clean(
+        { type: "literal", valueType: "enum[]", value: ["a", "b"] }
+        { type: "literal", valueType: "enumset", value: ["a", "b"] }
+      )
 
-  #   it "between becomes 3 parameters date", ->
-  #     @clean(
-  #       { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "date" }, op: "between", rhs: { type: "literal", valueType: "daterange", value: ["2014-01-01", "2014-12-31"] } }
-  #       { 
-  #         type: "op"
-  #         op: "between"
-  #         table: "t1"
-  #         exprs: [
-  #           { type: "field", table: "t1", column: "date" }            
-  #           { type: "literal", valueType: "date", value: "2014-01-01" }
-  #           { type: "literal", valueType: "date", value: "2014-12-31" }
-  #         ]
-  #       }
-  #     )
+    it "between becomes 3 parameters date", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "date" }, op: "between", rhs: { type: "literal", valueType: "daterange", value: ["2014-01-01", "2014-12-31"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "date" }            
+            { type: "literal", valueType: "date", value: "2014-01-01" }
+            { type: "literal", valueType: "date", value: "2014-12-31" }
+          ]
+        }
+      )
 
-  #   it "between becomes 3 parameters datetime", ->
-  #     @clean(
-  #       { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "datetime" }, op: "between", rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01", "2014-12-31"] } }
-  #       { 
-  #         type: "op"
-  #         op: "between"
-  #         table: "t1"
-  #         exprs: [
-  #           { type: "field", table: "t1", column: "datetime" }
-  #           { type: "literal", valueType: "datetime", value: "2014-01-01" }
-  #           { type: "literal", valueType: "datetime", value: "2014-12-31" }
-  #         ]
-  #       }
-  #     )
+    it "between becomes 3 parameters datetime", ->
+      @clean(
+        { type: "comparison", table: "t1", lhs: { type: "field", table: "t1", column: "datetime" }, op: "between", rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01", "2014-12-31"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "datetime" }
+            { type: "literal", valueType: "datetime", value: "2014-01-01" }
+            { type: "literal", valueType: "datetime", value: "2014-12-31" }
+          ]
+        }
+      )
 
-  #   it "between becomes 3 parameters date if were datetime on date", ->
-  #     @clean(
-  #       { 
-  #         type: "comparison"
-  #         table: "t1"
-  #         lhs: { type: "field", table: "t1", column: "date" }
-  #         op: "between"
-  #         rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01T01:02:04", "2014-12-31T01:02:04"] } }
-  #       { 
-  #         type: "op"
-  #         op: "between"
-  #         table: "t1"
-  #         exprs: [
-  #           { type: "field", table: "t1", column: "date" }
-  #           { type: "literal", valueType: "date", value: "2014-01-01" }
-  #           { type: "literal", valueType: "date", value: "2014-12-31" }
-  #         ]
-  #       }
-  #     )
+    it "between becomes 3 parameters date if were datetime on date", ->
+      @clean(
+        { 
+          type: "comparison"
+          table: "t1"
+          lhs: { type: "field", table: "t1", column: "date" }
+          op: "between"
+          rhs: { type: "literal", valueType: "datetimerange", value: ["2014-01-01T01:02:04", "2014-12-31T01:02:04"] } }
+        { 
+          type: "op"
+          op: "between"
+          table: "t1"
+          exprs: [
+            { type: "field", table: "t1", column: "date" }
+            { type: "literal", valueType: "date", value: "2014-01-01" }
+            { type: "literal", valueType: "date", value: "2014-12-31" }
+          ]
+        }
+      )
 
-    # it "upgrades legacy entity join references", ->
-    #   schema = @schema.addTable({
-    #     id: "entities.wwmc_visit"
-    #     contents: [
-    #       { id: "site", type: "join", join: { type: "n-1", toTable: "entities.surface_water" } }
-    #     ]
-    #     })
+    it "upgrades legacy entity join references", ->
+      schema = @schema.addTable({
+        id: "entities.wwmc_visit"
+        contents: [
+          { id: "site", type: "join", join: { type: "n-1", toTable: "entities.surface_water" } }
+        ]
+        })
 
-    #   schema = schema.addTable({
-    #     id: "entities.surface_water"
-    #     contents: [
-    #       { id: "location", type: "geometry" }
-    #     ]
-    #     })
+      schema = schema.addTable({
+        id: "entities.surface_water"
+        contents: [
+          { id: "location", type: "geometry" }
+        ]
+        })
 
-    #   exprCleaner = new ExprCleaner(schema)
+      exprCleaner = new ExprCleaner(schema)
 
-    #   clean = (expr, expected, options) =>
-    #     compare(exprCleaner.cleanExpr(expr, options), expected)
+      clean = (expr, expected, options) =>
+        compare(exprCleaner.cleanExpr(expr, options), expected)
 
-    #   clean(
-    #     { 
-    #       type: "scalar"
-    #       expr: { type: "field", table: "entities.surface_water", column: "location" }
-    #       joins: ["entities.wwmc_visit.site"]
-    #       table: "entities.wwmc_visit"
-    #     }
-    #     {
-    #       type: "scalar"
-    #       expr: { type: "field", table: "entities.surface_water", column: "location" }
-    #       joins: ["site"]
-    #       table: "entities.wwmc_visit"
-    #     }
-    #     )
+      clean(
+        { 
+          type: "scalar"
+          expr: { type: "field", table: "entities.surface_water", column: "location" }
+          joins: ["entities.wwmc_visit.site"]
+          table: "entities.wwmc_visit"
+        }
+        {
+          type: "scalar"
+          expr: { type: "field", table: "entities.surface_water", column: "location" }
+          joins: ["site"]
+          table: "entities.wwmc_visit"
+        }
+        )
 
-    # it "upgrades complex expression with legacy literals", ->
-    #   expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
-    #   expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
-    #   value = { type: "logical", table: "t1", op: "and", exprs: [expr1, expr2] }      
+    it "upgrades complex expression with legacy literals", ->
+      expr1 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 4 } }
+      expr2 = { type: "comparison", table: "t1", op: "=", lhs: { type: "field", table: "t1", column: "number" }, rhs: { type: "literal", valueType: "integer", value: 5 } }
+      value = { type: "logical", table: "t1", op: "and", exprs: [expr1, expr2] }      
 
-    #   @clean(
-    #     value,
-    #     { 
-    #       type: "op"
-    #       op: "and"
-    #       table: "t1"
-    #       exprs: [
-    #         { 
-    #           type: "op"
-    #           table: "t1"
-    #           op: "="
-    #           exprs: [
-    #             { type: "field", table: "t1", column: "number" }
-    #             { type: "literal", valueType: "number", value: 4 }
-    #           ]
-    #         }
-    #         { 
-    #           type: "op"
-    #           table: "t1"
-    #           op: "="
-    #           exprs: [
-    #             { type: "field", table: "t1", column: "number" }
-    #             { type: "literal", valueType: "number", value: 5 }
-    #           ]
-    #         }
-    #       ]
-    #     }
-    #   )
+      @clean(
+        value,
+        { 
+          type: "op"
+          op: "and"
+          table: "t1"
+          exprs: [
+            { 
+              type: "op"
+              table: "t1"
+              op: "="
+              exprs: [
+                { type: "field", table: "t1", column: "number" }
+                { type: "literal", valueType: "number", value: 4 }
+              ]
+            }
+            { 
+              type: "op"
+              table: "t1"
+              op: "="
+              exprs: [
+                { type: "field", table: "t1", column: "number" }
+                { type: "literal", valueType: "number", value: 5 }
+              ]
+            }
+          ]
+        }
+      )
 
