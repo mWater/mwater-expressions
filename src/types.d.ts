@@ -211,8 +211,9 @@ export interface EnumValue {
  * image: { id: id of image, caption: optional caption } 
  * imagelist: an array of images 
  * json: arbitrary json
+ * dataurl: file stored as a data URL in text. Starts with data:
  */
-export type LiteralType = "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "id" | "id[]" | "geometry" | "text[]" | "image" | "imagelist" | "json"
+export type LiteralType = "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "id" | "id[]" | "geometry" | "text[]" | "image" | "imagelist" | "json" | "dataurl"
 
 export interface Column {
   /** table-unique id of item */
