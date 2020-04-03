@@ -289,7 +289,7 @@ export default class ExprCleaner {
 
         return produce(expr, draft => {
           for (let i = 0 ; i < expr.exprs.length ; i++) {
-            draft.exprs[i] = this.cleanExpr(expr.exprs[i], { types: ["boolean"], table: expr.table })
+            draft.exprs[i] = this.cleanExpr(expr.exprs[i], { types: ["boolean"], aggrStatuses: options.aggrStatuses, table: expr.table })
           }
         })
 

@@ -76,6 +76,12 @@ describe "ExprCleaner", ->
       assert.isNull exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_invalid" })
       assert exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_valid" })
 
+    it "cleans aggregate op", ->
+      expr = { type: "op", table: "t1", op: "and", exprs: [
+        { type: "op", op: "=", table: "t1", exprs: [{ type: "op", table: "t1", op: "count", exprs: [] }, null] }
+        null
+      ]}
+      compare(@exprCleaner.cleanExpr(expr, aggrStatuses: ['aggregate', 'individual', 'literal'], types: ['boolean']), expr)
 
     describe "aggregation", ->
       it "aggregates if required", ->
