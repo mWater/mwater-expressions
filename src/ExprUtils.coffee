@@ -291,6 +291,10 @@ module.exports = class ExprUtils
 
     # Gets the aggregation status of a series of expressions (takes highest always)
     getListAggrStatus = (exprs) =>
+      # If has no expressions, is literal
+      if exprs.length == 0
+        return "literal"
+
       # Get highest type
       aggrStatuses = _.map(exprs, (subExpr) => @getExprAggrStatus(subExpr, depth + 1))
       if "aggregate" in aggrStatuses
