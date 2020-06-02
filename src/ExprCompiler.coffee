@@ -336,6 +336,12 @@ module.exports = class ExprCompiler
           op: expr.op
           exprs: compiledExprs
         }
+      when "least", "greatest"
+        return { 
+          type: "op"
+          op: expr.op
+          exprs: compiledExprs
+        }
       when "/"
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
@@ -607,6 +613,21 @@ module.exports = class ExprCompiler
           }
 
         return null
+
+      when "to date"
+        # Null if not present
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "substr"
+          exprs: [
+            compiledExprs[0]
+            1
+            10
+          ]
+        }      
 
       when "count where"
         # Null if not present
@@ -1137,6 +1158,45 @@ module.exports = class ExprCompiler
             { type: "op", op: "substr", exprs: [compiledExprs[0], 1, 7] }
             10
             "-01"
+          ]
+        }
+
+      when 'yearquarter'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [compiledExprs[0]] }
+            "YYYY-Q"
+          ]
+        }
+
+      when 'yearweek'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [compiledExprs[0]] }
+            "IYYY-IW"
+          ]
+        }
+
+      when 'weekofyear'
+        if not compiledExprs[0]
+          return null
+
+        return {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [compiledExprs[0]] }
+            "IW"
           ]
         }
 

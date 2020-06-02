@@ -108,6 +108,16 @@ addOp(true, "between", literal(3, "number"), literal(2, "number"), literal(4, "n
 addOp(true, "between", literal(2, "number"), literal(2, "number"), literal(4, "number"))
 addOp(false, "between", literal(1, "number"), literal(2, "number"), literal(4, "number"))
 
+addOp(3.4, "greatest", literal(3.4, "number"), literal(3.2, "number"))
+addOp(3.4, "greatest", literal(3.2, "number"), literal(3.4, "number"))
+addOp(3.4, "greatest", literal(3.4, "number"), literal(null, "number"))
+
+addOp(3.2, "least", literal(3.4, "number"), literal(3.2, "number"))
+addOp(3.2, "least", literal(3.2, "number"), literal(3.4, "number"))
+addOp(3.2, "least", literal(3.2, "number"), literal(null, "number"))
+
+addOp(4, "round", literal(3.6, "number"))
+
 addOp(3, "round", literal(3.4, "number"))
 addOp(4, "round", literal(3.6, "number"))
 
@@ -255,8 +265,22 @@ addOp("2015-05-01", "yearmonth", literal("2015-05-08", "datetime"))
 addOp("2015-01-01", "year", literal("2015-05-08", "date"))
 addOp("2015-01-01", "year", literal("2015-05-08", "datetime"))
 
+addOp("2015-01-01", "year", literal("2015-05-08", "date"))
+addOp("2015-01-01", "year", literal("2015-05-08", "datetime"))
+
+addOp("2015-1", "yearquarter", literal("2015-01-08", "date"))
+addOp("2015-4", "yearquarter", literal("2015-12-08", "datetime"))
+
+addOp("2015-01", "yearweek", literal("2015-01-04", "date"))
+addOp("2015-02", "yearweek", literal("2015-01-05", "datetime"))
+
+addOp("01", "weekofyear", literal("2015-01-04", "date"))
+addOp("02", "weekofyear", literal("2015-01-05", "datetime"))
+
 addOp(moment().format("YYYY-MM-DD"), "current date")
 addOp(((d) -> d.startsWith(moment().toISOString().substr(0, 10))), "current datetime") 
+
+addOp("2015-01-02", "to date", literal("2015-01-02T12:34:56Z", "datetime"))
 
 sampleRows = [
   makeRow(id: "1", a: 1, b: 1, c: true, d: true, e: "x", f: 1, ordering: 3)

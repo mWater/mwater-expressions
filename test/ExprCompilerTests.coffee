@@ -856,6 +856,40 @@ describe "ExprCompiler", ->
         null
       )
 
+    it "compiles least", ->
+      @compile(
+        {
+          type: "op"
+          op: "least"
+          exprs: [@number1, @number2]
+        }
+        {
+          type: "op"
+          op: "least"
+          exprs: [
+            @number1JsonQL
+            @number2JsonQL
+          ]
+        }
+      )
+
+    it "compiles greatest", ->
+      @compile(
+        {
+          type: "op"
+          op: "greatest"
+          exprs: [@number1, @number2]
+        }
+        {
+          type: "op"
+          op: "greatest"
+          exprs: [
+            @number1JsonQL
+            @number2JsonQL
+          ]
+        }
+      )
+
     it "compiles sum()", ->
       @compile(
         {
@@ -1871,6 +1905,60 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles yearquarter", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "yearquarter"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [{ type: "field", tableAlias: "T1", column: "date" }] }
+            "YYYY-Q"
+          ]
+        }
+      )
+
+    it "compiles yearweek", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "yearweek"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [{ type: "field", tableAlias: "T1", column: "date" }] }
+            "IYYY-IW"
+          ]
+        }
+      )
+
+    it "compiles weekofyear", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "weekofyear"
+          exprs: [{ type: "field", table: "t1", column: "date" }]
+        }
+        {
+          type: "op"
+          op: "to_char"
+          exprs: [
+            { type: "op", op: "::date", exprs: [{ type: "field", tableAlias: "T1", column: "date" }] }
+            "IW"
+          ]
+        }
+      )
+
     it "compiles year", ->
       @compile(
         {
@@ -1887,6 +1975,21 @@ describe "ExprCompiler", ->
             10
             "-01-01"
           ]
+        }
+      )
+
+    it "compiles to date", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "to date"
+          exprs: [{ type: "field", table: "t1", column: "datetime" }]
+        }
+        { 
+          type: "op", 
+          op: "substr", 
+          exprs: [{ type: "field", tableAlias: "T1", column: "datetime" }, 1, 10] 
         }
       )
 

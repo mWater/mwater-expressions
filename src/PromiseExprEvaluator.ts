@@ -620,6 +620,22 @@ export class PromiseExprEvaluator {
           return null
         }
         return Math.ceil(values[0])
+      case "least":
+        let least: number | null = null
+        for (const value of values) {
+          if (value != null && (least == null || value < least)) {
+            least = value
+          }
+        }
+        return least
+      case "greatest":
+        let greatest: number | null = null
+        for (const value of values) {
+          if (value != null && (greatest == null || value > greatest)) {
+            greatest = value
+          }
+        }
+        return greatest
       case "days difference":
         if (hasNull) {
           return null
@@ -675,6 +691,28 @@ export class PromiseExprEvaluator {
           return null
         }
         return values[0].substr(0, 7) + "-01"
+      case "yearquarter":
+        if (hasNull) {
+          return null
+        }
+        return values[0].substr(0, 4) + "-" + moment(values[0].substr(0, 10), 'YYYY-MM-DD').quarter()
+      case "yearweek":
+        if (hasNull) {
+          return null
+        }
+        const isoWeek = moment(values[0].substr(0, 10), 'YYYY-MM-DD').isoWeek()
+        return values[0].substr(0, 4) + "-" + (isoWeek < 10 ? "0" + isoWeek : isoWeek)
+      case "weekofyear":
+        if (hasNull) {
+          return null
+        }
+        const isoWeek2 = moment(values[0].substr(0, 10), 'YYYY-MM-DD').isoWeek()
+        return isoWeek2 < 10 ? "0" + isoWeek2 : isoWeek2
+      case "to date":
+        if (hasNull) {
+          return null
+        }
+        return values[0].substr(0, 10)
       case "year":
         if (hasNull) {
           return null
