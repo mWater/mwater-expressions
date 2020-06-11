@@ -19,10 +19,10 @@ export default class ExprUtils {
   stringifyExprLiteral(expr: Expr, literal: any, locale?: string, preferEnumCodes?: boolean): string
 
   /** Localize a localized string */
-  static localizeString(str?: LocalizedString | null, locale?: string): string
+  static localizeString(str?: LocalizedString | string | null, locale?: string): string
 
   /** Localize a localized string */
-  localizeString(str?: LocalizedString | null, locale?: string): string
+  localizeString(str?: LocalizedString | string | null, locale?: string): string
 
   /** Get a list of fields that are referenced in a an expression
    * Useful to know which fields and joins are used. Includes joins as fields */
