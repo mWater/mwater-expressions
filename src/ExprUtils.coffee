@@ -831,6 +831,9 @@ addOpItem(op: "= any", name: "is any of", resultType: "boolean", exprTypes: ["en
 addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["enumset", "enumset"])
 addOpItem(op: "intersects", name: "includes any of", resultType: "boolean", exprTypes: ["enumset", "enumset"])
 
+addOpItem(op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["text[]", "text[]"])
+addOpItem(op: "intersects", name: "includes any of", resultType: "boolean", exprTypes: ["text[]", "text[]"])
+
 # Add relative dates
 relativeDateOps = [
   ['thisyear', 'is this year']
