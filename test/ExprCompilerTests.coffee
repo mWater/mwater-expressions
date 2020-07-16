@@ -219,6 +219,34 @@ describe "ExprCompiler", ->
           limit: 1
         })
 
+    it "compiles scalar with one join that is through id", ->
+      @compile(
+        { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["id"] }
+        {
+          type: "scalar"
+          expr: { type: "field", tableAlias: "id", column: "number" }
+          from: { type: "table", table: "t2", alias: "id" }
+          where: { type: "op", op: "=", exprs: [
+            { type: "field", tableAlias: "T1", column: "id" }
+            { type: "field", tableAlias: "id", column: "primary" }
+          ]}
+          limit: 1
+        })
+
+    it "compiles scalar with one join that is through id[]", ->
+      @compile(
+        { type: "scalar", table: "t1", expr: { type: "op", table: "t2", op: "count", exprs: [] }, joins: ["id[]"] }
+        {
+          type: "scalar"
+          expr: { type: "op", op: "count", exprs: [] }
+          from: { type: "table", table: "t2", alias: "id__" }
+          where: { type: "op", op: "=", modifier: "any", exprs: [
+            { type: "field", tableAlias: "id__", column: "primary" }
+            { type: "field", tableAlias: "T1", column: "id[]" }
+          ]}
+          limit: 1
+        })
+
     it "compiles scalar with one join and sql aggr", ->
       @compile(
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"], aggr: "count" }

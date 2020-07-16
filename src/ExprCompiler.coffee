@@ -114,7 +114,7 @@ module.exports = class ExprCompiler
             ]
           }
           from: @compileTable(column.join.toTable, "inner")
-          where: @compileJoin(column.join, options.tableAlias, "inner")
+          where: @compileJoin(expr.table, column, options.tableAlias, "inner")
           limit: 1  # Limit 1 to be safe
         }
 
@@ -154,17 +154,19 @@ module.exports = class ExprCompiler
       joinColumn = @schema.getColumn(expr.table, expr.joins[0])
       if not joinColumn
         throw new ColumnNotFoundException("Join column #{expr.table}:#{expr.joins[0]} not found")
-      join = joinColumn.join
+
+      # Determine which column join is to
+      toTable = if joinColumn.type == "join" then joinColumn.join.toTable else joinColumn.idTable
 
       # Generate a consistent, semi-unique alias
       alias = generateAlias(expr, 0)
 
-      where = @compileJoin(join, tableAlias, alias)
+      where = @compileJoin(table, joinColumn, tableAlias, alias)
 
-      from = @compileTable(join.toTable, alias)
+      from = @compileTable(toTable, alias)
 
       # We are now at j1, which is the to of the first join
-      table = join.toTable
+      table = toTable
       tableAlias = alias
 
     # Perform remaining joins
@@ -173,23 +175,25 @@ module.exports = class ExprCompiler
         joinColumn = @schema.getColumn(table, expr.joins[i])
         if not joinColumn
           throw new ColumnNotFoundException("Join column #{table}:#{expr.joins[i]} not found")
-        join = joinColumn.join
+
+        # Determine which column join is to
+        toTable = if joinColumn.type == "join" then joinColumn.join.toTable else joinColumn.idTable
 
         # Generate a consistent, semi-unique alias
         nextAlias = generateAlias(expr, i)
 
-        onClause = @compileJoin(join, tableAlias, nextAlias)
+        onClause = @compileJoin(table, joinColumn, tableAlias, nextAlias)
 
         from = {
           type: "join"
           left: from
-          right: @compileTable(join.toTable, nextAlias)
+          right: @compileTable(toTable, nextAlias)
           kind: "inner"
           on: onClause
         }
 
         # We are now at jn
-        table = join.toTable
+        table = toTable
         tableAlias = nextAlias
 
     # Compile where clause
@@ -251,21 +255,50 @@ module.exports = class ExprCompiler
     return scalar
 
   # Compile a join into an on or where clause
-  #  join: join part of column definition
+  #  fromTableID: column definition
+  #  joinColumn: column definition
   #  fromAlias: alias of from table
   #  toAlias: alias of to table
-  compileJoin: (join, fromAlias, toAlias) ->
-    if join.jsonql
-      return injectTableAliases(join.jsonql, { "{from}": fromAlias, "{to}": toAlias })
-    else
-      # Use manual columns
+  compileJoin: (fromTableId, joinColumn, fromAlias, toAlias) ->
+    # For join columns
+    if joinColumn.type == "join"
+      if joinColumn.join.jsonql
+        return injectTableAliases(joinColumn.join.jsonql, { "{from}": fromAlias, "{to}": toAlias })
+      else
+        # Use manual columns
+        return { 
+          type: "op", op: "="
+          exprs: [
+            @compileColumnRef(joinColumn.join.toColumn, toAlias)
+            @compileColumnRef(joinColumn.join.fromColumn, fromAlias)
+          ]
+        }
+    else if joinColumn.type == "id"
+      # Get to table
+      toTable = @schema.getTable(joinColumn.idTable)
+
+      # Create equal
       return { 
         type: "op", op: "="
         exprs: [
-          @compileColumnRef(join.toColumn, toAlias)
-          @compileColumnRef(join.fromColumn, fromAlias)
+          @compileFieldExpr(expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias)
+          { type: "field", tableAlias: toAlias, column: toTable.primaryKey }
         ]
       }
+    else if joinColumn.type == "id[]"
+      # Get to table
+      toTable = @schema.getTable(joinColumn.idTable)
+
+      # Create equal
+      return { 
+        type: "op", op: "=", modifier: "any",
+        exprs: [
+          { type: "field", tableAlias: toAlias, column: toTable.primaryKey }
+          @compileFieldExpr(expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias)
+        ]
+      }
+    else
+      throw new Error("Invalid join column type #{column.type}")
 
   # Compile an expression. Pass expr and tableAlias.
   compileOpExpr: (options) ->

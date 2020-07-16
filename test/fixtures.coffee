@@ -13,6 +13,8 @@ exports.simpleSchema = ->
     { id: "geometry", name: { en: "Geometry" }, type: "geometry" }
     { id: "text[]", name: { en: "Text[]" }, type: "text[]" }
     { id: "1-2", name: { en: "T1->T2" }, type: "join", join: { type: "1-n", toTable: "t2", fromColumn: "primary", toColumn: "t1" }}
+    { id: "id", name: { en: "Id" }, type: "id", idTable: "t2" }
+    { id: "id[]", name: { en: "Id[]" }, type: "id[]", idTable: "t2" }
     { id: "ordering", name: { en: "Ordering"}, type: "number" }
 
     # Expressions
