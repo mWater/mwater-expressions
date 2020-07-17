@@ -60,7 +60,10 @@ module.exports = class ExprUtils
     t = startTable
     for j in joins
       joinCol = @schema.getColumn(t, j)
-      t = joinCol.join.toTable
+      if joinCol.type == "join"
+        t = joinCol.join.toTable
+      else
+        t = joinCol.idTable
 
     return t
 
@@ -69,10 +72,17 @@ module.exports = class ExprUtils
     t = table
     for j in joins
       joinCol = @schema.getColumn(t, j)
-      if joinCol.join.type in ['1-n', 'n-n']
-        return true
+      if joinCol.type == "join"
+        if joinCol.join.type in ['1-n', 'n-n']
+          return true
 
-      t = joinCol.join.toTable
+        t = joinCol.join.toTable
+      else if joinCol.type == "id"
+        t = joinCol.idTable
+      else if joinCol.type == "id[]"
+        return true
+      else
+        throw new Error("Unsupported join type #{joinCol.type}")
 
     return false
 
@@ -416,7 +426,12 @@ module.exports = class ExprUtils
       if not joinCol 
         return false
 
-      t = joinCol.join.toTable
+      if joinCol.type in ["id", "id[]"]
+        t = joinCol.idTable
+      else if joinCol.type == "join"
+        t = joinCol.join.toTable
+      else  
+        return false
 
     return true
 
@@ -552,7 +567,13 @@ module.exports = class ExprUtils
       else
         str += "NOT FOUND > "
         break
-      t = joinCol.join.toTable
+      if joinCol.type == "join"
+        t = joinCol.join.toTable
+      else if joinCol.type in ["id", "id[]"]
+        t = joinCol.idTable
+      else
+        str += "INVALID >"
+        break
 
     # Special case for id type to be rendered as {last join name}
     if expr.expr?.type == "id" and not expr.aggr
@@ -718,7 +739,12 @@ module.exports = class ExprUtils
           if not column
             break
 
-          table = column.join.toTable
+          if column.type == "join"
+            table = column.join.toTable
+          else if column.type in ['id', 'id[]']
+            table = column.idTable
+          else 
+            break
 
         cols = cols.concat(@getReferencedFields(expr.expr))
 
