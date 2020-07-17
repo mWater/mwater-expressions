@@ -298,7 +298,7 @@ module.exports = class ExprCompiler
         ]
       }
     else
-      throw new Error("Invalid join column type #{column.type}")
+      throw new Error("Invalid join column type #{joinColumn.type}")
 
   # Compile an expression. Pass expr and tableAlias.
   compileOpExpr: (options) ->
