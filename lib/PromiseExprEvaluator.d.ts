@@ -5,9 +5,11 @@ export interface PromiseExprEvaluatorRow {
     /** gets primary key of row */
     getPrimaryKey(): Promise<any>;
     /** gets the value of a column.
-     * For joins, getField will get array of rows for 1-n and n-n joins and a row or null for n-1 and 1-1 joins
+     * For joins, getField will get either the primary key or array of primary keys
      */
     getField(columnId: string): Promise<any>;
+    /** Get array of rows for 1-n and n-n joins and a row or null for n-1 and 1-1 joins */
+    followJoin(columnId: string): Promise<null | PromiseExprEvaluatorRow | PromiseExprEvaluatorRow[]>;
 }
 export interface PromiseExprEvaluatorContext {
     /** current row. Optional for aggr expressions */

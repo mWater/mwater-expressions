@@ -17,6 +17,7 @@ makeRow = (data) ->
   return {
     getPrimaryKey: () -> Promise.resolve(data.id)
     getField: (columnId) -> Promise.resolve(data[columnId])
+    followJoin: (columnId) -> Promise.resolve(data["join:" + columnId])
   }
 
 # Null
@@ -333,14 +334,14 @@ add({ type: "op", table: "t1", op: "count distinct", exprs: [{ type: "field", ta
 add({ type: "op", table: "t1", op: "array_agg", exprs: [{ type: "field", table: "t1", column: "e" }] }, ["x", "y", "z", "z"], { rows: sampleRows })
 
 # Row with join
-singleJoinRow = makeRow(j: makeRow(id: "j1", a:1, b:2))
+singleJoinRow = makeRow(j: "j1", "join:j": makeRow(id: "j1", a:1, b:2))
 
 add({ type: "scalar", joins: ["j"], expr: { type: "field", table: "t2", column: "b" }}, 2, { row: singleJoinRow })
 
 add({ type: "field", table: "t1", column: "j" }, "j1", { row: singleJoinRow })
 
 # Row with join
-multipleJoinRow = makeRow(j: sampleRows)
+multipleJoinRow = makeRow("join:j": sampleRows, j: ["1", "2", "3", "4"])
 
 add({ type: "scalar", joins: ["j"], expr: { type: "op", table: "t2", op: "sum", exprs: [{ type: "field", table: "t2", column: "a" }] }}, 10, { row: multipleJoinRow })
 
@@ -348,15 +349,15 @@ add({ type: "field", table: "t1", column: "j" }, ["1", "2", "3", "4"], { row: mu
 
 
 # Row with joins
-multipleJoinsRow = makeRow(j1: makeRow(j2: sampleRows))
+multipleJoinsRow = makeRow("join:j1": makeRow("join:j2": sampleRows))
 add({ type: "scalar", joins: ["j1", "j2"], expr: { type: "op", table: "t3", op: "sum", exprs: [{ type: "field", table: "t3", column: "a" }] }}, 10, { row: multipleJoinsRow })
 
-multipleJoinsRow = makeRow(j1: null)
+multipleJoinsRow = makeRow(j1: null, "join:j1": null)
 add({ type: "scalar", joins: ["j1", "j2"], expr: { type: "op", table: "t3", op: "sum", exprs: [{ type: "field", table: "t3", column: "a" }] }}, null, { row: multipleJoinsRow })
 
 
 # Scalar with no row
-add({ type: "scalar", joins: ["j"], expr: { type: "field", table: "t2", column: "b" }}, null, { row: makeRow(j: null) })
+add({ type: "scalar", joins: ["j"], expr: { type: "field", table: "t2", column: "b" }}, null, { row: makeRow("join:j": null, j: null) })
 
 
 # addOpItem(op: "within", name: "in", resultType: "boolean", exprTypes: ["id", "id"], lhsCond: (lhsExpr, exprUtils) => 
