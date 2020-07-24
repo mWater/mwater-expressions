@@ -22,22 +22,22 @@
   "author": "mWater",
   "license": "LGPL-3.0",
   "dependencies": {
-    "@babel/runtime": "^7.6.0",
+    "@babel/runtime": "^7.10.5",
     "async": "^1.5.0",
-    "immer": "^5.3.2",
+    "immer": "^5.3.6",
     "jsonql": "github:mWater/jsonql",
     "lodash": "^3.10.1",
-    "lru-cache": "^4.0.0",
-    "moment": "^2.10.6"
+    "lru-cache": "^4.1.5",
+    "moment": "^2.27.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.8",
-    "@types/lodash": "^3.10.2",
+    "@types/chai": "^4.2.12",
+    "@types/lodash": "^3.10.3",
     "@types/moment": "^2.13.0",
     "build-library": "github:mWater/build-library",
     "canonical-json": "0.0.4",
     "chai": "^3.4.0",
-    "sinon": "^7.4.2",
-    "ts-node": "^8.6.2"
+    "sinon": "^7.5.0",
+    "ts-node": "^8.10.2"
   }
 }
