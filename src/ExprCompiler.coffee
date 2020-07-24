@@ -1958,7 +1958,7 @@ module.exports = class ExprCompiler
     else
       return null
 
-# Converts a compiled expression to jsonb. Literals cannot use to_json as they will
+# Converts a compiled expression to jsonb. Literals cannot use to_jsonb as they will
 # trigger "could not determine polymorphic type because input has type unknown" unless the 
 # SQL is inlined
 convertToJsonB = (compiledExpr) ->
@@ -1970,4 +1970,4 @@ convertToJsonB = (compiledExpr) ->
     return { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: JSON.stringify(compiledExpr.value) }] }
   
   # First convert using to_json in case is array
-  return { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_json", exprs: [compiledExpr] }] }
+  return { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [compiledExpr] }] }
