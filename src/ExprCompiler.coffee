@@ -1969,5 +1969,5 @@ convertToJsonB = (compiledExpr) ->
   if compiledExpr.type == "literal"
     return { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: JSON.stringify(compiledExpr.value) }] }
   
-  # First convert using to_json in case is array
-  return { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [compiledExpr] }] }
+  # First convert using to_jsonb in case is array
+  return { type: "op", op: "to_jsonb", exprs: [compiledExpr] }

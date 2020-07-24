@@ -427,7 +427,7 @@ describe "ExprCompiler", ->
                     type: "op"
                     op: "@>"
                     exprs: [
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }]}
                       { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a"]' }]}
                     ]
                   }
@@ -444,7 +444,7 @@ describe "ExprCompiler", ->
                     type: "op"
                     op: "@>"
                     exprs: [
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
                       { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["b"]' }]}
                     ]
                   }
@@ -538,7 +538,7 @@ describe "ExprCompiler", ->
                     type: "op"
                     op: "@>"
                     exprs: [
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
                       { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a"]' }]}
                     ]
                   }
@@ -555,7 +555,7 @@ describe "ExprCompiler", ->
                     type: "op"
                     op: "@>"
                     exprs: [
-                      { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                      { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
                       { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["b"]' }]}
                     ]
                   }
@@ -1399,7 +1399,7 @@ describe "ExprCompiler", ->
           type: "op"
           op: "@>"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
             { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a","b"]' }]}
           ]
         }
@@ -1432,7 +1432,7 @@ describe "ExprCompiler", ->
           type: "op"
           op: "?|"
           exprs: [
-            { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
             { type: "literal", value: ["a", "b"] }
           ]
         }
@@ -1468,7 +1468,7 @@ describe "ExprCompiler", ->
               type: "op"
               op: "jsonb_array_length"
               exprs: [
-                { type: "op", op: "::jsonb", exprs: [{ type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }]}
+                { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
               ]
             }
             0
