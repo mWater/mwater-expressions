@@ -478,10 +478,10 @@ module.exports = class ExprCompiler
         if _.any(compiledExprs, (ce) -> not ce?)
           return null
 
-        # Null if empty list on rhs
+        # False if empty list on rhs
         if expr.exprs[1].type == "literal"
           if not expr.exprs[1].value or (_.isArray(expr.exprs[1].value) and expr.exprs[1].value.length == 0)
-            return null
+            return false
 
         return { type: "op", op: "=", modifier: "any", exprs: compiledExprs }
 

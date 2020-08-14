@@ -1323,7 +1323,7 @@ describe "ExprCompiler", ->
             { type: "literal", valueType: "enumset", value: [] }
           ]
         }
-        null
+        false
       )
 
     it "compiles invalid = any", ->
