@@ -38,7 +38,7 @@ module.exports = class ExprUtils
       # Handle list of specified types
       if search.lhsExpr
         lhsType = @getExprType(search.lhsExpr)
-        if lhsType and ((opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType) or opItem.moreExprType != lhsType)
+        if lhsType and ((opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType) or (opItem.exprTypes[0] == null and opItem.moreExprType != lhsType))
           return false
 
       # Check lhsCond
