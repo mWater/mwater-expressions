@@ -37,6 +37,7 @@
     "build-library": "github:mWater/build-library",
     "canonical-json": "0.0.4",
     "chai": "^3.4.0",
+    "husky": "^4.2.5",
     "sinon": "^7.5.0",
     "ts-node": "^8.10.2"
   }
