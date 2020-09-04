@@ -1045,6 +1045,6 @@ addOpItem(op: "to text", name: "Convert to text", desc: "Advanced: convert a cho
 
 addOpItem(op: "to date", name: "Convert to date", desc: "Convert a datetime to a date", resultType: "date", exprTypes: ["datetime"], prefix: true)
 
-addOpItem(op: "least", name: "Least of", desc: "Takes the smallest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true)
-addOpItem(op: "greatest", name: "Greatest of", desc: "Takes the largest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true)
+addOpItem(op: "least", name: "Least of", desc: "Takes the smallest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true, joiner: ", ")
+addOpItem(op: "greatest", name: "Greatest of", desc: "Takes the largest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true, joiner: ", ")
 
