@@ -39,7 +39,12 @@ module.exports = class ExprUtils
       if search.lhsExpr
         lhsType = @getExprType(search.lhsExpr)
 
-        # if lhsType and ((opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType) or (opItem.exprTypes[0] == null and opItem.moreExprType != lhsType))
+        # before = lhsType and opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType and opItem.moreExprType != lhsType
+        # after = lhsType and ((opItem.exprTypes[0]? and opItem.exprTypes[0] != lhsType) or (not opItem.exprTypes[0]? and opItem.moreExprType? and opItem.moreExprType != lhsType))
+        # if before != after
+        #   console.log(before)
+        #   throw new Error("ASDFASDFASF")
+
         if lhsType and opItem.exprTypes[0] != null and opItem.exprTypes[0] != lhsType and opItem.moreExprType != lhsType
           return false
 
