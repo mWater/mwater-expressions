@@ -1062,7 +1062,7 @@ describe "ExprCompiler", ->
       cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
       condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
 
-      # Compiles as sum(case when cond then 1 else 0 end)
+      # Compiles as coalesce(sum(case when cond then 1 else 0 end), 0)
       @compile(
         {
           type: "op"
@@ -1072,16 +1072,23 @@ describe "ExprCompiler", ->
         }
         {
           type: "op"
-          op: "sum"
+          op: "coalesce"
           exprs: [
-            { 
-              type: "case"
-              cases: [
-                when: condJsonQL
-                then: 1
+            {
+              type: "op"
+              op: "sum"
+              exprs: [
+                { 
+                  type: "case"
+                  cases: [
+                    when: condJsonQL
+                    then: 1
+                  ]
+                  else: 0
+                }
               ]
-              else: 0
             }
+            0
           ]
         }
       )

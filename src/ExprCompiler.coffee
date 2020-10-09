@@ -669,16 +669,23 @@ module.exports = class ExprCompiler
 
         return {
           type: "op"
-          op: "sum"
+          op: "coalesce"
           exprs: [
-            { 
-              type: "case"
-              cases: [
-                when: compiledExprs[0]
-                then: 1
+            {
+              type: "op"
+              op: "sum"
+              exprs: [
+                { 
+                  type: "case"
+                  cases: [
+                    when: compiledExprs[0]
+                    then: 1
+                  ]
+                  else: 0
+                }
               ]
-              else: 0
             }
+            0
           ]
         }
 
