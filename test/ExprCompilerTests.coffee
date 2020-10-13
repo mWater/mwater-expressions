@@ -1025,6 +1025,64 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles first", ->
+      text = { type: "field", table: "t2", column: "text" }
+      textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+
+      @compile(
+        {
+          type: "op"
+          op: "first"
+          table: "t2"
+          exprs: [text]
+        }
+        {
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: [textJsonQL], orderBy: [{ expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "asc", nulls: "last"}]}
+            1
+          ]
+        }
+      )
+
+    it "compiles first where", ->
+      text = { type: "field", table: "t2", column: "text" }
+      textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
+      cond = { type: "op", op: ">", exprs: [{ type: "field", table: "t2", column: "number" }, { type: "literal", valueType: "number", value: 3 }] }
+      condJsonQL = { type: "op", op: ">", exprs: [{ type: "field", tableAlias: "T1", column: "number" }, { type: "literal", value: 3 }] }
+
+      # Compiles to 
+      # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> asc nulls last))[1]
+      # Which prevents non-matching from appearing
+
+      @compile(
+        {
+          type: "op"
+          op: "first where"
+          table: "t2"
+          exprs: [text, cond]
+        }
+        {
+          type: "op"
+          op: "[]"
+          exprs: [
+            { 
+              type: "op"
+              op: "array_agg"
+              exprs: [
+                { type: "case", cases: [{ when: condJsonQL, then: textJsonQL }], else: null }
+              ]
+              orderBy: [
+                { expr: { type: "case", cases: [{ when: condJsonQL, then: 0 }], else: 1 } }
+                { expr: { type: "field", tableAlias: "T1", column: "number" }, direction: "asc", nulls: "last" }
+              ]
+            }
+            1
+          ]
+        }
+      )
+
     it "compiles percent", ->
       # Compiles as count(*) * 100::decimal / sum(count(*)) over()
       @compile(

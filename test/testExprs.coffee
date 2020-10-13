@@ -318,6 +318,14 @@ add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table:
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "a" }, null] }, 2, { rows: sampleRows })
 add({ type: "op", table: "t1", op: "last where", exprs: [{ type: "field", table: "t1", column: "f" }, null] }, 1, { rows: sampleRows })
 
+add({ type: "op", table: "t1", op: "first", exprs: [{ type: "field", table: "t1", column: "a" }] }, 3, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "first", exprs: [{ type: "field", table: "t1", column: "f" }] }, 3, { rows: sampleRows })
+
+add({ type: "op", table: "t1", op: "first where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 3, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "first where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "op", table: "t1", op: "not", exprs: [{ type: "field", table: "t1", column: "c" }] }] }, 4, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "first where", exprs: [{ type: "field", table: "t1", column: "a" }, null] }, 3, { rows: sampleRows })
+add({ type: "op", table: "t1", op: "first where", exprs: [{ type: "field", table: "t1", column: "f" }, null] }, 3, { rows: sampleRows })
+
 add({ type: "op", table: "t1", op: "count where", exprs: [{ type: "field", table: "t1", column: "c" }] }, 2, { rows: sampleRows })
 
 add({ type: "op", table: "t1", op: "sum where", exprs: [{ type: "field", table: "t1", column: "a" }, { type: "field", table: "t1", column: "c" }] }, 4, { rows: sampleRows })

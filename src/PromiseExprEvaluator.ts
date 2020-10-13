@@ -397,6 +397,67 @@ export class PromiseExprEvaluator {
           return values[1]
         }
         return null
+
+      case "first":
+        // Fail quietly if no ordering or no schema
+        if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+          console.warn("first does not work without schema and ordering");
+          return null
+        }
+        // Evaluate all rows by ordering
+        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        zipped = _.zip(values, orderValues)
+
+        // Sort by ordering asc
+        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["asc"])
+        values = _.map(zipped, entry => entry[0])
+        
+        // Take first non-null
+        for (let i = 0 ; i < values.length ; i++) {
+          if (values[i] != null) {
+            return values[i]
+          }
+        }
+        return null
+
+      case "first where":
+        // Fail quietly if no ordering or no schema
+        if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
+          console.warn("first where does not work without schema and ordering");
+          return null
+        }
+        // Evaluate all rows by ordering
+        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+
+        // Evaluate all rows
+        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+
+        // Evaluate all rows by where
+        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+
+        // Find smallest
+        if (orderValues.length == 0)
+          return null
+
+        index = -1
+        let smallest: any = null
+        for (let i = 0 ; i < context.rows.length ; i++) {
+          if ((wheres[i] || !exprs[1]) && (index == -1 || orderValues[i] < smallest) && values[i] != null) {
+            index = i
+            smallest = orderValues[i]
+          }
+        }
+
+        if (index >= 0) {
+          return values[index]
+        }
+        else {
+          return null
+        }
       case "count where":
         // Evaluate all rows by where
         wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))

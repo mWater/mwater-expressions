@@ -121,8 +121,8 @@ module.exports = class ExprUtils
       if expr.expr
         return @getExprEnumValues(expr.expr)  
 
-    # "last", "last where" and "previous" are only ops to pass through enum values
-    if expr.type == "op" and expr.op in ["last", "last where", "previous"] and expr.exprs[0]
+    # "last", "last where", "previous", "first", "first where" are only ops to pass through enum values
+    if expr.type == "op" and expr.op in ["last", "last where", "previous", "first", "first where"] and expr.exprs[0]
       return @getExprEnumValues(expr.exprs[0])  
 
     # Weeks of month has predefined values (1-5 as text)
@@ -1000,6 +1000,8 @@ for type in ['text', 'number', 'enum', 'enumset', 'boolean', 'date', 'datetime',
   addOpItem(op: "last", name: "Latest", desc: "Get latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
   addOpItem(op: "last where", name: "Latest where", desc: "Get latest value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "Latest", aggr: true, ordered: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
   addOpItem(op: "previous", name: "Previous", desc: "Get 2nd latest value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+  addOpItem(op: "first", name: "First", desc: "Get first value when there are multiple", resultType: type, exprTypes: [type], prefix: true, aggr: true, ordered: true)
+  addOpItem(op: "first where", name: "First where", desc: "Get first value that matches a condition", resultType: type, exprTypes: [type, "boolean"], prefix: true, prefixLabel: "First", aggr: true, ordered: true, rhsLiteral: false, joiner: "where", rhsPlaceholder: "All")
 
 addOpItem(op: "sum", name: "Total", desc: "Add all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)
 addOpItem(op: "avg", name: "Average", desc: "Average all values together", resultType: "number", exprTypes: ["number"], prefix: true, aggr: true)

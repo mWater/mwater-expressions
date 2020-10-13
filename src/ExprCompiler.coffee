@@ -473,6 +473,70 @@ module.exports = class ExprCompiler
           ]
         }
 
+      when "first"
+        # Null if not present
+        if not compiledExprs[0]
+          return null
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table)?.ordering
+        if not ordering
+          throw new Error("Table #{expr.table} must be ordered to use first()")
+
+        # (array_agg(xyz order by theordering asc nulls last))[1]
+        return { 
+          type: "op"
+          op: "[]"
+          exprs: [
+            { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "asc", nulls: "last" }] }
+            1
+          ]
+        }
+
+      when "first where"
+        # Null if not value present
+        if not compiledExprs[0]
+          return null
+
+        # Get ordering
+        ordering = @schema.getTable(expr.table)?.ordering
+        if not ordering
+          throw new Error("Table #{expr.table} must be ordered to use first where()")
+
+        # Simple first if not condition present
+        if not compiledExprs[1]
+          # (array_agg(xyz order by theordering asc nulls last))[1]
+          return { 
+            type: "op"
+            op: "[]"
+            exprs: [
+              { type: "op", op: "array_agg", exprs: [compiledExprs[0]], orderBy: [{ expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "asc", nulls: "last" }] }
+              1
+            ]
+          }
+
+        # Compiles to:
+        # (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> asc nulls last))[1]
+        # which prevents non-matching from appearing
+        return { 
+          type: "op"
+          op: "[]"
+          exprs: [
+            { 
+              type: "op"
+              op: "array_agg"
+              exprs: [
+                { type: "case", cases: [{ when: compiledExprs[1], then: compiledExprs[0] }], else: null }
+              ]
+              orderBy: [
+                { expr: { type: "case", cases: [{ when: compiledExprs[1], then: 0 }], else: 1 } }
+                { expr: @compileFieldExpr(expr: { type: "field", table: expr.table, column: ordering}, tableAlias: options.tableAlias), direction: "asc", nulls: "last" }
+              ] 
+            }
+            1
+          ]
+        }
+
       when '= any'
         # Null if any not present
         if _.any(compiledExprs, (ce) -> not ce?)
