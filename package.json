@@ -23,7 +23,7 @@
   "license": "LGPL-3.0",
   "dependencies": {
     "@babel/runtime": "^7.10.5",
-    "async": "^1.5.0",
+    "async": "^3.2.0",
     "immer": "^5.3.6",
     "jsonql": "github:mWater/jsonql",
     "lodash": "^3.10.1",
@@ -31,6 +31,7 @@
     "moment": "^2.27.0"
   },
   "devDependencies": {
+    "@types/async": "^3.2.3",
     "@types/chai": "^4.2.12",
     "@types/lodash": "^3.10.3",
     "@types/moment": "^2.13.0",

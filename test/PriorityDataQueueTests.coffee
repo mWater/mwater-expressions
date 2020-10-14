@@ -1,6 +1,6 @@
 assert = require('chai').assert
 
-PriorityDataQueue = require '../src/PriorityDataQueue'
+PriorityDataQueue = require('../src/PriorityDataQueue').default
 DataSource = require '../src/DataSource'
 
 # Very simple DataSource implementation used for testing

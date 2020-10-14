@@ -9,7 +9,7 @@ export default class DataSource {
     Height, if specified, is minimum height needed. May return larger image
     Can be used to upload by posting to this url
   */
-  getImageUrl(imageId: string, height: number): string
+  getImageUrl(imageId: string, height?: number): string
 
   // Clears the cache if possible with this data source
   clearCache(): void
