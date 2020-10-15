@@ -178,7 +178,7 @@ export interface Column {
     name: LocalizedString;
     /** localized description of item */
     desc?: LocalizedString;
-    /**  optional non-localized code of item */
+    /** optional non-localized code of item */
     code?: string;
     /** type of content item. Literal type or `join`, `expr`. `expr` is deprecated! */
     type: LiteralType | "join" | "expr";
@@ -214,10 +214,13 @@ export interface Join {
     /** table column to end join at or jsonql with alias {alias}.  */
     toColumn?: string | JsonQL;
 }
+/** Grouping of columns */
 export interface Section {
     id?: string;
     type: "section";
     name: LocalizedString;
+    /** localized description of section */
+    desc?: LocalizedString;
     contents: Array<Section | Column>;
 }
 export interface SchemaJson {

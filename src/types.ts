@@ -225,7 +225,7 @@ export interface Column {
   /** localized description of item */
   desc?: LocalizedString
   
-  /**  optional non-localized code of item */
+  /** optional non-localized code of item */
   code?: string
   
   /** type of content item. Literal type or `join`, `expr`. `expr` is deprecated! */
@@ -273,12 +273,17 @@ export interface Join {
   toColumn?: string | JsonQL
 }
 
+/** Grouping of columns */
 export interface Section {
   id?: string
 
   type: "section"
 
   name: LocalizedString
+
+  /** localized description of section */
+  desc?: LocalizedString
+  
 
   contents: Array<Section | Column>
 }
