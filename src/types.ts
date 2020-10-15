@@ -231,32 +231,35 @@ export interface Column {
   /** type of content item. Literal type or `join`, `expr`. `expr` is deprecated! */
   type: LiteralType | "join" | "expr"
   
-  /**  Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value */
+  /** Values for enum. Array of { id, name, code }. For type `enum` or `enumset` only. `id` is the string value of the enum. `code` is optional non-localized code for enum value */
   enumValues?: EnumValue[]
   
-  /**  table for id, id[] fields */
+  /** table for id, id[] fields */
   idTable?: string
   
-  /**  Details of the join. See below. For type `join` only. */
+  /** Details of the join. See below. For type `join` only. */
   join?: Join
   
-  /**  true if column is deprecated. Do not show unless already selected */
+  /** true if column is deprecated. Do not show unless already selected */
   deprecated?: boolean
   
-  /**  set to expression if the column is an mwater-expression to be evaluated */
+  /** set to expression if the column is an mwater-expression to be evaluated */
   expr?: Expr
   
-  /**  true if column contains confidential data and should be not displayed by default */
+  /** true if column contains confidential data and should be not displayed by default */
   confidential?: boolean
   
-  /**  true if column is redacted and might be blank or scrambled */
+  /** true if column is redacted and might be blank or scrambled */
   redacted?: boolean
   
-  /**  Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr` */
+  /** Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr` */
   jsonql?: JsonQL
   
-  /**  sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when using a schema file for Water.org's visualization server */
+  /** sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when using a schema file for Water.org's visualization server */
   sql?: string
+
+  /** sql expression for saving back to database. Uses `{value}` which will be substituted with the value to be written *Note*: this is only for when using a schema file for Water.org's visualization server */
+  reverseSql?: string;
 }
 
 export interface Join {
