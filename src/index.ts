@@ -1,4 +1,4 @@
-import { Column, Section } from './types'
+import { Column, LocalizedString, Section } from './types'
 
 export * from './types'
 export { default as DataSource } from './DataSource'
@@ -37,4 +37,31 @@ export function flattenContents(contents: (Column | Section)[]): Column[] {
   }
 
   return columns
+}
+
+/** Localize a string that is { en: "english word", etc. }. Works with null and plain strings too. */
+export function localizeString(name: LocalizedString | null | undefined | string, locale?: string) {
+  if (!name) {
+    return name
+  }
+
+  // Simple string
+  if (typeof(name) == "string") {
+    return name
+  }
+
+  if (locale && name[locale] != null) {
+    return name[locale]
+  }
+
+  if (name._base && name[name._base] != null) {
+    return name[name._base]
+  }
+
+  // Fall back to English
+  if (name.en != null) {
+    return name.en
+  }
+
+  return null
 }

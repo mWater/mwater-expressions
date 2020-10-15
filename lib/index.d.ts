@@ -1,4 +1,4 @@
-import { Column, Section } from './types';
+import { Column, LocalizedString, Section } from './types';
 export * from './types';
 export { default as DataSource } from './DataSource';
 export { default as ExprValidator } from './ExprValidator';
@@ -15,3 +15,5 @@ export { default as ColumnNotFoundException } from './ColumnNotFoundException';
 export * from './injectTableAliases';
 /** Flatten a list of contents to columns */
 export declare function flattenContents(contents: (Column | Section)[]): Column[];
+/** Localize a string that is { en: "english word", etc. }. Works with null and plain strings too. */
+export declare function localizeString(name: LocalizedString | null | undefined | string, locale?: string): string | null | undefined;
