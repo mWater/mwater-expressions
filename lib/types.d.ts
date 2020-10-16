@@ -202,6 +202,8 @@ export interface Column {
     sql?: string;
     /** sql expression for saving back to database. Uses `{value}` which will be substituted with the value to be written *Note*: this is only for when using a schema file for Water.org's visualization server */
     reverseSql?: string;
+    /** True if column is required and cannot be null */
+    required?: boolean;
 }
 export interface Join {
     type: "1-n" | "n-1" | "n-n" | "1-1";
