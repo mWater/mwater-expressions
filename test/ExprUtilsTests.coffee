@@ -10,6 +10,7 @@ canonical = require 'canonical-json'
 variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+  { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t2" }
   { id: "varidexpr", name: { _base: "en", en: "Varidexpr" }, type: "id", table: "t1", idTable: "t2" }
 ]
 
@@ -462,6 +463,17 @@ describe "ExprUtils", ->
         { type: "literal", valueType: "number", value: 3 }
       ]}
       compare(@exprUtils.inlineVariableValues(expr, { varnumber: 4 }), result)
+
+    it "inlines literal ids", ->
+      expr = { type: "op", op: "=", exprs: [
+        { type: "variable", variableId: "varid" }
+        { type: "literal", valueType: "id", idTable: "t2", value: "123" }
+      ]}
+      result = { type: "op", op: "=", exprs: [
+        { type: "literal", valueType: "id", idTable: "t2", value: "123" }
+        { type: "literal", valueType: "id", idTable: "t2", value: "123" }
+      ]}
+      compare(@exprUtils.inlineVariableValues(expr, { varid: "123" }), result)
 
     it "nulls entire value if literal null", ->
       expr = { type: "op", op: ">", exprs: [

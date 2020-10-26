@@ -793,7 +793,10 @@ module.exports = class ExprUtils
         if variable.table
           return variableValues[variable.id] or null
         if variableValues[variable.id]?
-          return { type: "literal", valueType: variable.type, value: variableValues[variable.id] }
+          literalValue = { type: "literal", valueType: variable.type, value: variableValues[variable.id] }
+          if variable.idTable
+            literalValue.idTable = variable.idTable
+          return literalValue
         else  
           return null
       return part
