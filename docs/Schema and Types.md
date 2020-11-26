@@ -81,7 +81,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `number`: e.g 1.34, 2, 5
 * `boolean`: true or false
 * `enum`: fixed set of values with localized names. See values definition
-* `enumset`: set (unordered) of enum values
+* `enumset`: set (unordered) of enum values. Stored as `text[]` or `jsonb`
 * `geometry`: geometry column. Database-specific, but should be GeoJSON when queried as JSON.
 * `date`: date stored as ISO 8601 (e.g. "2015-12-31")
 * `datetime`: timestamp stored as ISO 8601 (e.g. "2015-12-31T02:04:31Z") 
@@ -89,7 +89,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `image`: TODO
 * `imagelist`: TODO
 * `id`: an id column. Requires `idTable`
-* `id[]`: array of primary keys of another table. Include `idTable` field
+* `id[]`: array of primary keys of another table. Include `idTable` field. Stored as `integer[]` or `text[]`
 
 Special column types:
 * `join`: not a column per se, but link to one or N rows in another table
