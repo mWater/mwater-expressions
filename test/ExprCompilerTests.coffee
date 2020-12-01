@@ -242,7 +242,7 @@ describe "ExprCompiler", ->
           from: { type: "table", table: "t2", alias: "id__" }
           where: { type: "op", op: "=", modifier: "any", exprs: [
             { type: "field", tableAlias: "id__", column: "primary" }
-            { type: "field", tableAlias: "T1", column: "id[]" }
+            { type: "scalar", expr: { type: "op", op: "unnest", exprs: [{ type: "field", tableAlias: "T1", column: "id[]" }]}}
           ]}
           limit: 1
         })

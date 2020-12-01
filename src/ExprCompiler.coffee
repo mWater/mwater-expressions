@@ -294,7 +294,12 @@ module.exports = class ExprCompiler
         type: "op", op: "=", modifier: "any",
         exprs: [
           { type: "field", tableAlias: toAlias, column: toTable.primaryKey }
-          @compileFieldExpr(expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias)
+          { 
+            type: "scalar", 
+            expr: { type: "op", op: "unnest", exprs: [
+              @compileFieldExpr(expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias)
+            ]}
+          }
         ]
       }
     else
