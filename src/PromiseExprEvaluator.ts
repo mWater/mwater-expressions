@@ -30,18 +30,15 @@ export interface PromiseExprEvaluatorContext {
 export class PromiseExprEvaluator {
   schema?: Schema
   locale?: string
-  variables?: Variable[]
   variableValues?: { [variableId: string]: any }
 
   constructor(options: { 
     schema?: Schema
     locale?: string
-    variables?: Variable[]
     variableValues?: { [variableId: string]: any }
   }) {
     this.schema = options.schema
     this.locale = options.locale
-    this.variables = options.variables
     this.variableValues = options.variableValues
   }
 
@@ -113,9 +110,12 @@ export class PromiseExprEvaluator {
         if (expr.table) {
           throw new Error(`Synchronous table variables not supported`)
         }
+        if (!this.schema) {
+          throw new Error(`Schema required`)
+        }
     
         // Get variable
-        const variable = _.findWhere(this.variables || [], {
+        const variable = _.findWhere(this.schema.getVariables(), {
           id: expr.variableId
         })
         if (!variable) {
@@ -123,10 +123,15 @@ export class PromiseExprEvaluator {
         }
 
         // Get value
-        if (this.variableValues![variable.id] == null) {
+        const value = this.variableValues![variable.id]
+        if (value == null) {
           return null
         }
-        return this.variableValues![variable.id]
+        // Handle literal case
+        if (value.type == "literal") {
+          return value.value
+        }
+        throw new Error(`Synchronous non-literal variables`)
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }
@@ -922,10 +927,12 @@ export class PromiseExprEvaluator {
   }
 
   async evaluateVariable(expr: VariableExpr, context: PromiseExprEvaluatorContext) {
+    if (!this.schema) {
+      throw new Error("Schema required")
+    }
+
     // Get variable
-    const variable = _.findWhere(this.variables || [], {
-      id: expr.variableId
-    })
+    const variable = this.schema.getVariable(expr.variableId)
     if (!variable) {
       throw new Error(`Variable ${expr.variableId} not found`)
     }
@@ -936,12 +943,8 @@ export class PromiseExprEvaluator {
       return null
     }
 
-    // If expression, compile
-    if (variable.table) {
-      return await this.evaluate(value, context)
-    } else {
-      return value
-    }
+    // Evaluate
+    return await this.evaluate(value, context)
   }
 }
 

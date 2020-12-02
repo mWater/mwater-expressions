@@ -41,4 +41,10 @@ exports.simpleSchema = ->
     { id: "3-2", name: { en: "T3->T2" }, type: "join", join: { type: "n-1", toTable: "t2", fromColumn: "t2", toColumn: "primary" }}
   ]})
 
+  schema = schema.addVariable({ id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] })
+  schema = schema.addVariable({ id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" })
+  schema = schema.addVariable({ id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" })
+  schema = schema.addVariable({ id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t2" })
+  schema = schema.addVariable({ id: "varidexpr", name: { _base: "en", en: "Varidexpr" }, type: "id", table: "t1", idTable: "t2" })
+
   return schema

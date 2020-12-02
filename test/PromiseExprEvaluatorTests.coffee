@@ -14,15 +14,9 @@ compare = (actual, expected) ->
   else
     assert.equal actual, expected
  
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
-]
-
 variableValues = {
-  varenum: "a"
-  varnumber: 123
+  varenum: { type: "literal", valueType: "enum", value: "a" } 
+  varnumber: { type: "literal", valueType: "number", value: 123 } 
   varnumberexpr: { type: "op", op: "+", table: "t1", exprs: [
     { type: "field", table: "t1", column: "number" }
     { type: "literal", valueType: "number", value: 2 }
@@ -33,7 +27,7 @@ describe "PromiseExprEvaluator", ->
   for testExpr in testExprs
     do (testExpr) =>
       it JSON.stringify(testExpr.expr), =>
-        ev = new PromiseExprEvaluator({ schema: fixtures.simpleSchema(), locale: "en", variables: variables, variableValues: variableValues })
+        ev = new PromiseExprEvaluator({ schema: fixtures.simpleSchema(), locale: "en", variableValues: variableValues })
         value = await ev.evaluate(testExpr.expr, testExpr.context)
         if _.isFunction(testExpr.value)
           assert.isTrue testExpr.value(value)
@@ -41,7 +35,7 @@ describe "PromiseExprEvaluator", ->
           compare(value, testExpr.value)
 
   it "does simple expressions synchronously", -> 
-    ev = new PromiseExprEvaluator({ schema: fixtures.simpleSchema(), locale: "en", variables: variables, variableValues: variableValues })
+    ev = new PromiseExprEvaluator({ schema: fixtures.simpleSchema(), locale: "en", variableValues: variableValues })
     
     assert.equal ev.evaluateSync({ type: "literal", valueType: "number", value: 1234 }), 1234
     

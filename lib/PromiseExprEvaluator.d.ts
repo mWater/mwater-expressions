@@ -1,4 +1,4 @@
-import { Expr, Variable, CaseExpr, ScalarExpr, VariableExpr, ScoreExpr, BuildEnumsetExpr } from "./types";
+import { Expr, CaseExpr, ScalarExpr, VariableExpr, ScoreExpr, BuildEnumsetExpr } from "./types";
 import Schema from "./Schema";
 /** Represents a row to be evaluated */
 export interface PromiseExprEvaluatorRow {
@@ -21,14 +21,12 @@ export interface PromiseExprEvaluatorContext {
 export declare class PromiseExprEvaluator {
     schema?: Schema;
     locale?: string;
-    variables?: Variable[];
     variableValues?: {
         [variableId: string]: any;
     };
     constructor(options: {
         schema?: Schema;
         locale?: string;
-        variables?: Variable[];
         variableValues?: {
             [variableId: string]: any;
         };

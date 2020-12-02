@@ -6,9 +6,8 @@ WeakCache = require('./WeakCache').WeakCache
 exprAggrStatusWeakCache = new WeakCache()
 
 module.exports = class ExprUtils
-  constructor: (schema, variables = []) ->
+  constructor: (schema) ->
     @schema = schema
-    @variables = variables
 
   # Search can contain resultTypes, lhsExpr, op, aggr. lhsExpr is actual expression of lhs. resultTypes is optional array of result types
   # If search ordered is not true, excludes ordered ones
@@ -255,7 +254,7 @@ module.exports = class ExprUtils
       return @getExprEnumValues(expr.else)
 
     if expr.type == "variable"
-      return _.findWhere(@variables, id: expr.variableId)?.enumValues
+      return @schema.getVariable(expr.variableId)?.enumValues
 
   # gets the id table of an expression of type id
   getExprIdTable: (expr) ->
@@ -288,7 +287,7 @@ module.exports = class ExprUtils
       return null
     
     if expr.type == "variable"
-      return _.findWhere(@variables, id: expr.variableId)?.idTable
+      return @schema.getVariable(expr.variableId)?.idTable
 
   # Gets the type of an expression
   getExprType: (expr) ->
@@ -349,7 +348,7 @@ module.exports = class ExprUtils
       when "count" # Deprecated
         return "count"
       when "variable"
-        variable = _.findWhere(@variables, id: expr.variableId)
+        variable = @schema.getVariable(expr.variableId)
         if not variable
           return null
         return variable.type
@@ -392,7 +391,7 @@ module.exports = class ExprUtils
         if column?.expr
           # This is a slow operation for complex columns. Use weak cache
           # to cache column expression aggregate status
-          return exprAggrStatusWeakCache.cacheFunction([@schema, column.expr], [@variables], () =>
+          return exprAggrStatusWeakCache.cacheFunction([@schema, column.expr], [], () =>
             return @getExprAggrStatus(column.expr, depth + 1)
           )
           
@@ -420,7 +419,7 @@ module.exports = class ExprUtils
       when "count", "comparison", "logical" # Deprecated
         return "individual"
       when "variable"
-        variable = _.findWhere(@variables, id: expr.variableId)
+        variable = @schema.getVariable(expr.variableId)
         if not variable
           return "literal" # To prevent crash in cleaning, return something
         if variable.table
@@ -559,7 +558,7 @@ module.exports = class ExprUtils
       when "count"
         return "Count" # Deprecated
       when "variable"
-        variable = _.findWhere(@variables, id: expr.variableId)
+        variable = @schema.getVariable(expr.variableId)
         return @localizeString(variable?.name, locale)
       else
         throw new Error("Unsupported type #{expr.type}")
@@ -787,7 +786,7 @@ module.exports = class ExprUtils
       part = mapObject(part, replacer)
       if part and part.type == "variable"
         # Find variable
-        variable = _.findWhere(@variables, id: part.variableId)
+        variable = @schema.getVariable(part.variableId)
         if not variable
           throw new Error("Variable #{part.variableId} not found")
         if variable.table

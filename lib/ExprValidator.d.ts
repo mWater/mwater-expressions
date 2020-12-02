@@ -3,7 +3,7 @@ import { Variable, Expr, AggrStatus } from "./types";
 
 /** Validates expressions. If an expression has been cleaned, it will always be valid */
 export default class ExprValidator {
-  constructor(schema: Schema, variables?: Variable[])
+  constructor(schema: Schema)
 
   /** Validates an expression, returning null if it is valid, otherwise return an error string
    * options are:

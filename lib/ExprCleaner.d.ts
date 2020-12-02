@@ -1,6 +1,6 @@
 import ExprUtils from './ExprUtils';
 import { Schema } from '.';
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types';
+import { Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types';
 interface CleanExprOptions {
     /** optional current table. expression must be related to this table or will be stripped */
     table?: string;
@@ -15,9 +15,8 @@ interface CleanExprOptions {
 }
 export default class ExprCleaner {
     schema: Schema;
-    variables: Variable[];
     exprUtils: ExprUtils;
-    constructor(schema: Schema, variables?: Variable[]);
+    constructor(schema: Schema);
     cleanExpr(expr: Expr, options?: {
         /** optional current table. expression must be related to this table or will be stripped */
         table?: string;

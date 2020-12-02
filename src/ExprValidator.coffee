@@ -7,10 +7,9 @@ weakCache = new WeakCache()
 
 # Validates expressions. If an expression has been cleaned, it will always be valid
 module.exports = class ExprValidator
-  constructor: (schema, variables = []) ->
+  constructor: (schema) ->
     @schema = schema
-    @variables = variables
-    @exprUtils = new ExprUtils(schema, variables)
+    @exprUtils = new ExprUtils(schema)
 
   # Validates an expression, returning null if it is valid, otherwise return an error string
   # NOTE: This uses global weak caching and assumes that expressions are never mutated after
@@ -25,12 +24,7 @@ module.exports = class ExprValidator
     if not expr
       return null
 
-    if not @schema 
-      return weakCache.cacheFunction([expr], [@variables, options], () => 
-        return @validateExprInternal(expr, options)
-      )
-
-    return weakCache.cacheFunction([@schema, expr], [@variables, options], () => 
+    return weakCache.cacheFunction([@schema, expr], [options], () => 
       return @validateExprInternal(expr, options)
     )
 
@@ -139,7 +133,7 @@ module.exports = class ExprValidator
 
       when "variable"
         # Get variable
-        variable = _.findWhere(@variables, id: expr.variableId)
+        variable = _.findWhere(@schema.getVariables(), id: expr.variableId)
         if not variable
           return "Missing variable #{expr.variableId}"
 

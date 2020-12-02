@@ -78,7 +78,7 @@ export interface VariableExpr {
   variableId: string
 }
 
-/** Variable that is referenced in an expression */
+/** Variable that is referenced in an expression. The value is another expression */
 export interface Variable {
   /** Unique id of the variable */
   id: string
@@ -92,7 +92,7 @@ export interface Variable {
   /** Type of the value of the variable */
   type: LiteralType
 
-  /** Table that variable expression is for. If present, is a non-literal variable and the value is an expression. Note: must be non-aggregate */
+  /** Table that variable expression is for. If present, value is an expression for the table. Note: must be non-aggregate */
   table?: string
 
   /** For enum and enumset variables */
@@ -294,6 +294,8 @@ export interface Section {
   contents: Array<Section | Column>
 }
 
+/** JSON version of a schema */
 export interface SchemaJson {
   tables: Table[]
+  variables?: Variable[]
 }

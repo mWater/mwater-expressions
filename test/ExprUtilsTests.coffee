@@ -7,19 +7,12 @@ Schema = require('../src/Schema').default
 
 canonical = require 'canonical-json'
 
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t2" }
-  { id: "varidexpr", name: { _base: "en", en: "Varidexpr" }, type: "id", table: "t1", idTable: "t2" }
-]
-
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
 
 describe "ExprUtils", ->
   beforeEach ->
-    @exprUtils = new ExprUtils(fixtures.simpleSchema(), variables)
+    @exprUtils = new ExprUtils(fixtures.simpleSchema())
 
   it "determines if multiple joins", ->
     assert.isTrue @exprUtils.isMultipleJoins("t1", ["1-2"])

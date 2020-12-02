@@ -1,8 +1,8 @@
 import Schema from "./Schema";
-import { Variable, AggrStatus, Expr, LocalizedString, FieldExpr, EnumValue, LiteralType } from "./types";
+import { AggrStatus, Expr, LocalizedString, FieldExpr, EnumValue, LiteralType } from "./types";
 
 export default class ExprUtils {
-  constructor(schema: Schema, variables?: Variable[])
+  constructor(schema: Schema)
 
   summarizeExpr(expr: Expr, locale?: string): string
 
@@ -28,7 +28,7 @@ export default class ExprUtils {
    * Useful to know which fields and joins are used. Includes joins as fields */
   getReferencedFields(expr: Expr): FieldExpr[]
 
-  /** Replace variables with literal values */
+  /** Replace variables with their values */
   inlineVariableValues(expr: Expr, variableValues: { [variableId: string]: any }): Expr
 
   /** Determine if op is aggregate */

@@ -6,17 +6,10 @@ fixtures = require './fixtures'
 
 canonical = require 'canonical-json'
 
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
-  { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t1" }
-]
-
 describe "ExprValidator", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
-    @exprValidator = new ExprValidator(@schema, variables)
+    @exprValidator = new ExprValidator(@schema)
     @isValid = (expr, options) =>
       assert.isNull @exprValidator.validateExpr(expr, options), "Expected to be valid"
 
@@ -215,5 +208,5 @@ describe "ExprValidator", ->
     it "checks idTable", ->
       @isValid({ type: "variable", variableId: "varid" })
       @isValid({ type: "variable", variableId: "varid" }, { table: "t2" })
-      @isValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
-      @notValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+      @isValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+      @notValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })

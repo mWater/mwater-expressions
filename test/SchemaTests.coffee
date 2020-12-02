@@ -46,7 +46,10 @@ describe "Schema", ->
             type: "text"
           }
         ]
-      }]
+      }], 
+      variables: [
+        { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+      ]
     })
 
     assert.equal JSON.stringify(schema.toJSON()), JSON.stringify({
@@ -60,7 +63,10 @@ describe "Schema", ->
             type: "text"
           }
         ]
-      }]
+      }],
+      variables: [
+        { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
+      ]
     })
 
   # it "skips id types", ->

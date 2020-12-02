@@ -1,4 +1,4 @@
-import { SchemaJson, Table, Column } from "./types";
+import { SchemaJson, Table, Column, Variable } from "./types";
 declare type ColumnMap = {
     [columnId: string]: Column;
 };
@@ -16,6 +16,8 @@ export default class Schema {
     columnMaps: {
         [tableId: string]: ColumnMap;
     };
+    /** Variables of the schema */
+    variables: Variable[];
     constructor(schemaJson?: SchemaJson);
     private indexTable;
     getTables(): Table[];
@@ -23,10 +25,15 @@ export default class Schema {
     getColumn(tableId: string, columnId: string): Column | null;
     /** Gets the columns in order, flattened out from sections */
     getColumns(tableId: string): Column[];
+    getVariable(variableId: string): Variable | null;
+    getVariables(): Variable[];
     /** Add table with id, name, desc, primaryKey, ordering (column with natural order) and contents (array of columns/sections)
      * Will replace table if already exists.
      * schemas are immutable, so returns a fresh copy */
     addTable(table: Table): Schema;
+    /** Adds a variable to the schema
+     * schemas are immutable, so returns a fresh copy */
+    addVariable(variable: Variable): Schema;
     toJSON(): SchemaJson;
 }
 export {};

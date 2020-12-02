@@ -9,17 +9,10 @@ canonical = require 'canonical-json'
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
 
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
-  { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t1" }
-]
-
 describe "ExprCleaner", ->
   beforeEach ->
     @schema = fixtures.simpleSchema()
-    @exprCleaner = new ExprCleaner(@schema, variables)
+    @exprCleaner = new ExprCleaner(@schema)
     @clean = (expr, expected, options) =>
       compare(@exprCleaner.cleanExpr(expr, options), expected)
 
@@ -51,8 +44,8 @@ describe "ExprCleaner", ->
       assert.isNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varxyz" }, table: "t2")
 
     it "allows variable if right id table", ->
-      assert.isNotNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
-      assert.isNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+      assert.isNotNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+      assert.isNull @exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
 
     it "nulls recursive field expr", ->
       table = @schema.getTable("t1")

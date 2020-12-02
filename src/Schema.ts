@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { flattenContents } from '.';
-import { SchemaJson, Table, Column } from "./types";
+import { SchemaJson, Table, Column, Variable } from "./types";
 
 type ColumnMap = { [columnId: string] : Column }
 
@@ -17,10 +17,14 @@ export default class Schema {
   /** Map of "<tableid>" to map of { "<columnid>" to column } */
   columnMaps: { [tableId: string]: ColumnMap }
 
+  /** Variables of the schema */
+  variables: Variable[]
+
   constructor(schemaJson?: SchemaJson) {
     this.tables = []
     this.tableMap = {}
     this.columnMaps = {}
+    this.variables = []
 
     if (schemaJson) {
       this.tables = schemaJson.tables
@@ -29,6 +33,10 @@ export default class Schema {
       for (let table of this.tables) {
         this.tableMap[table.id] = table
         this.columnMaps[table.id] = this.indexTable(table)
+      }
+
+      if (schemaJson.variables) {
+        this.variables = schemaJson.variables
       }
     }
   }
@@ -56,6 +64,14 @@ export default class Schema {
     return flattenContents(this.getTable(tableId)!.contents)
   }
 
+  getVariable(variableId: string): Variable | null {
+    return this.variables.find(v => v.id == variableId) || null
+  }
+
+  getVariables(): Variable[] {
+    return this.variables
+  }
+
   /** Add table with id, name, desc, primaryKey, ordering (column with natural order) and contents (array of columns/sections)
    * Will replace table if already exists. 
    * schemas are immutable, so returns a fresh copy */
@@ -76,12 +92,29 @@ export default class Schema {
     schema.tables = tables;
     schema.tableMap = tableMap;
     schema.columnMaps = columnMaps;
+    schema.variables = this.variables
 
     return schema
   }
 
+  /** Adds a variable to the schema 
+   * schemas are immutable, so returns a fresh copy */
+  addVariable(variable: Variable): Schema {
+   // Remove existing and add new
+   const variables = _.filter(this.variables, v => v.id !== variable.id)
+   variables.push(variable)
+
+   const schema = new Schema();
+   schema.tables = this.tables;
+   schema.tableMap = this.tableMap;
+   schema.columnMaps = this.columnMaps;
+   schema.variables = variables
+
+   return schema
+ }
+
   // Convert to a JSON 
   toJSON(): SchemaJson {
-    return { tables: this.tables }
+    return { tables: this.tables, variables: this.variables }
   }
 }

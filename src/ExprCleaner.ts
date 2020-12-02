@@ -25,13 +25,11 @@ interface CleanExprOptions {
 // Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
 export default class ExprCleaner {
   schema: Schema
-  variables: Variable[]
   exprUtils: ExprUtils
 
-  constructor(schema: Schema, variables: Variable[] = []) {
+  constructor(schema: Schema) {
     this.schema = schema
-    this.variables = variables
-    this.exprUtils = new ExprUtils(schema, variables)
+    this.exprUtils = new ExprUtils(schema)
   }
 
   // Clean an expression, returning null if completely invalid, otherwise removing
@@ -578,7 +576,7 @@ export default class ExprCleaner {
 
   cleanVariableExpr(expr: VariableExpr, options: CleanExprOptions) {
     // Get variable
-    const variable = this.variables.find(v => v.id == expr.variableId)
+    const variable = this.schema.getVariable(expr.variableId)
     if (!variable) {
       return null
     }

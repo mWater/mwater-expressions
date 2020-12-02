@@ -42,15 +42,9 @@ nowMinus24HoursExpr = {
   ]
 }
 
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
-]
-
 variableValues = {
-  varenum: "a"
-  varnumber: 123
+  varenum: { type: "literal", valueType: "enum", value: "a" } 
+  varnumber: { type: "literal", valueType: "number", value: 123 } 
   varnumberexpr: { type: "op", op: "+", table: "t1", exprs: [
     { type: "field", table: "t1", column: "number" }
     { type: "literal", valueType: "number", value: 2 }
@@ -59,7 +53,7 @@ variableValues = {
 
 describe "ExprCompiler", ->
   beforeEach ->
-    @ec = new ExprCompiler(fixtures.simpleSchema(), variables, variableValues)
+    @ec = new ExprCompiler(fixtures.simpleSchema(), variableValues)
     @compile = (expr, expected) =>
       jsonql = @ec.compileExpr(expr: expr, tableAlias: "T1")
       compare(jsonql, expected)
