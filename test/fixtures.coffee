@@ -1,4 +1,4 @@
-Schema = require '../src/Schema'
+Schema = require('../src/Schema').default
 
 exports.simpleSchema = ->
   schema = new Schema()

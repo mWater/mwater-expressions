@@ -1,6 +1,6 @@
 assert = require('chai').assert
 _ = require 'lodash'
-Schema = require '../src/Schema'
+Schema = require('../src/Schema').default
 ExprValidator = require '../src/ExprValidator'
 fixtures = require './fixtures'
 

@@ -4,7 +4,7 @@ _ = require 'lodash'
 canonical = require 'canonical-json'
 moment = require 'moment'
 sinon = require 'sinon'
-Schema = require '../src/Schema'
+Schema = require('../src/Schema').default
 
 ExprCompiler = require '../src/ExprCompiler'
 ColumnNotFoundException = require '../src/ColumnNotFoundException'

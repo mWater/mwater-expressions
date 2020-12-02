@@ -3,7 +3,7 @@ fixtures = require './fixtures'
 _ = require 'lodash'
 
 ExprUtils = require '../src/ExprUtils'
-Schema = require '../src/Schema'
+Schema = require('../src/Schema').default
 
 canonical = require 'canonical-json'
 
