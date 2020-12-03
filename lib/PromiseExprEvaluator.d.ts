@@ -25,6 +25,7 @@ export declare class PromiseExprEvaluator {
     variableValues?: {
         [variableId: string]: any;
     };
+    /** variableValues are the expressions which the variable contains */
     constructor(options: {
         schema?: Schema;
         locale?: string;

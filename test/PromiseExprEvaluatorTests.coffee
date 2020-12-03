@@ -21,8 +21,8 @@ variables = [
 ]
 
 variableValues = {
-  varenum: "a"
-  varnumber: 123
+  varenum: { type: "literal", valueType: "enum", value: "a" } 
+  varnumber: { type: "literal", valueType: "number", value: 123 } 
   varnumberexpr: { type: "op", op: "+", table: "t1", exprs: [
     { type: "field", table: "t1", column: "number" }
     { type: "literal", valueType: "number", value: 2 }

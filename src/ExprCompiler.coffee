@@ -38,7 +38,7 @@ nowMinus24HoursExpr = {
 
 # Compiles expressions to JsonQL
 module.exports = class ExprCompiler 
-  # Variable values are lookup of id to variable value
+  # Variable values are lookup of id to variable value, which is always an expression
   constructor: (schema, variables = [], variableValues = {}) ->
     @schema = schema
     @variables = variables
@@ -2023,14 +2023,12 @@ module.exports = class ExprCompiler
     if not variable
       throw new Error("Variable #{options.expr.variableId} not found")
 
-    # Get value
+    # Get value (which is always an expression)
     value = @variableValues[variable.id]
 
     # If expression, compile
-    if variable.table
+    if value?
       return @compileExpr({ expr: value, tableAlias: options.tableAlias })
-    else if value?
-      return { type: "literal", value: value }
     else
       return null
 

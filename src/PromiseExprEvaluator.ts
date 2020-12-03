@@ -33,6 +33,7 @@ export class PromiseExprEvaluator {
   variables?: Variable[]
   variableValues?: { [variableId: string]: any }
 
+  /** variableValues are the expressions which the variable contains */
   constructor(options: { 
     schema?: Schema
     locale?: string
@@ -123,10 +124,15 @@ export class PromiseExprEvaluator {
         }
 
         // Get value
-        if (this.variableValues![variable.id] == null) {
+        const value = this.variableValues![variable.id]
+        if (value == null) {
           return null
         }
-        return this.variableValues![variable.id]
+        // Handle literal case
+        if (value.type == "literal") {
+          return value.value
+        }
+        throw new Error(`Synchronous non-literal variables`)
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }
@@ -936,12 +942,8 @@ export class PromiseExprEvaluator {
       return null
     }
 
-    // If expression, compile
-    if (variable.table) {
-      return await this.evaluate(value, context)
-    } else {
-      return value
-    }
+    // Evaluate
+    return await this.evaluate(value, context)
   }
 }
 
