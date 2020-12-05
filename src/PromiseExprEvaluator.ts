@@ -31,7 +31,7 @@ export class PromiseExprEvaluator {
   schema?: Schema
   locale?: string
   variables?: Variable[]
-  variableValues?: { [variableId: string]: any }
+  variableValues?: { [variableId: string]: Expr }
 
   /** variableValues are the expressions which the variable contains */
   constructor(options: { 

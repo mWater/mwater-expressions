@@ -29,7 +29,7 @@ export default class ExprUtils {
   getReferencedFields(expr: Expr): FieldExpr[]
 
   /** Replace variables with literal values */
-  inlineVariableValues(expr: Expr, variableValues: { [variableId: string]: any }): Expr
+  inlineVariableValues(expr: Expr, variableValues: { [variableId: string]: Expr }): Expr
 
   /** Determine if op is aggregate */
   static isOpAggr(op: string): boolean

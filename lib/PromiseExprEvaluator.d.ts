@@ -23,7 +23,7 @@ export declare class PromiseExprEvaluator {
     locale?: string;
     variables?: Variable[];
     variableValues?: {
-        [variableId: string]: any;
+        [variableId: string]: Expr;
     };
     /** variableValues are the expressions which the variable contains */
     constructor(options: {
