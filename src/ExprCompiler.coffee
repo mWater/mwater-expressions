@@ -3,7 +3,7 @@ injectTableAlias = require('./injectTableAliases').injectTableAlias
 injectTableAliases = require('./injectTableAliases').injectTableAliases
 ExprUtils = require './ExprUtils'
 moment = require 'moment'
-ColumnNotFoundException = require './ColumnNotFoundException'
+ColumnNotFoundException = require('./ColumnNotFoundException').default
 
 # now expression: (to_json(now() at time zone 'UTC')#>>'{}')
 nowExpr = {
