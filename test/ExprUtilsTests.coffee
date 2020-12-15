@@ -462,7 +462,7 @@ describe "ExprUtils", ->
         { type: "literal", valueType: "number", value: 4 }
         { type: "literal", valueType: "number", value: 3 }
       ]}
-      compare(@exprUtils.inlineVariableValues(expr, { varnumber: 4 }), result)
+      compare(@exprUtils.inlineVariableValues(expr, { varnumber: { type: "literal", valueType: "number", value: 4 } }), result)
 
     it "inlines literal ids", ->
       expr = { type: "op", op: "=", exprs: [
@@ -473,7 +473,7 @@ describe "ExprUtils", ->
         { type: "literal", valueType: "id", idTable: "t2", value: "123" }
         { type: "literal", valueType: "id", idTable: "t2", value: "123" }
       ]}
-      compare(@exprUtils.inlineVariableValues(expr, { varid: "123" }), result)
+      compare(@exprUtils.inlineVariableValues(expr, { varid: { type: "literal", valueType: "id", idTable: "t2", value: "123" }}), result)
 
     it "nulls entire value if literal null", ->
       expr = { type: "op", op: ">", exprs: [
