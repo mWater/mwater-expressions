@@ -790,7 +790,7 @@ module.exports = class ExprUtils
         variable = _.findWhere(@variables, id: part.variableId)
         if not variable
           throw new Error("Variable #{part.variableId} not found")
-        return variableValues[variable.id] or null
+        return mapObject(variableValues[variable.id] or null, replacer)
       return part
 
     return mapObject(expr, replacer)
