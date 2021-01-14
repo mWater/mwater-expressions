@@ -443,6 +443,34 @@ describe "ExprCleaner", ->
         expr = @exprCleaner.cleanExpr(scalarExpr)
         compare(expr, { type: "field", table: "t1", column: "1-2" })
 
+  describe "spatial join", ->
+    it "leaves valid one alone", ->
+      expr = { 
+        type: "spatial join"
+        valueExpr: { type: "op", op: "count", table: "t2", exprs: [] }
+        table: "t1"
+        toTable: "t2"
+        fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
+        toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
+        radius: 10
+        filterExpr: { type: "field", table: "t2", column: "boolean" }
+      }
+
+      compare(expr, @exprCleaner.cleanExpr(expr))
+
+    it "removes invalid filters", ->
+      expr = { 
+        type: "spatial join"
+        valueExpr: { type: "op", op: "count", table: "t2", exprs: [] }
+        table: "t1"
+        toTable: "t2"
+        fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
+        toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
+        radius: 10
+        filterExpr: { type: "field", table: "t1", column: "boolean" }
+      }
+
+      compare(_.extend({}, expr, { filterExpr: null }), @exprCleaner.cleanExpr(expr))
 
   # Version 1 expression should be upgraded to version 2
   describe "upgrade", ->

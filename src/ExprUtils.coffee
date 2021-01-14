@@ -257,6 +257,9 @@ module.exports = class ExprUtils
     if expr.type == "variable"
       return _.findWhere(@variables, id: expr.variableId)?.enumValues
 
+    if expr.type == "spatial join"
+      return @getExprEnumValues(expr.valueExpr)
+
   # gets the id table of an expression of type id
   getExprIdTable: (expr) ->
     if not expr
@@ -289,6 +292,9 @@ module.exports = class ExprUtils
     
     if expr.type == "variable"
       return _.findWhere(@variables, id: expr.variableId)?.idTable
+
+    if expr.type == "spatial join"
+      return @getExprIdTable(expr.valueExpr)
 
   # Gets the type of an expression
   getExprType: (expr) ->
@@ -353,6 +359,8 @@ module.exports = class ExprUtils
         if not variable
           return null
         return variable.type
+      when "spatial join"
+        return @getExprType(expr.valueExpr)
       else
         throw new Error("Not implemented for #{expr.type}")
 
@@ -385,7 +393,7 @@ module.exports = class ExprUtils
       return null
 
     switch expr.type
-      when "id", "scalar"
+      when "id", "scalar", "spatial join"
         return "individual"
       when "field"
         column = @schema.getColumn(expr.table, expr.column)
@@ -561,6 +569,8 @@ module.exports = class ExprUtils
       when "variable"
         variable = _.findWhere(@variables, id: expr.variableId)
         return @localizeString(variable?.name, locale)
+      when "spatial join"
+        return "Spatial join: " + @summarizeExpr(expr.valueExpr, locale)
       else
         throw new Error("Unsupported type #{expr.type}")
 
@@ -767,6 +777,9 @@ module.exports = class ExprUtils
       when "build enumset"
         for value in _.values(expr.values)
           cols = cols.concat(@getReferencedFields(value))
+      
+      when "spatial join"
+        cols = cols.concat(@getReferencedFields(expr.fromGeometryExpr))
 
     return _.uniq(cols, (col) -> col.table + "/" + col.column)
 

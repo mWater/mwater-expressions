@@ -143,6 +143,16 @@ module.exports = class ExprValidator
         if not variable
           return "Missing variable #{expr.variableId}"
 
+      when "spatial join"
+        if not expr.toTable
+          return "Missing to table"
+        if not expr.fromGeometryExpr
+          return "Missing from geometry"
+        if not expr.toGeometryExpr
+          return "Missing to geometry"
+        if not expr.radius
+          return "Radius required"
+
     # Validate table
     if options.idTable and @exprUtils.getExprIdTable(expr) and @exprUtils.getExprIdTable(expr) != options.idTable
       return "Wrong idTable"

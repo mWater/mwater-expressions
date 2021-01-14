@@ -27,6 +27,8 @@ exports.simpleSchema = ->
   schema = schema.addTable({ id: "t2", name: { en: "T2" }, primaryKey: "primary", ordering: "number", contents: [
     { id: "text", name: { en: "Text" }, type: "text" }
     { id: "number", name: { en: "Number" }, type: "number" }
+    { id: "geometry", name: { en: "Geometry" }, type: "geometry" }
+    { id: "boolean", name: { en: "Boolean" }, type: "boolean" }
     { id: "2-1", name: { en: "T2->T1" }, type: "join", join: { type: "n-1", toTable: "t1", fromColumn: "t1", toColumn: "primary" }}
   ]})
 

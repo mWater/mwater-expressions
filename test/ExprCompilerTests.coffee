@@ -2838,3 +2838,66 @@ describe "ExprCompiler", ->
           { type: "op", op: "coalesce", exprs:[{ type: "op", op: "::decimal", exprs: [{ type: "literal", value: 2 }]}, 0] }
         ]
       })
+
+  describe "spatial join", ->
+    it "compiles", ->
+      expr = { 
+        type: "spatial join"
+        valueExpr: { type: "op", op: "count", table: "t2", exprs: [] }
+        table: "t1"
+        toTable: "t2"
+        fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
+        toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
+        radius: 10
+        filterExpr: { type: "field", table: "t2", column: "boolean" }
+      }
+
+      radiusExpr = {
+        type: "op"
+        op: "/"
+        exprs: [
+          10
+          { type: "op", op: "cos", exprs: [
+            { type: "op", op: "/", exprs: [
+              { type: "op", op: "ST_YMin", exprs: [
+                { type: "op", op: "ST_Transform", exprs: [
+                  { type: "field", tableAlias: "T1", column: "geometry" }
+                  4326
+                ]}
+              ]}
+              57.3
+            ]}
+          ]}
+        ]
+      }
+
+      @compile(expr, { 
+        type: "scalar",
+        expr: { type: "op", op: "count", exprs: [] },
+        from: { type: "table", table: "t2", alias: "spatial" }
+        where: { type: "op", op: "and", exprs: [
+          {
+            type: "op"
+            op: "&&"
+            exprs: [
+              { type: "field", tableAlias: "spatial", column: "geometry" }
+              { type: "op", op: "ST_Expand", exprs: [
+                { type: "field", tableAlias: "T1", column: "geometry" }
+                radiusExpr
+              ]}
+            ]
+          },
+          {
+            type: "op"
+            op: "<="
+            exprs: [
+              { type: "op", op: "ST_Distance", exprs: [
+                { type: "field", tableAlias: "spatial", column: "geometry" }
+                { type: "field", tableAlias: "T1", column: "geometry" }
+              ]}
+              radiusExpr
+            ]
+          },
+          { type: "field", tableAlias: "spatial", column: "boolean" }
+        ]}
+      })

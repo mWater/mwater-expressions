@@ -2,7 +2,7 @@ import _ from 'lodash'
 import ExprUtils from './ExprUtils'
 import ExprValidator from './ExprValidator'
 import { Schema } from '.'
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
+import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, SpatialJoinExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
 import produce from 'immer'
 
 interface CleanExprOptions {
@@ -228,6 +228,8 @@ export default class ExprCleaner {
         return this.cleanBuildEnumsetExpr(expr, cleanOptions)
       case "variable":
         return this.cleanVariableExpr(expr, cleanOptions)
+      case "spatial join":
+        return this.cleanSpatialJoinExpr(expr, cleanOptions)
       // default:
       //   throw new Error(`Unknown expression type ${expr.type}`)
     }
@@ -589,6 +591,25 @@ export default class ExprCleaner {
     }
 
     return expr
+  }
+
+  cleanSpatialJoinExpr(expr: SpatialJoinExpr, options: CleanExprOptions) {
+    return produce(expr, draft => {
+      // Clean geometry from
+      draft.fromGeometryExpr = this.cleanExpr(expr.fromGeometryExpr, { types: ['geometry'], table: options.table })  
+
+      // If toTable, clean rest
+      if (expr.toTable) {
+        if (!this.schema.getTable(expr.toTable)) {
+          draft.toTable = null
+        }
+        else {
+          draft.toGeometryExpr = this.cleanExpr(expr.toGeometryExpr, { types: ['geometry'], table: expr.toTable })  
+          draft.valueExpr = this.cleanExpr(expr.valueExpr, { aggrStatuses: ["aggregate"], types: options.types, table: expr.toTable })
+          draft.filterExpr = this.cleanExpr(expr.filterExpr, { types: ["boolean"], table: expr.toTable })
+        }
+      }
+    })
   }
 
   cleanComparisonExpr(expr: LegacyComparisonExpr, options: CleanExprOptions) {
