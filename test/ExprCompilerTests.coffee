@@ -1542,7 +1542,7 @@ describe "ExprCompiler", ->
       )
 
     it "compiles line length", ->
-      # ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]')
+      # ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]'::text)
       @compile(
         { 
           type: "op"
@@ -1563,7 +1563,7 @@ describe "ExprCompiler", ->
                 { type: "op", op: "::integer", exprs: [4326] }
               ]
             }
-            'SPHEROID["GRS_1980",6378137,298.257222101]'
+            { type: "op", op: "::text", exprs: ['SPHEROID["GRS_1980",6378137,298.257222101]'] }
           ]
         }
       )
