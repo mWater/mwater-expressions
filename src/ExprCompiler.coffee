@@ -674,17 +674,17 @@ module.exports = class ExprCompiler
         if not compiledExprs[0]?
           return null
 
-        # ST_Length_Spheroid(ST_Transform(location,4326::integer), 'SPHEROID["GRS_1980",6378137,298.257222101]'::text)
+        # ST_Length_Spheroid(ST_Transform(location,4326::integer), 'SPHEROID["GRS_1980",6378137,298.257222101]'::spheroid)
         return {
           type: "op"
-          op: "ST_Length_Spheroid",
+          op: "ST_LengthSpheroid",
           exprs: [
             {
               type: "op"
               op: "ST_Transform"
               exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }]
             }
-            { type: "op", op: "::text", exprs: ['SPHEROID["GRS_1980",6378137,298.257222101]' ]}
+            { type: "op", op: "::spheroid", exprs: ['SPHEROID["GRS_1980",6378137,298.257222101]' ]}
           ]
         }
 

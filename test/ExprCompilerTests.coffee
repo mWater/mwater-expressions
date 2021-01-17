@@ -1553,7 +1553,7 @@ describe "ExprCompiler", ->
         }
         { 
           type: "op"
-          op: "ST_Length_Spheroid"
+          op: "ST_LengthSpheroid"
           exprs: [
             {
               type: "op"
@@ -1563,7 +1563,7 @@ describe "ExprCompiler", ->
                 { type: "op", op: "::integer", exprs: [4326] }
               ]
             }
-            { type: "op", op: "::text", exprs: ['SPHEROID["GRS_1980",6378137,298.257222101]'] }
+            { type: "op", op: "::spheroid", exprs: ['SPHEROID["GRS_1980",6378137,298.257222101]'] }
           ]
         }
       )
