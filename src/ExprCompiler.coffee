@@ -2045,12 +2045,12 @@ module.exports = class ExprCompiler
       st_distance(wp.location, hh.location) < 1000/cos(ST_YMin(ST_Transform(wp.location, 4326)) / 57)
     ###
  
-    # Create radius expr: radius/cos(ST_YMin(ST_Transform(<fromGeometryExpr>, 4326)) / 57)
+    # Create radius expr: <radiusExpr>/cos(ST_YMin(ST_Transform(<fromGeometryExpr>, 4326)) / 57)
     radiusExpr = {
       type: "op"
       op: "/"
       exprs: [
-        expr.radius
+        @compileExpr({ expr: expr.radiusExpr, tableAlias: options.tableAlias })
         { type: "op", op: "cos", exprs: [
           { type: "op", op: "/", exprs: [
             { type: "op", op: "ST_YMin", exprs: [

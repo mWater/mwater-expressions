@@ -81,8 +81,8 @@ export interface SpatialJoinExpr {
     fromGeometryExpr: Expr;
     /** Geometry expression of destination table */
     toGeometryExpr: Expr;
-    /** Radius in meters of the join */
-    radius: number | null;
+    /** Radius expression in meters of the join */
+    radiusExpr: Expr;
     /** Aggregate value expression to calculate */
     valueExpr: Expr;
     /** Filter of rows included in toTable in aggregation */

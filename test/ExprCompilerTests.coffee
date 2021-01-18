@@ -2848,7 +2848,7 @@ describe "ExprCompiler", ->
         toTable: "t2"
         fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
         toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
-        radius: 10
+        radiusExpr: { type: "literal", valueType: "number", value: 10 }
         filterExpr: { type: "field", table: "t2", column: "boolean" }
       }
 
@@ -2856,7 +2856,7 @@ describe "ExprCompiler", ->
         type: "op"
         op: "/"
         exprs: [
-          10
+          { type: "literal", value: 10 }
           { type: "op", op: "cos", exprs: [
             { type: "op", op: "/", exprs: [
               { type: "op", op: "ST_YMin", exprs: [

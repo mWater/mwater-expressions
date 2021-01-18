@@ -452,7 +452,7 @@ describe "ExprCleaner", ->
         toTable: "t2"
         fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
         toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
-        radius: 10
+        radiusExpr: { type: "literal", valueType: "number", value: 10 }
         filterExpr: { type: "field", table: "t2", column: "boolean" }
       }
 
@@ -466,7 +466,7 @@ describe "ExprCleaner", ->
         toTable: "t2"
         fromGeometryExpr: { type: "field", table: "t1", column: "geometry" }
         toGeometryExpr: { type: "field", table: "t2", column: "geometry" }
-        radius: 10
+        radiusExpr: { type: "literal", valueType: "number", value: 10 }
         filterExpr: { type: "field", table: "t1", column: "boolean" }
       }
 

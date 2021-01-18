@@ -150,7 +150,7 @@ module.exports = class ExprValidator
           return "Missing from geometry"
         if not expr.toGeometryExpr
           return "Missing to geometry"
-        if not expr.radius
+        if not expr.radiusExpr
           return "Radius required"
 
     # Validate table
