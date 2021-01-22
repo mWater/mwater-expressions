@@ -22,7 +22,7 @@ module.exports = class MWaterDataSource extends DataSource
     @options = options
 
     if @options.localCaching
-      @cache = LRU({ max: 500, maxAge: 1000 * 15 * 60 })
+      @cache = new LRU({ max: 500, maxAge: 1000 * 15 * 60 })
 
   performQuery: (jsonql, cb) ->
     if @options.localCaching
@@ -58,7 +58,7 @@ module.exports = class MWaterDataSource extends DataSource
     # Create URL
     url = @apiUrl + "jsonql?" + querystring.stringify(queryParams)
 
-    $.ajax({ 
+    $.ajax({
       dataType: "json"
       method: method
       url: url
@@ -68,7 +68,7 @@ module.exports = class MWaterDataSource extends DataSource
       if @options.localCaching
         # Cache rows
         @cache.set(cacheKey, rows)
-        
+
       cb(null, rows)
     .fail (xhr) =>
       cb(new Error(xhr.responseText))
@@ -76,7 +76,7 @@ module.exports = class MWaterDataSource extends DataSource
   # Get the cache expiry time in ms from epoch. No cached items before this time will be used
   getCacheExpiry: -> @cacheExpiry
 
-  # Clears the local cache 
+  # Clears the local cache
   clearCache: ->
     @cache?.reset()
 
@@ -87,7 +87,7 @@ module.exports = class MWaterDataSource extends DataSource
   # Height, if specified, is minimum height needed. May return larger image
   # Can be used to upload by posting to this url
   getImageUrl: (imageId, height) ->
-    apiUrl = @options.imageApiUrl or @apiUrl 
+    apiUrl = @options.imageApiUrl or @apiUrl
 
     url = apiUrl + "images/#{imageId}"
     query = {}
