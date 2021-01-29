@@ -1,5 +1,5 @@
 _ = require 'lodash'
-ExprUtils = require './ExprUtils'
+ExprUtils = require('./ExprUtils').default
 WeakCache = require('./WeakCache').WeakCache
 
 # Weak cache is global to allow validator to be created and destroyed

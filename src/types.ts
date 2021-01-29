@@ -135,6 +135,9 @@ export interface ScalarExpr {
   /** Table id of start table */
   table: string
 
+  /** @deprecated */
+  aggr?: string
+
   /** Array of join columns to follow to get to table of expr. All must be `join` type */
   joins: string[]
   

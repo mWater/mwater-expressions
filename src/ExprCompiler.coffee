@@ -1,7 +1,7 @@
 _ = require 'lodash'
 injectTableAlias = require('./injectTableAliases').injectTableAlias
 injectTableAliases = require('./injectTableAliases').injectTableAliases
-ExprUtils = require './ExprUtils'
+ExprUtils = require('./ExprUtils').default
 moment = require 'moment'
 ColumnNotFoundException = require('./ColumnNotFoundException').default
 

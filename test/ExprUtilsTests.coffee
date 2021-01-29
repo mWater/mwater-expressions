@@ -2,7 +2,7 @@ assert = require('chai').assert
 fixtures = require './fixtures'
 _ = require 'lodash'
 
-ExprUtils = require '../src/ExprUtils'
+ExprUtils = require('../src/ExprUtils').default
 Schema = require('../src/Schema').default
 
 canonical = require 'canonical-json'
@@ -389,18 +389,18 @@ describe "ExprUtils", ->
         exprs: [{ type: "field", table: "t1", column: "date" }]
       }
       assert.deepEqual @exprUtils.getExprEnumValues(expr), [
-        { id: "01", name: { en: "January" } }
-        { id: "02", name: { en: "February" } }
-        { id: "03", name: { en: "March" } }
-        { id: "04", name: { en: "April" } }
-        { id: "05", name: { en: "May" } }
-        { id: "06", name: { en: "June" } }
-        { id: "07", name: { en: "July" } }
-        { id: "08", name: { en: "August" } }
-        { id: "09", name: { en: "September" } }
-        { id: "10", name: { en: "October" } }
-        { id: "11", name: { en: "November" } }
-        { id: "12", name: { en: "December" } }
+        { id: "01", name: { _base: "en", en: "January" } }
+        { id: "02", name: { _base: "en", en: "February" } }
+        { id: "03", name: { _base: "en", en: "March" } }
+        { id: "04", name: { _base: "en", en: "April" } }
+        { id: "05", name: { _base: "en", en: "May" } }
+        { id: "06", name: { _base: "en", en: "June" } }
+        { id: "07", name: { _base: "en", en: "July" } }
+        { id: "08", name: { _base: "en", en: "August" } }
+        { id: "09", name: { _base: "en", en: "September" } }
+        { id: "10", name: { _base: "en", en: "October" } }
+        { id: "11", name: { _base: "en", en: "November" } }
+        { id: "12", name: { _base: "en", en: "December" } }
       ]
 
     it "finds in field", ->
