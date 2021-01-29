@@ -13,6 +13,7 @@ export { default as PriorityDataQueue } from './PriorityDataQueue';
 export { default as NullDataSource } from './NullDataSource';
 export { default as ColumnNotFoundException } from './ColumnNotFoundException';
 export * from './injectTableAliases';
+export * from './extensions';
 /** Flatten a list of contents to columns */
 export declare function flattenContents(contents: (Column | Section)[]): Column[];
 /** Localize a string that is { en: "english word", etc. }. Works with null and plain strings too. */

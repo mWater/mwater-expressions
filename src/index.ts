@@ -23,6 +23,8 @@ export { default as ColumnNotFoundException } from './ColumnNotFoundException'
 
 export * from './injectTableAliases'
 
+export * from './extensions'
+
 /** Flatten a list of contents to columns */
 export function flattenContents(contents: (Column | Section)[]): Column[] {
   let columns: Column[] = []
