@@ -3,6 +3,7 @@ import { Expr, Variable, CaseExpr, ScalarExpr, VariableExpr, ScoreExpr, BuildEnu
 import Schema from "./Schema"
 import ExprUtils from "./ExprUtils"
 import moment from "moment"
+import { getExprExtension } from "./extensions"
 
 /** Represents a row to be evaluated */
 export interface PromiseExprEvaluatorRow {
@@ -85,6 +86,8 @@ export class PromiseExprEvaluator {
         return await this.evaluateBuildEnumset(expr, context)
       case "variable":
         return await this.evaluateVariable(expr, context)
+      case "extension":
+        return await getExprExtension(expr.extension).evaluate(expr, context, this.schema, this.locale, this.variables, this.variableValues)
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }
@@ -133,6 +136,8 @@ export class PromiseExprEvaluator {
           return value.value
         }
         throw new Error(`Synchronous non-literal variables`)
+      case "extension":
+        return getExprExtension(expr.extension).evaluateSync(expr, this.schema, this.locale, this.variables, this.variableValues)
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }

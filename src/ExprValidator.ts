@@ -1,11 +1,20 @@
 import _ from "lodash";
 import ExprUtils from "./ExprUtils";
+import { getExprExtension } from "./extensions";
 import Schema from "./Schema";
 import { AggrStatus, Expr, LiteralType, Variable } from "./types";
 import { WeakCache } from "./WeakCache";
 
 // Weak cache is global to allow validator to be created and destroyed
 const weakCache = new WeakCache();
+
+export interface ValidateOptions  { 
+  table?: string
+  types?: LiteralType[]
+  enumValueIds?: string[]
+  idTable?: string
+  aggrStatuses?: AggrStatus[] 
+}
 
 /** Validates expressions. If an expression has been cleaned, it will always be valid */
 export default class ExprValidator {
@@ -29,14 +38,7 @@ export default class ExprValidator {
    *   idTable: table that type of id must be from
    *   aggrStatuses: statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"]
    */
-  validateExpr(expr: Expr, options?: { 
-      table?: string
-      types?: LiteralType[]
-      enumValueIds?: string[]
-      idTable?: string
-      aggrStatuses?: AggrStatus[] 
-      depth?: number
-    }): string | null {
+  validateExpr(expr: Expr, options?: ValidateOptions): string | null {
     options = options || {}
 
     if (!expr) {
@@ -62,8 +64,8 @@ export default class ExprValidator {
     aggrStatuses?: AggrStatus[] 
     depth?: number
   }): string | null => {
-    let error, key, value;
-    let enumValueIds, needle, needle1;
+    let error, key, value
+    let enumValueIds
     const aggrStatuses = options.aggrStatuses || {aggrStatuses: ["individual", "literal"]};
 
     if (!expr) {
@@ -223,6 +225,11 @@ export default class ExprValidator {
           return "Radius required";
         }
         break;
+      case "extension":
+        const err = getExprExtension(expr.extension).validateExpr(expr, options, this.schema, this.variables)
+        if (err) {
+          return err
+        }
     }
 
     // Validate table

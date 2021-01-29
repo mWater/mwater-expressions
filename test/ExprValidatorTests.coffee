@@ -3,8 +3,11 @@ _ = require 'lodash'
 Schema = require('../src/Schema').default
 ExprValidator = require('../src/ExprValidator').default
 fixtures = require './fixtures'
+setupTestExtension = require('./extensionSetup').setupTestExtension
 
 canonical = require 'canonical-json'
+
+setupTestExtension()
 
 variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
@@ -217,3 +220,8 @@ describe "ExprValidator", ->
       @isValid({ type: "variable", variableId: "varid" }, { table: "t2" })
       @isValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
       @notValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+
+  it "validates extension", ->
+    schema = fixtures.simpleSchema()
+    exprValidator = new ExprValidator(schema, variables)
+    assert.equal exprValidator.validateExpr({ type: "extension", extension: "test" }), "test"

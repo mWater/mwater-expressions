@@ -64,6 +64,10 @@ export default class ExprUtils {
     getExprIdTable(expr: Expr): string | null;
     /** Gets the type of an expression */
     getExprType(expr: Expr): LiteralType | null;
+    /** Determines the aggregation status of an expression. This is whether the expression is
+     * aggregate (like sum, avg, etc) or individual (a regular field-containing expression) or
+     * literal (which is neither, just a number or text).
+     * Invisible second parameter is depth to prevent infinite recursion */
     getExprAggrStatus(expr: Expr, _depth?: number): AggrStatus | null;
     /** Determines if an set of joins are valid */
     areJoinsValid(table: string, joins: string[]): boolean;
@@ -71,11 +75,11 @@ export default class ExprUtils {
     getAggrTypes(expr: Expr): any[];
     localizeString(name: LocalizedString | string | null | undefined, locale?: string): string | null | undefined;
     static localizeString(name: LocalizedString | string | null | undefined, locale?: string): string | null | undefined;
-    static andExprs(table: string, ...exprs: Expr[]): import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").SpatialJoinExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyCountExpr | Expr[] | {
+    static andExprs(table: string, ...exprs: Expr[]): import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").SpatialJoinExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyCountExpr | Expr[] | {
         type: string;
         op: string;
         table: string;
-        exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").SpatialJoinExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
+        exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").SpatialJoinExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
     } | null;
     /** Summarizes expression as text */
     summarizeExpr(expr: Expr, locale?: string): string | null;

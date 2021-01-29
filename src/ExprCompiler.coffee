@@ -4,6 +4,7 @@ injectTableAliases = require('./injectTableAliases').injectTableAliases
 ExprUtils = require('./ExprUtils').default
 moment = require 'moment'
 ColumnNotFoundException = require('./ColumnNotFoundException').default
+getExprExtension = require('./extensions').getExprExtension
 
 # now expression: (to_json(now() at time zone 'UTC')#>>'{}')
 nowExpr = {
@@ -76,6 +77,8 @@ module.exports = class ExprCompiler
         compiledExpr = @compileVariableExpr(options)
       when "spatial join"
         compiledExpr = @compileSpatialJoinExpr(options)
+      when "extension"
+        compiledExpr = getExprExtension(expr.extension).compileExpr(expr, options.tableAlias, @schema, @variables, @variableValues)
       when "count" # DEPRECATED
         compiledExpr = null
       when "comparison" # DEPRECATED

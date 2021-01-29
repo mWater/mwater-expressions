@@ -8,6 +8,9 @@ fixtures = require './fixtures'
 PromiseExprEvaluator = require('../src/PromiseExprEvaluator').PromiseExprEvaluator
 testExprs = require './testExprs'
 
+setupTestExtension = require('./extensionSetup').setupTestExtension
+setupTestExtension()
+
 compare = (actual, expected) ->
   if _.isObject(actual) or _.isArray(actual)
     assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"

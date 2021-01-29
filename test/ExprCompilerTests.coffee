@@ -5,9 +5,11 @@ canonical = require 'canonical-json'
 moment = require 'moment'
 sinon = require 'sinon'
 Schema = require('../src/Schema').default
-
 ExprCompiler = require '../src/ExprCompiler'
 ColumnNotFoundException = require '../src/ColumnNotFoundException'
+setupTestExtension = require('./extensionSetup').setupTestExtension
+
+setupTestExtension()
 
 compare = (actual, expected) ->
   assert.equal canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
@@ -2901,3 +2903,7 @@ describe "ExprCompiler", ->
           { type: "field", tableAlias: "spatial", column: "boolean" }
         ]}
       })
+
+  describe "extension", ->
+    it "compiles", ->
+      @compile({ type: "extension", extension: "test" }, { type: "literal", value: 4 })

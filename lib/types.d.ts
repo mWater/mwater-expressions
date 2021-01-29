@@ -7,10 +7,10 @@ export interface Row {
     [alias: string]: any;
 }
 /** Expression. Can be null */
-export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | SpatialJoinExpr | LegacyExpr | null;
+export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | SpatialJoinExpr | ExtensionExpr | LegacyExpr | null;
 export interface LiteralExpr {
     type: "literal";
-    valueType: string;
+    valueType: LiteralType;
     idTable?: string;
     value: any;
 }
@@ -87,6 +87,16 @@ export interface SpatialJoinExpr {
     valueExpr: Expr;
     /** Filter of rows included in toTable in aggregation */
     filterExpr: Expr;
+}
+/** Expression which is implemented by an extension to the standard
+ * mWater expressions
+ */
+export interface ExtensionExpr {
+    type: "extension";
+    /** Extension to use */
+    extension: string;
+    /** Table to which expression applies (if any) */
+    table?: string;
 }
 /** Variable that is referenced in an expression. The value is another expression */
 export interface Variable {

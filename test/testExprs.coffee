@@ -468,6 +468,8 @@ add({ type: "field", table: "t1", column: "expr_number" }, 4, { row: makeRow(num
 # variable values
 add({ type: "variable", variableId: "varnumber" }, 123, { row: makeRow(number: 4) })
 
+# extensions
+add({ type: "extension", extension: "test" }, 4)
 
 #   describe "scalar", ->
 #     it "n-1 scalar", ->

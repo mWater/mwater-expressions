@@ -1,5 +1,6 @@
 import _ from "lodash";
 import moment from "moment";
+import { getExprExtension } from "./extensions";
 import Schema from "./Schema";
 import { AggrStatus, CaseExpr, EnumValue, Expr, FieldExpr, LiteralType, LocalizedString, ScalarExpr, Variable } from "./types";
 import { WeakCache } from "./WeakCache";
@@ -345,6 +346,10 @@ export default class ExprUtils {
       return this.getExprEnumValues(expr.valueExpr);
     }
 
+    if (expr.type == "extension") {
+      return getExprExtension(expr.extension).getExprEnumValues(expr, this.schema, this.variables)
+    }
+
     return null
   }
 
@@ -388,6 +393,11 @@ export default class ExprUtils {
     if (expr.type === "spatial join") {
       return this.getExprIdTable(expr.valueExpr);
     }
+
+    if (expr.type == "extension") {
+      return getExprExtension(expr.extension).getExprIdTable(expr, this.schema, this.variables)
+    }
+
     return null
   }
 
@@ -463,7 +473,9 @@ export default class ExprUtils {
         }
         return variable.type;
       case "spatial join":
-        return this.getExprType(expr.valueExpr);
+        return this.getExprType(expr.valueExpr)
+      case "extension":
+        return getExprExtension(expr.extension).getExprType(expr, this.schema, this.variables)
       default:
         // TODO remove
         if (expr.type as any == "count") {
@@ -474,10 +486,10 @@ export default class ExprUtils {
     }
   }
 
-  // Determines the aggregation status of an expression. This is whether the expression is
-  // aggregate (like sum, avg, etc) or individual (a regular field-containing expression) or 
-  // literal (which is neither, just a number or text). 
-  // Invisible second parameter is depth to prevent infinite recursion
+  /** Determines the aggregation status of an expression. This is whether the expression is
+   * aggregate (like sum, avg, etc) or individual (a regular field-containing expression) or 
+   * literal (which is neither, just a number or text). 
+   * Invisible second parameter is depth to prevent infinite recursion */
   getExprAggrStatus(expr: Expr, _depth?: number): AggrStatus | null {
     if ((expr == null) || !expr.type) {
       return null;
@@ -555,6 +567,8 @@ export default class ExprUtils {
           return "individual";
         }
         return "literal";
+      case "extension":
+        return getExprExtension(expr.extension).getExprAggrStatus(expr, this.schema, this.variables)
       // default:
       //   throw new Error(`Not implemented for ${expr.type}`);
     }
@@ -723,6 +737,8 @@ export default class ExprUtils {
         return variable ? this.localizeString(variable.name, locale) || null : null
       case "spatial join":
         return "Spatial join: " + this.summarizeExpr(expr.valueExpr, locale);
+      case "extension":
+        return getExprExtension(expr.extension).summarizeExpr(expr, locale, this.schema, this.variables)
       default:
         throw new Error(`Unsupported type ${expr.type}`);
     }
@@ -800,10 +816,8 @@ export default class ExprUtils {
     switch (type) {
       case "text":
         return value;
-        break;
       case "number":
         return "" + value;
-        break;
       case "enum":
         // Get enumValues
         var item = _.findWhere(enumValues!, {id: value});
@@ -825,7 +839,6 @@ export default class ExprUtils {
           }
           return "???";
         }).join(', ');
-        break;
 
       case "text[]":
         // Parse if string
@@ -834,15 +847,12 @@ export default class ExprUtils {
         }
 
         return value.join(', ');
-        break;
 
       case "date":
         return moment(value, moment.ISO_8601).format("ll");
-        break;
 
       case "datetime":
         return moment(value, moment.ISO_8601).format("lll");
-        break;
     }
 
     if (value === true) {
@@ -930,9 +940,8 @@ export default class ExprUtils {
   /** Get a list of fields that are referenced in a an expression
    * Useful to know which fields and joins are used. Includes joins as fields
    */
-  getReferencedFields(expr: Expr) {
+  getReferencedFields(expr: Expr): FieldExpr[] {
     let column, table;
-    let value;
     let cols: FieldExpr[] = [];
 
     if (!expr) {
@@ -996,7 +1005,11 @@ export default class ExprUtils {
       case "spatial join":
         cols = cols.concat(this.getReferencedFields(expr.fromGeometryExpr));
         break;
-    }
+
+      case "extension":
+        cols = cols.concat(getExprExtension(expr.extension).getReferencedFields(expr, this.schema, this.variables));
+        break;
+      }
 
     return _.uniq(cols, col => col.table + "/" + col.column);
   }

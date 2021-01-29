@@ -4,8 +4,9 @@ import ExprValidator from './ExprValidator'
 import { Schema } from '.'
 import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, SpatialJoinExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
 import produce from 'immer'
+import { getExprExtension } from './extensions'
 
-interface CleanExprOptions {
+export interface CleanExprOptions {
   /** optional current table. expression must be related to this table or will be stripped */
   table?: string
 
@@ -78,7 +79,7 @@ export default class ExprCleaner {
       return this.cleanLogicalExpr(expr, { ...options, aggrStatuses: aggrStatuses })
     if (expr.type == "count")
       return this.cleanCountExpr(expr, { ...options, aggrStatuses: aggrStatuses })
-    if (expr.type == "literal" && expr.valueType == "enum[]")
+    if (expr.type == "literal" && (expr.valueType as any) == "enum[]")
       expr = { type: "literal", valueType: "enumset", value: expr.value }
 
     // Strip if wrong table 
@@ -99,7 +100,7 @@ export default class ExprCleaner {
     }
     
     // Fix old expression type
-    if ((expr.type === "literal") && (expr.valueType === "enum[]")) {
+    if ((expr.type === "literal") && ((expr as any).valueType === "enum[]")) {
       return { type: "literal", valueType: "enumset", value: expr.value }
     }
 
@@ -230,6 +231,8 @@ export default class ExprCleaner {
         return this.cleanVariableExpr(expr, cleanOptions)
       case "spatial join":
         return this.cleanSpatialJoinExpr(expr, cleanOptions)
+      case "extension":
+        return getExprExtension(expr.extension).cleanExpr(expr, cleanOptions, this.schema, this.variables)
       // default:
       //   throw new Error(`Unknown expression type ${expr.type}`)
     }
@@ -631,11 +634,11 @@ export default class ExprCleaner {
       newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
     }
 
-    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "daterange")) {
+    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && ((expr as any).rhs.valueType === "daterange")) {
       (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0] }, { type: "literal", valueType: "date", value: expr.rhs.value[1] }]
     }
 
-    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && (expr.rhs.valueType === "datetimerange")) {
+    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && ((expr as any).rhs.valueType === "datetimerange")) {
       // If date, convert datetime to date
       if (this.exprUtils.getExprType(expr.lhs) === "date") {
         (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) }, { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }]
