@@ -15,7 +15,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm build ; npm test"
+      "pre-commit": "npm test"
     }
   },
   "style": "src/index.css",
