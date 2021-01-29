@@ -1,7 +1,7 @@
 assert = require('chai').assert
 _ = require 'lodash'
 Schema = require('../src/Schema').default
-ExprValidator = require '../src/ExprValidator'
+ExprValidator = require('../src/ExprValidator').default
 fixtures = require './fixtures'
 
 canonical = require 'canonical-json'
