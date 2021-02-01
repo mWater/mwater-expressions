@@ -242,6 +242,14 @@ export default class ExprValidator {
       return "Invalid type";
     }
 
+    // Validate aggregate
+    const aggrStatus = this.exprUtils.getExprAggrStatus(expr)
+    if (options.aggrStatuses && aggrStatus) {
+      if (!options.aggrStatuses.includes(aggrStatus)) {
+        return "Invalid aggregation"
+      }
+    }
+
     // Validate enums
     if (options.enumValueIds && (this.exprUtils.getExprType(expr) == "enum" || this.exprUtils.getExprType(expr) == "enumset")) {
       if (_.difference(_.pluck(this.exprUtils.getExprEnumValues(expr) || [], "id"), options.enumValueIds).length > 0) {
