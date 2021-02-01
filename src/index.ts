@@ -2,7 +2,7 @@ import { Column, LocalizedString, Section } from './types'
 
 export * from './types'
 export { default as DataSource } from './DataSource'
-export { default as ExprValidator } from './ExprValidator'
+export { default as ExprValidator, ValidateOptions } from './ExprValidator'
 export { default as Schema } from './Schema'
 export * from './PromiseExprEvaluator'
 
@@ -11,7 +11,7 @@ export { default as ExprUtils } from './ExprUtils'
 export { WeakCache } from './WeakCache'
 
 /** Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed. */
-export { default as ExprCleaner } from './ExprCleaner'
+export { default as ExprCleaner, CleanExprOptions } from './ExprCleaner'
 
 export { default as ExprCompiler } from './ExprCompiler'
 
