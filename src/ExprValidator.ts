@@ -211,20 +211,6 @@ export default class ExprValidator {
         }
         break;
 
-      case "spatial join":
-        if (!expr.toTable) {
-          return "Missing to table";
-        }
-        if (!expr.fromGeometryExpr) {
-          return "Missing from geometry";
-        }
-        if (!expr.toGeometryExpr) {
-          return "Missing to geometry";
-        }
-        if (!expr.radiusExpr) {
-          return "Radius required";
-        }
-        break;
       case "extension":
         const err = getExprExtension(expr.extension).validateExpr(expr, options, this.schema, this.variables)
         if (err) {

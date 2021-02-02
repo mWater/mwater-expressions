@@ -7,7 +7,7 @@ export interface Row {
     [alias: string]: any;
 }
 /** Expression. Can be null */
-export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | OldSpatialJoinExpr | ExtensionExpr | LegacyExpr | null;
+export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | ExtensionExpr | LegacyExpr | null;
 export interface LiteralExpr {
     type: "literal";
     valueType: LiteralType;
@@ -69,26 +69,6 @@ export interface VariableExpr {
     /** Table of expression that variable references (if relevant) */
     table?: string;
     variableId: string;
-}
-/** Joins to a geometry expression in another table, joining to all those within a radius, calculating an aggregate
- * @deprecated
-*/
-export interface OldSpatialJoinExpr {
-    type: "spatial join";
-    /** Table id of "from" table */
-    table: string;
-    /** Table to join to spatially */
-    toTable: string | null;
-    /** Geometry expression of originating table */
-    fromGeometryExpr: Expr;
-    /** Geometry expression of destination table */
-    toGeometryExpr: Expr;
-    /** Radius expression in meters of the join */
-    radiusExpr: Expr;
-    /** Aggregate value expression to calculate */
-    valueExpr: Expr;
-    /** Filter of rows included in toTable in aggregation */
-    filterExpr: Expr;
 }
 /** Expression which is implemented by an extension to the standard
  * mWater expressions

@@ -75,8 +75,6 @@ module.exports = class ExprCompiler
         compiledExpr = @compileBuildEnumsetExpr(options)
       when "variable"
         compiledExpr = @compileVariableExpr(options)
-      when "spatial join"
-        compiledExpr = @compileSpatialJoinExpr(options)
       when "extension"
         compiledExpr = getExprExtension(expr.extension).compileExpr(expr, options.tableAlias, @schema, @variables, @variableValues)
       when "count" # DEPRECATED
@@ -2036,85 +2034,6 @@ module.exports = class ExprCompiler
       return @compileExpr({ expr: value, tableAlias: options.tableAlias })
     else
       return null
-
-  compileSpatialJoinExpr: (options) ->
-    expr = options.expr 
-
-    ### Sample:
-      (select count(*) from entities.household as hh 
-      where 
-        hh.location && st_expand(wp.location, 1000/cos(ST_YMin(ST_Transform(wp.location, 4326)) / 57))
-      and
-      st_distance(wp.location, hh.location) < 1000/cos(ST_YMin(ST_Transform(wp.location, 4326)) / 57)
-    ###
- 
-    # Create radius expr: <radiusExpr>/cos(ST_YMin(ST_Transform(<fromGeometryExpr>, 4326)) / 57)
-    radiusExpr = {
-      type: "op"
-      op: "/"
-      exprs: [
-        @compileExpr({ expr: expr.radiusExpr, tableAlias: options.tableAlias })
-        { type: "op", op: "cos", exprs: [
-          { type: "op", op: "/", exprs: [
-            { type: "op", op: "ST_YMin", exprs: [
-              { type: "op", op: "ST_Transform", exprs: [
-                @compileExpr({ expr: expr.fromGeometryExpr, tableAlias: options.tableAlias })
-                4326
-              ]}
-            ]}
-            57.3
-          ]}
-        ]}
-      ]
-    }
-
-    # Create scalar
-    query = {
-      type: "scalar"
-      expr: @compileExpr({ expr: expr.valueExpr, tableAlias: "spatial" })
-      from: { 
-        type: "table"
-        table: expr.toTable
-        alias: "spatial"
-      }
-      where: {
-        type: "op"
-        op: "and"
-        exprs: []
-      }
-    }
-
-    # Add bounding box condition
-    query.where.exprs.push({
-      type: "op"
-      op: "&&"
-      exprs: [
-        @compileExpr({ expr: expr.toGeometryExpr, tableAlias: "spatial" })
-        { type: "op", op: "ST_Expand", exprs: [
-          @compileExpr({ expr: expr.fromGeometryExpr, tableAlias: options.tableAlias })
-          radiusExpr
-        ]}
-      ]
-    })
-
-    # Add distance condition
-    query.where.exprs.push({
-      type: "op"
-      op: "<="
-      exprs: [
-        { type: "op", op: "ST_Distance", exprs: [
-          @compileExpr({ expr: expr.toGeometryExpr, tableAlias: "spatial" })  
-          @compileExpr({ expr: expr.fromGeometryExpr, tableAlias: options.tableAlias })
-        ]}
-        radiusExpr
-      ]
-    })
-
-    # Add filter
-    if expr.filterExpr
-      query.where.exprs.push(@compileExpr({ expr: expr.filterExpr, tableAlias: "spatial" }))
-
-    return query
 
 # Converts a compiled expression to jsonb. Literals cannot use to_jsonb as they will
 # trigger "could not determine polymorphic type because input has type unknown" unless the 

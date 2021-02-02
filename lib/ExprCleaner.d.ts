@@ -1,6 +1,6 @@
 import ExprUtils from './ExprUtils';
 import { Schema } from '.';
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, OldSpatialJoinExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types';
+import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types';
 export interface CleanExprOptions {
     /** optional current table. expression must be related to this table or will be stripped */
     table?: string;
@@ -40,7 +40,6 @@ export default class ExprCleaner {
     cleanScoreExpr(expr: ScoreExpr, options: CleanExprOptions): ScoreExpr;
     cleanBuildEnumsetExpr(expr: BuildEnumsetExpr, options: CleanExprOptions): BuildEnumsetExpr;
     cleanVariableExpr(expr: VariableExpr, options: CleanExprOptions): VariableExpr | null;
-    cleanSpatialJoinExpr(expr: OldSpatialJoinExpr, options: CleanExprOptions): OldSpatialJoinExpr;
     cleanComparisonExpr(expr: LegacyComparisonExpr, options: CleanExprOptions): Expr;
     cleanLogicalExpr(expr: LegacyLogicalExpr, options: CleanExprOptions): Expr;
     cleanCountExpr(expr: LegacyCountExpr, options: CleanExprOptions): Expr;

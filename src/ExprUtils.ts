@@ -342,10 +342,6 @@ export default class ExprUtils {
       return _.findWhere(this.variables, {id: expr.variableId})?.enumValues || null;
     }
 
-    if (expr.type === "spatial join") {
-      return this.getExprEnumValues(expr.valueExpr);
-    }
-
     if (expr.type == "extension") {
       return getExprExtension(expr.extension).getExprEnumValues(expr, this.schema, this.variables)
     }
@@ -388,10 +384,6 @@ export default class ExprUtils {
     
     if (expr.type === "variable") {
       return _.findWhere(this.variables, {id: expr.variableId})?.idTable || null
-    }
-
-    if (expr.type === "spatial join") {
-      return this.getExprIdTable(expr.valueExpr);
     }
 
     if (expr.type == "extension") {
@@ -472,8 +464,6 @@ export default class ExprUtils {
           return null;
         }
         return variable.type;
-      case "spatial join":
-        return this.getExprType(expr.valueExpr)
       case "extension":
         return getExprExtension(expr.extension).getExprType(expr, this.schema, this.variables)
       default:
@@ -522,8 +512,8 @@ export default class ExprUtils {
     };
 
     switch (expr.type) {
-      case "id": case "scalar": case "spatial join":
-        return "individual";
+      case "id": case "scalar":
+        return "individual"
       case "field":
         var column = this.schema.getColumn(expr.table, expr.column);
         if (column && column.expr) {
@@ -735,8 +725,6 @@ export default class ExprUtils {
       case "variable":
         var variable = _.findWhere(this.variables, {id: expr.variableId});
         return variable ? this.localizeString(variable.name, locale) || "" : ""
-      case "spatial join":
-        return "DEPRECATED! Spatial join: " + this.summarizeExpr(expr.valueExpr, locale);
       case "extension":
         return getExprExtension(expr.extension).summarizeExpr(expr, locale, this.schema, this.variables)
       default:
@@ -1002,10 +990,6 @@ export default class ExprUtils {
         }
         break;
       
-      case "spatial join":
-        cols = cols.concat(this.getReferencedFields(expr.fromGeometryExpr));
-        break;
-
       case "extension":
         cols = cols.concat(getExprExtension(expr.extension).getReferencedFields(expr, this.schema, this.variables));
         break;

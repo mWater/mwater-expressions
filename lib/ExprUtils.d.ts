@@ -75,11 +75,11 @@ export default class ExprUtils {
     getAggrTypes(expr: Expr): any[];
     localizeString(name: LocalizedString | string | null | undefined, locale?: string): string | null | undefined;
     static localizeString(name: LocalizedString | string | null | undefined, locale?: string): string | null | undefined;
-    static andExprs(table: string, ...exprs: Expr[]): import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").OldSpatialJoinExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyCountExpr | Expr[] | {
+    static andExprs(table: string, ...exprs: Expr[]): import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyCountExpr | Expr[] | {
         type: string;
         op: string;
         table: string;
-        exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").OldSpatialJoinExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
+        exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
     } | null;
     /** Summarizes expression as text */
     summarizeExpr(expr: Expr, locale?: string): string;
