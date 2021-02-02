@@ -657,7 +657,7 @@ export default class ExprUtils {
   }
 
   /** Summarizes expression as text */
-  summarizeExpr(expr: Expr, locale?: string): string | null {
+  summarizeExpr(expr: Expr, locale?: string): string {
     if (!expr) {
       return "None"; // TODO localize
     }
@@ -666,9 +666,9 @@ export default class ExprUtils {
       case "scalar":
         return this.summarizeScalarExpr(expr, locale);
       case "field":
-        return this.localizeString(this.schema.getColumn(expr.table, expr.column)?.name, locale) || null
+        return this.localizeString(this.schema.getColumn(expr.table, expr.column)?.name, locale) || ""
       case "id":
-        return this.localizeString(this.schema.getTable(expr.table)?.name, locale) || null
+        return this.localizeString(this.schema.getTable(expr.table)?.name, locale) || ""
       case "op":
         // Special case for contains/intersects with literal RHS
         if ((expr.op === "contains") && (expr.exprs[1]?.type === "literal") && (expr.exprs[1]?.valueType === "enumset")) { 
@@ -734,7 +734,7 @@ export default class ExprUtils {
         return "Count"; // Deprecated
       case "variable":
         var variable = _.findWhere(this.variables, {id: expr.variableId});
-        return variable ? this.localizeString(variable.name, locale) || null : null
+        return variable ? this.localizeString(variable.name, locale) || "" : ""
       case "spatial join":
         return "Spatial join: " + this.summarizeExpr(expr.valueExpr, locale);
       case "extension":

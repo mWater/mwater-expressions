@@ -82,7 +82,7 @@ export default class ExprUtils {
         exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").SpatialJoinExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
     } | null;
     /** Summarizes expression as text */
-    summarizeExpr(expr: Expr, locale?: string): string | null;
+    summarizeExpr(expr: Expr, locale?: string): string;
     summarizeScalarExpr(expr: ScalarExpr, locale?: string): string;
     summarizeCaseExpr(expr: CaseExpr, locale?: string): string;
     /** Converts a literal value related to an expression to a string, using name of enums. preferEnumCodes tries to use code over name */

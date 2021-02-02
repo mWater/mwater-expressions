@@ -26,7 +26,7 @@ export interface ExprExtension<T extends ExtensionExpr> {
   getExprType(expr: Expr, schema: Schema, variables: Variable[]): LiteralType | null 
 
   /** Summarizes expression as text */
-  summarizeExpr(expr: Expr, locale: string | undefined, schema: Schema, variables: Variable[]): string | null
+  summarizeExpr(expr: Expr, locale: string | undefined, schema: Schema, variables: Variable[]): string
 
   /** Get a list of fields that are referenced in a an expression
    * Useful to know which fields and joins are used. Includes joins as fields
