@@ -7,7 +7,7 @@ export interface Row {
     [alias: string]: any;
 }
 /** Expression. Can be null */
-export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | SpatialJoinExpr | ExtensionExpr | LegacyExpr | null;
+export declare type Expr = LiteralExpr | FieldExpr | OpExpr | IdExpr | ScalarExpr | CaseExpr | ScoreExpr | BuildEnumsetExpr | VariableExpr | OldSpatialJoinExpr | ExtensionExpr | LegacyExpr | null;
 export interface LiteralExpr {
     type: "literal";
     valueType: LiteralType;
@@ -70,8 +70,10 @@ export interface VariableExpr {
     table?: string;
     variableId: string;
 }
-/** Joins to a geometry expression in another table, joining to all those within a radius, calculating an aggregate */
-export interface SpatialJoinExpr {
+/** Joins to a geometry expression in another table, joining to all those within a radius, calculating an aggregate
+ * @deprecated
+*/
+export interface OldSpatialJoinExpr {
     type: "spatial join";
     /** Table id of "from" table */
     table: string;

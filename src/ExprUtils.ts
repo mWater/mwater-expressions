@@ -736,7 +736,7 @@ export default class ExprUtils {
         var variable = _.findWhere(this.variables, {id: expr.variableId});
         return variable ? this.localizeString(variable.name, locale) || "" : ""
       case "spatial join":
-        return "Spatial join: " + this.summarizeExpr(expr.valueExpr, locale);
+        return "DEPRECATED! Spatial join: " + this.summarizeExpr(expr.valueExpr, locale);
       case "extension":
         return getExprExtension(expr.extension).summarizeExpr(expr, locale, this.schema, this.variables)
       default:

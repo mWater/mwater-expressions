@@ -2,7 +2,7 @@ import _ from 'lodash'
 import ExprUtils from './ExprUtils'
 import ExprValidator from './ExprValidator'
 import { Schema } from '.'
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, SpatialJoinExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
+import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, OldSpatialJoinExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
 import produce from 'immer'
 import { getExprExtension } from './extensions'
 
@@ -596,7 +596,7 @@ export default class ExprCleaner {
     return expr
   }
 
-  cleanSpatialJoinExpr(expr: SpatialJoinExpr, options: CleanExprOptions) {
+  cleanSpatialJoinExpr(expr: OldSpatialJoinExpr, options: CleanExprOptions) {
     return produce(expr, draft => {
       // Clean geometry from
       draft.fromGeometryExpr = this.cleanExpr(expr.fromGeometryExpr, { types: ['geometry'], table: options.table })  
