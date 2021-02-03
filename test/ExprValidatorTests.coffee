@@ -100,6 +100,15 @@ describe "ExprValidator", ->
         expr: { type: "field", table: "t1", column: "xyz" }
       }
       @notValid(expr)
+    
+    it "valid aggr", ->
+      expr = {
+        type: "scalar"
+        table: "t1"
+        joins: ["1-2"]
+        expr: { type: "op", table: "t2", op: "avg", exprs: [{ type: "field", table: "t2", column: "number" }] }
+      }
+      @isValid(expr)
 
   describe "op", ->
     it "invalid if mixed aggregate and individual"

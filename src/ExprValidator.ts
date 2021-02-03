@@ -118,7 +118,14 @@ export default class ExprValidator {
       case "op":
         // Validate exprs
         for (let subexpr of expr.exprs) {
-          error = this.validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"));
+          // If op is aggregate, only allow non-aggregate
+          if (ExprUtils.isOpAggr(expr.op)) {
+            error = this.validateExprInternal(subexpr, { ..._.omit(options, "types", "enumValueIds", "idTable"), aggrStatuses: ["literal", "individual"] });
+          }
+          else {
+            error = this.validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"));
+          }
+
           if (error) {
             return error;
           }
@@ -138,7 +145,14 @@ export default class ExprValidator {
         }
 
         var exprTable = this.exprUtils.followJoins(expr.table, expr.joins);
-        error = this.validateExprInternal(expr.expr, _.extend({}, options, {table: exprTable}));
+
+        // If joins are 1-n, allow aggrStatus of "aggregate"
+        if (this.exprUtils.isMultipleJoins(expr.table, expr.joins)) {
+          error = this.validateExprInternal(expr.expr, _.extend({}, options, {table: exprTable, aggrStatuses: ["literal", "aggregate"]}))
+        }
+        else {
+          error = this.validateExprInternal(expr.expr, _.extend({}, options, {table: exprTable}))
+        }
         if (error) {
           return error;
         }

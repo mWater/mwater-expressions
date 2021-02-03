@@ -81,6 +81,18 @@ describe "ExprUtils", ->
     it "gets for scalar", ->
       assert.equal @exprUtils.getExprAggrStatus({ type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" }}), "individual"
 
+    it "gets for scalar aggregation", ->
+      assert.equal @exprUtils.getExprAggrStatus({ 
+        type: "scalar", 
+        table: "t1", 
+        joins: ["1-2"], 
+        expr: { 
+          type: "op", 
+          op: "sum", 
+          exprs: [{ type: "field", table: "t2", column: "number" }]
+        }
+      }), "individual"
+
     it "gets for literal variable", ->
       assert.equal @exprUtils.getExprAggrStatus({ type: "variable", variableId: "varnumber" }), "literal"
 
