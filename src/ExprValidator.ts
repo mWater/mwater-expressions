@@ -66,7 +66,7 @@ export default class ExprValidator {
   }): string | null => {
     let error, key, value
     let enumValueIds
-    const aggrStatuses = options.aggrStatuses || {aggrStatuses: ["individual", "literal"]};
+    const aggrStatuses = options.aggrStatuses || ["individual", "literal"]
 
     if (!expr) {
       return null;
@@ -230,9 +230,9 @@ export default class ExprValidator {
 
     // Validate aggregate
     const aggrStatus = this.exprUtils.getExprAggrStatus(expr)
-    if (options.aggrStatuses && aggrStatus) {
-      if (!options.aggrStatuses.includes(aggrStatus)) {
-        return "Invalid aggregation"
+    if (aggrStatuses && aggrStatus) {
+      if (!aggrStatuses.includes(aggrStatus)) {
+        return `Invalid aggregation ${aggrStatus} expected ${aggrStatuses.join(", ")}`
       }
     }
 
