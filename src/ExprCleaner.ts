@@ -23,7 +23,8 @@ export interface CleanExprOptions {
   aggrStatuses: AggrStatus[]
 }
 
-// Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
+/** Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed.
+ * The resulting expression must be valid. */
 export default class ExprCleaner {
   schema: Schema
   variables: Variable[]

@@ -8,6 +8,8 @@ Expressions are always of the form `{ type: <type of expression>, ... }`
 
 Expressions can be aggregate (e.g. sum(...)) or individual. Aggregation status is the term for one of "literal", "individual" or "aggregate".
 
+**NOTE**: See types.ts for a more complete list of expression types
+
 The types are:
 
 - `field`: References a column in the current row

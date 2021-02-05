@@ -6,7 +6,7 @@ import { AggrStatus, Expr, LiteralType, Variable } from "./types";
 import { WeakCache } from "./WeakCache";
 
 // Weak cache is global to allow validator to be created and destroyed
-const weakCache = new WeakCache();
+const weakCache = new WeakCache()
 
 export interface ValidateOptions  { 
   table?: string
@@ -238,8 +238,9 @@ export default class ExprValidator {
     }
 
     // Validate type if present
-    if (options.types && !options.types.includes(this.exprUtils.getExprType(expr)!)) {
-      return "Invalid type";
+    const type = this.exprUtils.getExprType(expr)
+    if (options.types && type && !options.types.includes(type)) {
+      return "Invalid type"
     }
 
     // Validate aggregate
