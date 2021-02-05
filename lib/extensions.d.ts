@@ -24,7 +24,7 @@ export interface ExprExtension<T extends ExtensionExpr> {
     /** Compile to JsonQL */
     compileExpr(expr: Expr, tableAlias: string, schema: Schema, variables: Variable[], variableValues: {
         [variableId: string]: Expr;
-    }): JsonQLExpr;
+    }): JsonQLExpr | null;
     /** Evaluate an expression given the context */
     evaluate(expr: Expr, context: PromiseExprEvaluatorContext, schema: Schema | undefined, locale: string | undefined, variables: Variable[] | undefined, variableValues: {
         [variableId: string]: any;
