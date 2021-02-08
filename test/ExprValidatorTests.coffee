@@ -111,7 +111,17 @@ describe "ExprValidator", ->
       @isValid(expr)
 
   describe "op", ->
-    it "invalid if mixed aggregate and individual"
+    it "invalid if mixed aggregate and individual", ->
+      expr = {
+        type: "op"
+        table: "t1"
+        op: "+"
+        exprs: [
+          { type: "field", table: "t1", column: "number" },
+          { type: "op", op: "sum", exprs: [{ type: "field", table: "t1", column: "number" }] }
+        ]
+      }
+      @notValid(expr, { aggrStatuses: ["individual", "literal", "aggregate"] })
 
     it "valid", ->
       expr = { 

@@ -117,19 +117,31 @@ export default class ExprValidator {
 
       case "op":
         // Validate exprs
-        for (let subexpr of expr.exprs) {
+        for (const subexpr of expr.exprs) {
           // If op is aggregate, only allow non-aggregate
           if (ExprUtils.isOpAggr(expr.op)) {
-            error = this.validateExprInternal(subexpr, { ..._.omit(options, "types", "enumValueIds", "idTable"), aggrStatuses: ["literal", "individual"] });
+            error = this.validateExprInternal(subexpr, { ..._.omit(options, "types", "enumValueIds", "idTable"), aggrStatuses: ["literal", "individual"] })
           }
           else {
-            error = this.validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"));
+            error = this.validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"))
           }
 
           if (error) {
-            return error;
+            return error
           }
         }
+
+        // Do not allow mixing aggregate and individual
+        let hasIndividual = false, hasAggregate = false
+        for (const subexpr of expr.exprs) {
+          const aggrStatus = this.exprUtils.getExprAggrStatus(subexpr)
+          hasIndividual = hasIndividual || (aggrStatus == "individual")
+          hasAggregate = hasAggregate || (aggrStatus == "aggregate")
+        }
+        if (hasIndividual && hasAggregate) {
+          return "Cannot mix individual and aggregate expressions"
+        }
+
 
         // Find op
         var opItems = this.exprUtils.findMatchingOpItems({op: expr.op, lhsExpr: expr.exprs[0], resultTypes: options.types});
