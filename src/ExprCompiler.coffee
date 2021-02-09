@@ -37,7 +37,7 @@ nowMinus24HoursExpr = {
 }
 
 
-# Compiles expressions to JsonQL
+# Compiles expressions to JsonQL. Assumes that geometry is in Webmercator (3857)
 module.exports = class ExprCompiler 
   # Variable values are lookup of id to variable value, which is always an expression
   constructor: (schema, variables = [], variableValues = {}) ->

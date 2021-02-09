@@ -82,7 +82,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `boolean`: true or false
 * `enum`: fixed set of values with localized names. See values definition
 * `enumset`: set (unordered) of enum values. Stored as `text[]` or `jsonb`
-* `geometry`: geometry column. Database-specific, but should be GeoJSON when queried as JSON.
+* `geometry`: geometry column. Database-specific, but should be GeoJSON when queried as JSON. Must be stored in webmercator (3857)
 * `date`: date stored as ISO 8601 (e.g. "2015-12-31")
 * `datetime`: timestamp stored as ISO 8601 (e.g. "2015-12-31T02:04:31Z") 
 * `text[]`: ordered array of text values
