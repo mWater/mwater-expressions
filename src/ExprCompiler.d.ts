@@ -5,6 +5,6 @@ import { Expr, Variable } from "./types";
 export default class ExprCompiler {
   constructor(schema: Schema, variables?: Variable[], variableValues?: { [variableId: string]: Expr })
 
-  compileExpr(options: { expr: Expr, tableAlias: string }): JsonQLExpr | null
+  compileExpr(options: { expr: Expr, tableAlias: string }): JsonQLExpr
   compileTable(table: string, alias: string): JsonQLFrom
 }
