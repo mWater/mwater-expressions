@@ -45,6 +45,11 @@ export default class ExprValidator {
       return null;
     }
 
+    // Non-objects are not valid expressions
+    if (typeof(expr) != "object") {
+      return "Invalid expression"
+    }
+
     if (!this.schema) { 
       return weakCache.cacheFunction([expr], [this.variables, options], () => { 
         return this.validateExprInternal(expr, options!);
