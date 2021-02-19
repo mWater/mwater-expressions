@@ -601,14 +601,14 @@ export default class ExprUtils {
     return _.uniq(_.pluck(aggrOpItems, "resultType"));
   }
 
-  localizeString(name: LocalizedString | string | null | undefined, locale?: string) {
+  localizeString(name: LocalizedString | string | null | undefined, locale?: string): string {
     return ExprUtils.localizeString(name, locale);
   }
 
-  // Localize a string that is { en: "english word", etc. }. Works with null and plain strings too.
-  static localizeString(name: LocalizedString | string | null | undefined, locale?: string) {
+  // Localize a string that is { en: "english word", etc. }. Works with null and plain strings too, returning always a string ("" for null)
+  static localizeString(name: LocalizedString | string | null | undefined, locale?: string): string {
     if (!name) {
-      return name;
+      return ""
     }
 
     // Simple string
@@ -629,7 +629,7 @@ export default class ExprUtils {
       return name.en;
     }
 
-    return null;
+    return ""
   }
 
   // Combine n expressions together by and
