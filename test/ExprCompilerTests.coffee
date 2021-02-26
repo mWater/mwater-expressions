@@ -580,6 +580,14 @@ describe "ExprCompiler", ->
       joins: ["2-1"],
     }, { type: "field", tableAlias: "T1", column: "t1" })
 
+  it "simplifies scalar join to id", ->
+    @compile({ 
+      type: "scalar", 
+      table: "t2",
+      expr: { type: "id", table: "t1" }, 
+      joins: ["id"],
+    }, { type: "field", tableAlias: "T1", column: "id" })
+
   it "compiles literals", ->
     @compile({ type: "literal", valueType: "text", value: "abc" }, { type: "literal", value: "abc" })
     @compile({ type: "literal", valueType: "number", value: 123 }, { type: "literal", value: 123 })
