@@ -167,7 +167,9 @@ export interface Table {
     contents: Array<Column | Section>;
     /** true if table is deprecated. Do not show unless already selected */
     deprecated?: boolean;
-    /** Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server.  */
+    /** Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server.
+     * @deprecated This is not enforced everywhere as some queries don't use compileTable
+     */
     jsonql?: JsonQL;
     /** sql expression that gets the table. Usually just name of the table. *Note*: this is only for when using a schema file for Water.org's visualization server */
     sql?: string;
