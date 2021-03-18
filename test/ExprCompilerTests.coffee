@@ -5,7 +5,7 @@ canonical = require 'canonical-json'
 moment = require 'moment'
 sinon = require 'sinon'
 Schema = require('../src/Schema').default
-ExprCompiler = require '../src/ExprCompiler'
+ExprCompiler = require('../src/ExprCompiler').default
 ColumnNotFoundException = require '../src/ColumnNotFoundException'
 setupTestExtension = require('./extensionSetup').setupTestExtension
 

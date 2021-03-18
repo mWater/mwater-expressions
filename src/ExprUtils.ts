@@ -1271,6 +1271,7 @@ addOpItem({op: "array_agg", name: "Make list of", desc: "Aggregates results into
 
 addOpItem({op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"]});
 addOpItem({op: "intersects", name: "includes any of", resultType: "boolean", exprTypes: ["id[]", "id[]"]});
+addOpItem({op: "includes", name: "includes", resultType: "boolean", exprTypes: ["id[]", "id"]});
 
 addOpItem({op: "count", name: "Total Number", desc: "Get total number of items", resultType: "number", exprTypes: [], prefix: true, aggr: true});
 addOpItem({op: "percent", name: "Percent of Total", desc: "Percent of all items", resultType: "number", exprTypes: [], prefix: true, aggr: true});

@@ -1,4 +1,4 @@
-import { JsonQL } from "jsonql";
+import { JsonQL, JsonQLQuery } from "jsonql";
 export interface LocalizedString {
     _base: string;
     [language: string]: string;
@@ -104,6 +104,8 @@ export interface ScalarExpr {
     table: string;
     /** @deprecated */
     aggr?: string;
+    /** @deprecated */
+    where?: Expr;
     /** Array of join columns to follow to get to table of expr. All must be `join` type */
     joins: string[];
     /** Expression from final table to get value */
@@ -170,7 +172,7 @@ export interface Table {
     /** Optional custom JsonQL expression. This allows a simple table to be translated to an arbitrarily complex JsonQL expression before being sent to the server.
      * @deprecated This is not enforced everywhere as some queries don't use compileTable
      */
-    jsonql?: JsonQL;
+    jsonql?: JsonQLQuery;
     /** sql expression that gets the table. Usually just name of the table. *Note*: this is only for when using a schema file for Water.org's visualization server */
     sql?: string;
 }
