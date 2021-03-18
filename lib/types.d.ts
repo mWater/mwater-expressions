@@ -1,4 +1,4 @@
-import { JsonQL, JsonQLQuery } from "jsonql";
+import { JsonQLExpr, JsonQLQuery } from "jsonql";
 export interface LocalizedString {
     _base: string;
     [language: string]: string;
@@ -154,7 +154,7 @@ export interface Table {
     /** non-localized short code for a table (optional) */
     code?: string;
     /** column of database (not schema column) with primary key (optional). Can be JsonQL expression with `{alias}` for table alias  */
-    primaryKey?: string | JsonQL;
+    primaryKey?: string | JsonQLExpr;
     /** column in schema with natural ordering (optional). */
     ordering?: string;
     /** table with "ancestor" and "descendant". Faster than ancestry and ancestryText */
@@ -164,7 +164,7 @@ export interface Table {
     /** DEPRECATED: column with jsonb array of primary keys as JSON text, including self. Required if non-text primary keys for optimization purposes. */
     ancestryText?: string;
     /** column with label when choosing a single row. Can be JsonQL expression with `{alias}` for table alias */
-    label?: string | JsonQL;
+    label?: string | JsonQLExpr;
     /** array of content items (columns, sections and joins) of the table */
     contents: Array<Column | Section>;
     /** true if table is deprecated. Do not show unless already selected */
@@ -214,7 +214,7 @@ export interface Column {
     /** true if column is redacted and might be blank or scrambled */
     redacted?: boolean;
     /** Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr` */
-    jsonql?: JsonQL;
+    jsonql?: JsonQLExpr;
     /** sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when using a schema file for Water.org's visualization server */
     sql?: string;
     /** sql expression for saving back to database. Uses `{value}` which will be substituted with the value to be written *Note*: this is only for when using a schema file for Water.org's visualization server */
@@ -229,11 +229,11 @@ export interface Join {
     /** Inverse join column id in the case of 1-n joins (but optionally for all joins) */
     inverse?: string;
     /** jsonql expression with aliases {from} and {to} */
-    jsonql?: JsonQL;
+    jsonql?: JsonQLExpr;
     /** table column to start join from or jsonql with alias {alias} */
-    fromColumn?: string | JsonQL;
+    fromColumn?: string | JsonQLExpr;
     /** table column to end join at or jsonql with alias {alias}.  */
-    toColumn?: string | JsonQL;
+    toColumn?: string | JsonQLExpr;
 }
 /** Grouping of columns */
 export interface Section {

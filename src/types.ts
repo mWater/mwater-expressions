@@ -1,4 +1,4 @@
-import { JsonQL, JsonQLQuery } from "jsonql"
+import { JsonQLExpr, JsonQLQuery } from "jsonql"
 
 export interface LocalizedString {
   _base: string,
@@ -191,7 +191,7 @@ export interface Table {
   code?: string
   
   /** column of database (not schema column) with primary key (optional). Can be JsonQL expression with `{alias}` for table alias  */
-  primaryKey?: string | JsonQL
+  primaryKey?: string | JsonQLExpr
   
   /** column in schema with natural ordering (optional). */
   ordering?: string
@@ -206,7 +206,7 @@ export interface Table {
   ancestryText?: string
   
   /** column with label when choosing a single row. Can be JsonQL expression with `{alias}` for table alias */
-  label?: string | JsonQL
+  label?: string | JsonQLExpr
   
   /** array of content items (columns, sections and joins) of the table */
   contents: Array<Column | Section>
@@ -275,7 +275,7 @@ export interface Column {
   redacted?: boolean
   
   /** Optional custom JsonQL expression. This allows a simple column to be translated to an arbitrarily complex JsonQL expresion before being sent to the server. It will have any fields with tableAlias = `{alias}` replaced by the appropriate alias. For all except `join`, `section` and `expr` */
-  jsonql?: JsonQL
+  jsonql?: JsonQLExpr
   
   /** sql expression that gets the column value. Uses `{alias}` which will be substituted with the table alias. Usually just `{alias}.some_column_name`. *Note*: this is only for when using a schema file for Water.org's visualization server */
   sql?: string
@@ -294,11 +294,11 @@ export interface Join {
   /** Inverse join column id in the case of 1-n joins (but optionally for all joins) */
   inverse?: string
   /** jsonql expression with aliases {from} and {to} */
-  jsonql?: JsonQL
+  jsonql?: JsonQLExpr
   /** table column to start join from or jsonql with alias {alias} */
-  fromColumn?: string | JsonQL
+  fromColumn?: string | JsonQLExpr
   /** table column to end join at or jsonql with alias {alias}.  */
-  toColumn?: string | JsonQL
+  toColumn?: string | JsonQLExpr
 }
 
 /** Grouping of columns */
