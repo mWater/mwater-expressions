@@ -161,6 +161,9 @@ addOp(false, "intersects", literal(["a", "b", "c"], "enumset"), literal(["d"], "
 addOp(true, "intersects", literal(["a", "b", "c"], "text[]"), literal(["a", "x"], "text[]"))
 addOp(false, "intersects", literal(["a", "b", "c"], "text[]"), literal(["d"], "text[]"))
 
+addOp(true, "includes", literal(["a", "b", "c"], "text[]"), literal("a", "text"))
+addOp(false, "includes", literal(["a", "b", "c"], "enumset"), literal("d", "enum"))
+
 # Length of null returns 0 as enumsets are not stored as [] when empty, but rather as null
 addOp(2, "length", literal(["a", "b"], "enumset"))
 addOp(0, "length", literal(null, "enumset"))

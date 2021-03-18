@@ -659,6 +659,11 @@ export class PromiseExprEvaluator {
           return null
         }
         return _.intersection(values[0], values[1]).length > 0
+      case "includes":
+        if (hasNull) {
+          return null
+        }
+        return _.includes(values[0], values[1])
       case "length":
         if (hasNull) {
           return 0

@@ -723,7 +723,7 @@ export default class ExprCompiler {
             convertToJsonB(compiledExprs[0]),
             convertToJsonB(compiledExprs[1])
           ]
-        };
+        }
 
       case "intersects":
         // Null if either not present
@@ -731,21 +731,45 @@ export default class ExprCompiler {
           return null;
         }
 
-        // Null if no expressions in literal list
-        if (((compiledExprs[1] as any).type === "literal") && ((compiledExprs[1] as any).value.length === 0)) {
+        // Use (select bool_or(x.value) from (select LEFT::jsonb @> jsonb_array_elements(RIGHT::jsonb) as value) as x)
+        return {
+          type: "scalar",
+          expr: { type: "op", op: "bool_or", exprs: [{ type: "field", tableAlias: "elements", column: "value" }] },
+          from: { 
+            type: "subquery",
+            alias: "elements",
+            query: {
+              type: "query",
+              selects: [
+                { 
+                  type: "select", 
+                  expr: { type: "op", op: "@>", exprs: [
+                    convertToJsonB(compiledExprs[0]),
+                    { type: "op", op: "jsonb_array_elements", exprs: [convertToJsonB(compiledExprs[1])] }
+                  ]}, 
+                  alias: "value" 
+                }
+              ]
+            }
+          }
+        }
+
+      case "includes":
+        // Null if either not present
+        if (compiledExprs[0] == null || compiledExprs[1] == null) {
           return null;
         }
 
-        // Cast to jsonb and use ?| Also convert to json first to handle literal arrays
+        // Cast both to jsonb and use @>. Also convert both to json first to handle literal arrays
         return {
           type: "op",
-          op: "?|",
+          op: "@>",
           exprs: [
             convertToJsonB(compiledExprs[0]),
-            compiledExprs[1]
+            convertToJsonB(compiledExprs[1])
           ]
-        };
-
+        }
+  
       case "length":
         // 0 if null
         if ((compiledExprs[0] == null)) {

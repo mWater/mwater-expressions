@@ -1493,6 +1493,26 @@ describe "ExprCompiler", ->
         null
       )
 
+    it "compiles includes", ->
+      @compile(
+        { 
+          type: "op"
+          op: "includes", 
+          exprs: [
+            { type: "field", table: "t1", column: "enumset" } 
+            { type: "literal", valueType: "enum", value: "a" }
+          ]
+        }
+        {
+          type: "op"
+          op: "@>"
+          exprs: [
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
+            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '"a"' }]}
+          ]
+        }
+      )
+
     it "compiles intersects", ->
       @compile(
         { 
@@ -1504,26 +1524,26 @@ describe "ExprCompiler", ->
           ]
         }
         {
-          type: "op"
-          op: "?|"
-          exprs: [
-            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
-            { type: "literal", value: ["a", "b"] }
-          ]
-        }
-      )
-
-    it "compiles empty intersects", ->
-      @compile(
-        { 
-          type: "op"
-          op: "intersects", 
-          exprs: [
-            { type: "field", table: "t1", column: "enumset" } 
-            { type: "literal", valueType: "enumset", value: [] }
-          ]
-        }
-        null
+          type: "scalar",
+          expr: { type: "op", op: "bool_or", exprs: [{ type: "field", tableAlias: "elements", column: "value" }] },
+          from: { 
+            type: "subquery",
+            alias: "elements",
+            query: {
+              type: "query",
+              selects: [
+                { 
+                  type: "select", 
+                  expr: { type: "op", op: "@>", exprs: [
+                    { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enumset" }] }
+                    { type: "op", op: "jsonb_array_elements", exprs: [{ type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a","b"]' }]}] }
+                  ]}, 
+                  alias: "value" 
+                }
+              ]
+            }
+          }
+        }        
       )
 
     it "compiles length", ->
