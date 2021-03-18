@@ -153,8 +153,10 @@ export interface Table {
     desc?: LocalizedString;
     /** non-localized short code for a table (optional) */
     code?: string;
-    /** column of database (not schema column) with primary key (optional). Can be JsonQL expression with `{alias}` for table alias  */
-    primaryKey?: string | JsonQLExpr;
+    /** column of database (not schema column) with primary key (optional).
+     * Note: used to allow JsonQL but removed now.
+     */
+    primaryKey?: string;
     /** column in schema with natural ordering (optional). */
     ordering?: string;
     /** table with "ancestor" and "descendant". Faster than ancestry and ancestryText */
