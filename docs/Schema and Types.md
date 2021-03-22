@@ -89,7 +89,7 @@ joins and columns can be nested within sections for organizational purposes.
 * `image`: TODO
 * `imagelist`: TODO
 * `id`: an id column. Requires `idTable`
-* `id[]`: array of primary keys of another table. Include `idTable` field. Stored as `integer[]` or `text[]`
+* `id[]`: array of primary keys of another table. Include `idTable` field. Stored as `integer[]` or `text[]` or `jsonb` (suggested)
 
 Special column types:
 * `join`: not a column per se, but link to one or N rows in another table

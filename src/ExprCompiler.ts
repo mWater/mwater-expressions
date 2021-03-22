@@ -332,7 +332,7 @@ export default class ExprCompiler {
       return { 
         type: "op", op: "=",
         exprs: [
-          this.compileFieldExpr({expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias}),
+          this.compileFieldExpr({ expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias}),
           { type: "field", tableAlias: toAlias, column: toTable.primaryKey }
         ]
       };
@@ -340,19 +340,14 @@ export default class ExprCompiler {
       // Get to table
       toTable = this.schema.getTable(joinColumn.idTable!)!
 
-      // Create equal
+      const compiledFrom = this.compileFieldExpr({ expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias})
+      const compiledTo: JsonQLExpr = { type: "field", tableAlias: toAlias, column: toTable.primaryKey! }
+
+      // Use to_jsonb(fromTable.fromColumn) @> to_jsonb(toTable.toColumn)
       return { 
-        type: "op", op: "=", modifier: "any",
-        exprs: [
-          { type: "field", tableAlias: toAlias, column: toTable.primaryKey },
-          { 
-            type: "scalar", 
-            expr: { type: "op", op: "unnest", exprs: [
-              this.compileFieldExpr({expr: { type: "field", table: fromTableId, column: joinColumn.id }, tableAlias: fromAlias})
-            ]}
-          }
-        ]
-      };
+        type: "op", op: "@>", 
+        exprs: [convertToJsonB(compiledFrom), convertToJsonB(compiledTo)]
+      }
     } else {
       throw new Error(`Invalid join column type ${joinColumn.type}`);
     }

@@ -242,9 +242,9 @@ describe "ExprCompiler", ->
           type: "scalar"
           expr: { type: "op", op: "count", exprs: [] }
           from: { type: "table", table: "t2", alias: "id__" }
-          where: { type: "op", op: "=", modifier: "any", exprs: [
-            { type: "field", tableAlias: "id__", column: "primary" }
-            { type: "scalar", expr: { type: "op", op: "unnest", exprs: [{ type: "field", tableAlias: "T1", column: "id[]" }]}}
+          where: { type: "op", op: "@>", exprs: [
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "id[]" }] }
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "id__", column: "primary" }] }
           ]}
           limit: 1
         })
