@@ -131,11 +131,9 @@ export class PromiseExprEvaluator {
         if (value == null) {
           return null
         }
-        // Handle literal case
-        if (value.type == "literal") {
-          return value.value
-        }
-        throw new Error(`Synchronous non-literal variables`)
+
+        // Evaluate variable
+        return this.evaluateSync(value)
       case "extension":
         return getExprExtension(expr.extension).evaluateSync(expr, this.schema, this.locale, this.variables, this.variableValues)
       default:
