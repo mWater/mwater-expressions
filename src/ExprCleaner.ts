@@ -257,7 +257,7 @@ export default class ExprCleaner {
 
     // Invalid expr
     if (column.expr) {
-      if (new ExprValidator(this.schema).validateExpr(column.expr, options)) {
+      if (new ExprValidator(this.schema, this.variables).validateExpr(column.expr, options)) {
         return null
       }
     }
