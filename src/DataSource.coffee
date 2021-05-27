@@ -2,7 +2,7 @@ _ = require 'lodash'
 
 # Fetches data for queries
 module.exports = class DataSource
-  # Performs a single query. Calls cb with (error, rows)
+  # Performs a single query. Calls cb with (error, rows) or uses promise if no callback
   performQuery: (query, cb) ->
     throw new Error("Not implemented")
 

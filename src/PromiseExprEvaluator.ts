@@ -298,7 +298,7 @@ export class PromiseExprEvaluator {
       return null
     }
 
-    let values, orderValues, wheres, zipped, sum, ofs, count, items, value
+    let values, orderValues, wheres, zipped, sum, ofs, count, items, value, index
 
     switch (op) {
       case "count":
@@ -367,7 +367,7 @@ export class PromiseExprEvaluator {
         if (orderValues.length == 0)
           return null
 
-        let index = -1
+        index = -1
         let largest: any = null
         for (let i = 0 ; i < context.rows.length ; i++) {
           if ((wheres[i] || !exprs[1]) && (index == -1 || orderValues[i] > largest) && values[i] != null) {

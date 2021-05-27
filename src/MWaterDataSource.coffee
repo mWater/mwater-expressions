@@ -25,6 +25,17 @@ module.exports = class MWaterDataSource extends DataSource
       @cache = new LRU({ max: 500, maxAge: 1000 * 15 * 60 })
 
   performQuery: (jsonql, cb) ->
+    # If no callback, use promise
+    if not cb
+      return new Promise((resolve, reject) => 
+        @performQuery(jsonql, (error, rows) =>
+          if error
+            reject(error)
+          else
+            resolve(rows)
+        )
+      )
+
     if @options.localCaching
       cacheKey = JSON.stringify(jsonql)
       cachedRows = @cache.get(cacheKey)

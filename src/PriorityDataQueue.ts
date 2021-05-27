@@ -33,12 +33,12 @@ export default class PriorityDataQueue {
   // Designed to be called by PriorityDataSource
   performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void, priority: number) {
     // Push to the priorityQueue
-    return this.performQueryPriorityQueue.push(query, priority, cb)
+    this.performQueryPriorityQueue.push(query, priority, cb)
   }
 
   // Clears the cache if possible with this data source
   clearCache() {
-    return this.dataSource.clearCache()
+    this.dataSource.clearCache()
   }
 
   // Get the cache expiry time in ms from epoch. No cached items before this time will be used
@@ -53,7 +53,7 @@ export default class PriorityDataQueue {
 
   kill() {
     if (this.performQueryPriorityQueue != null) {
-      return this.performQueryPriorityQueue.kill()
+      this.performQueryPriorityQueue.kill()
     }
   }
 }
