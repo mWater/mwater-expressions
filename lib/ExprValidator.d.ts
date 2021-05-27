@@ -26,11 +26,11 @@ export default class ExprValidator {
      */
     validateExpr(expr: Expr, options?: ValidateOptions): string | null;
     validateExprInternal: (expr: Expr, options: {
-        table?: string | undefined;
-        types?: LiteralType[] | undefined;
-        enumValueIds?: string[] | undefined;
-        idTable?: string | undefined;
-        aggrStatuses?: AggrStatus[] | undefined;
-        depth?: number | undefined;
+        table?: string;
+        types?: LiteralType[];
+        enumValueIds?: string[];
+        idTable?: string;
+        aggrStatuses?: AggrStatus[];
+        depth?: number;
     }) => string | null;
 }
