@@ -1298,8 +1298,9 @@ addOpItem({op: "is latest", name: "Is latest for each", desc: "Only include late
 addOpItem({op: "current date", name: "Today", desc: "Advanced: current date. Do not use in comparisons", resultType: "date", exprTypes: [], prefix: true});
 addOpItem({op: "current datetime", name: "Now", desc: "Advanced: current datetime. Do not use in comparisons", resultType: "datetime", exprTypes: [], prefix: true});
 
-addOpItem({op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true});
-addOpItem({op: "to text", name: "Convert to text", desc: "Advanced: convert a choice or number type to a text value", resultType: "text", exprTypes: ["number"], prefix: true});
+addOpItem({op: "to text", name: "Convert to text", desc: "Advanced: convert a choice, text list, or number type to a text value", resultType: "text", exprTypes: ["enum"], prefix: true});
+addOpItem({op: "to text", name: "Convert to text", desc: "Advanced: convert a choice, text list, or number type to a text value", resultType: "text", exprTypes: ["number"], prefix: true});
+addOpItem({op: "to text", name: "Convert to text", desc: "Advanced: convert a choice, text list, or number type to a text value", resultType: "text", exprTypes: ["text[]"], prefix: true});
 
 addOpItem({op: "to date", name: "Convert to date", desc: "Convert a datetime to a date", resultType: "date", exprTypes: ["datetime"], prefix: true});
 

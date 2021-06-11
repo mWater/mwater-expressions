@@ -173,6 +173,8 @@ add({ type: "op", table: "t1", op: "to text", exprs: [{ type: "field", table: "t
 
 addOp("2.5", "to text", literal(2.5, "number"))
 
+addOp("a, b", "to text", literal(["a", "b"], "text[]"))
+
 addOp(true, "thisyear", literal(moment().subtract(1, "minutes").format("YYYY-MM-DD"), "date"))
 addOp(false, "thisyear", literal(moment().subtract(1, "minutes").add(1, "years").format("YYYY-MM-DD"), "date"))
 

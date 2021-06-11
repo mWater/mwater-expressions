@@ -1958,6 +1958,43 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles text[] to text", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "to text"
+          exprs: [{ type: "field", table: "t1", column: "text[]" }]
+        }
+        {
+          type: "op"
+          op: "array_to_string"
+          exprs: [
+            { 
+              type: "scalar"
+              expr: {
+                type: "op"
+                op: "array_agg"
+                exprs: [{ type: "field", tableAlias: "values" }]
+              }
+              from: {
+                type: "subexpr"
+                expr: {
+                  type: "op"
+                  op: "jsonb_array_elements_text"
+                  exprs: [{ type: "op", op: "to_jsonb", exprs: [
+                    { type: "field", tableAlias: "T1", column: "text[]" }
+                  ]}]
+                }
+                alias: "values"
+              }
+            }
+            # Requires explicit text type
+            { type: "op", op: "::text", exprs: [', '] }
+          ]
+        }
+      )
+
     it "compiles weekofmonth", ->
       @compile(
         {

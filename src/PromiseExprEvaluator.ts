@@ -926,6 +926,7 @@ export class PromiseExprEvaluator {
         }
         if (this.schema) {
           const exprUtils = new ExprUtils(this.schema)
+          const type = exprUtils.getExprType(exprs[0])
           return exprUtils.stringifyExprLiteral(exprs[0], values[0], this.locale)
         } else {
           return values[0] + ""

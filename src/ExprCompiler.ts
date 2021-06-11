@@ -840,7 +840,37 @@ export default class ExprCompiler {
           };
         }
 
-        return null;
+        if (exprUtils.getExprType(expr.exprs[0]) === "text[]") {
+          return {
+            type: "op",
+            op: "array_to_string",
+            exprs: [
+              { 
+                type: "scalar",
+                expr: {
+                  type: "op",
+                  op: "array_agg",
+                  exprs: [{ type: "field", tableAlias: "values" }]
+                },
+                from: {
+                  type: "subexpr",
+                  expr: {
+                    type: "op",
+                    op: "jsonb_array_elements_text",
+                    exprs: [{ type: "op", op: "to_jsonb", exprs: [
+                      compiledExprs[0]
+                    ]}]
+                  },
+                  alias: "values"
+                }
+              },
+              // Requires explicit text type
+              { type: "op", op: "::text", exprs: [', '] }
+            ]
+          }
+        }
+
+        return null
 
       case "to date":
         // Null if not present
