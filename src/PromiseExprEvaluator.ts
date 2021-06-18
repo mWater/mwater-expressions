@@ -931,6 +931,14 @@ export class PromiseExprEvaluator {
         } else {
           return values[0] + ""
         }
+      case "to number":
+        if (hasNull) {
+          return null
+        }
+        if (_.isString(values[0]) && values[0].match(/^([0-9]+[.]?[0-9]*|[.][0-9]+)$/)) {
+          return parseFloat(values[0])
+        }
+        return null
       default:
         throw new Error(`Unknown op ${op}`)
     }

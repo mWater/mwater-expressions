@@ -1995,6 +1995,39 @@ describe "ExprCompiler", ->
         }
       )
 
+    it "compiles to number", ->
+      @compile(
+        {
+          type: "op"
+          table: "t1"
+          op: "to number"
+          exprs: [{ type: "field", table: "t1", column: "text" }]
+        }
+        {
+          type: "case"
+          cases: [
+            {
+              when: {
+                type: "op"
+                op: "~"
+                exprs: [
+                  { type: "field", tableAlias: "T1", column: "text" }
+                  "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"
+                ]
+              }
+              then: {
+                type: "op"
+                op: "::numeric"
+                exprs: [
+                  { type: "op", op: "::text", exprs: [{ type: "field", tableAlias: "T1", column: "text" }] }
+                ]
+              }
+            }
+          ]
+          else: { type: "literal", value: null }
+        }
+      )
+
     it "compiles weekofmonth", ->
       @compile(
         {

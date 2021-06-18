@@ -1307,3 +1307,4 @@ addOpItem({op: "to date", name: "Convert to date", desc: "Convert a datetime to 
 addOpItem({op: "least", name: "Least of", desc: "Takes the smallest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true, joiner: ", "});
 addOpItem({op: "greatest", name: "Greatest of", desc: "Takes the largest of several numbers", resultType: "number", exprTypes: ["number", "number"], moreExprType: "number", prefix: true, joiner: ", "});
 
+addOpItem({op: "to number", name: "Convert to number", desc: "Convert a text value to a number or null if not valid number", resultType: "number", exprTypes: ["text"], prefix: true})
