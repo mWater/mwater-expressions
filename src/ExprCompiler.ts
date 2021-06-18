@@ -902,7 +902,7 @@ export default class ExprCompiler {
               when: {
                 type: "op",
                 op: "~",
-                exprs: [compiledExprs[0], "^([0-9]+[.]?[0-9]*|[.][0-9]+)$" ]
+                exprs: [compiledExprs[0], { type: "literal", value: "^([0-9]+[.]?[0-9]*|[.][0-9]+)$" }]
               },
               then: {
                 type: "op",

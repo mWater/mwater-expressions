@@ -2012,7 +2012,7 @@ describe "ExprCompiler", ->
                 op: "~"
                 exprs: [
                   { type: "field", tableAlias: "T1", column: "text" }
-                  "^([0-9]+[.]?[0-9]*|[.][0-9]+)$"
+                  { type: "literal", value: "^([0-9]+[.]?[0-9]*|[.][0-9]+)$" }
                 ]
               }
               then: {
