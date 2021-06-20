@@ -25,7 +25,7 @@
     "@babel/runtime": "^7.12.5",
     "@types/async": "^3.2.5",
     "async": "^3.2.0",
-    "immer": "^8.0.0",
+    "immer": "^8.0.1",
     "jsonql": "github:mWater/jsonql",
     "lodash": "^3.10.1",
     "lru-cache": "^6.0.0",
