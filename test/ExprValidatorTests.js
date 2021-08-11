@@ -1,246 +1,281 @@
-assert = require('chai').assert
-_ = require 'lodash'
-Schema = require('../src/Schema').default
-ExprValidator = require('../src/ExprValidator').default
-fixtures = require './fixtures'
-setupTestExtension = require('./extensionSetup').setupTestExtension
+import { assert } from 'chai';
+import _ from 'lodash';
+import { default as Schema } from '../src/Schema';
+import { default as ExprValidator } from '../src/ExprValidator';
+import fixtures from './fixtures';
+import { setupTestExtension } from './extensionSetup';
+import canonical from 'canonical-json';
 
-canonical = require 'canonical-json'
+setupTestExtension();
 
-setupTestExtension()
-
-variables = [
-  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] }
-  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" }
-  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" }
+const variables = [
+  { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] },
+  { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" },
+  { id: "varnumberexpr", name: { _base: "en", en: "Varnumberexpr" }, type: "number", table: "t1" },
   { id: "varid", name: { _base: "en", en: "Varid" }, type: "id", idTable: "t1" }
-]
+];
 
-describe "ExprValidator", ->
-  beforeEach ->
-    @schema = fixtures.simpleSchema()
-    @exprValidator = new ExprValidator(@schema, variables)
-    @isValid = (expr, options) =>
-      assert.isNull @exprValidator.validateExpr(expr, options), "Expected to be valid"
+describe("ExprValidator", function() {
+  beforeEach(function() {
+    this.schema = fixtures.simpleSchema();
+    this.exprValidator = new ExprValidator(this.schema, variables);
+    this.isValid = (expr, options) => {
+      return assert.isNull(this.exprValidator.validateExpr(expr, options), "Expected to be valid");
+    };
 
-    @notValid = (expr, options) =>
-      assert @exprValidator.validateExpr(expr, options), "Expected to be invalid"
+    return this.notValid = (expr, options) => {
+      return assert(this.exprValidator.validateExpr(expr, options), "Expected to be invalid");
+    };
+  });
 
-  it "invalid if wrong table", ->
-    @notValid({ type: "field", table: "t1", column: "text" }, table: "t2")
+  it("invalid if wrong table", function() {
+    return this.notValid({ type: "field", table: "t1", column: "text" }, {table: "t2"});
+  });
 
-  it "invalid if wrong type", ->
-    @notValid({ type: "field", table: "t1", column: "enum" }, types: ["text"])
+  it("invalid if wrong type", function() {
+    return this.notValid({ type: "field", table: "t1", column: "enum" }, {types: ["text"]});
+  });
 
-  it "invalid if wrong idTable", ->
-    field = { type: "id", table: "t1" }
-    @isValid(field, types: ["id"], idTable: "t1")
-    @notValid(field, types: ["id"], idTable: "t2")
+  it("invalid if wrong idTable", function() {
+    const field = { type: "id", table: "t1" };
+    this.isValid(field, {types: ["id"], idTable: "t1"});
+    return this.notValid(field, {types: ["id"], idTable: "t2"});
+  });
 
-  it "invalid if wrong enums", ->
-    field = { type: "field", table: "t1", column: "enum" }
-    @isValid(field, enumValueIds: ["a", "b", "c"])
-    @notValid(field, enumValueIds: ["a"])
+  it("invalid if wrong enums", function() {
+    const field = { type: "field", table: "t1", column: "enum" };
+    this.isValid(field, {enumValueIds: ["a", "b", "c"]});
+    return this.notValid(field, {enumValueIds: ["a"]});
+  });
 
-  it "invalid if wrong enums expression", ->
-    field = { type: "field", table: "t1", column: "expr_enum" }
-    @isValid(field, enumValueIds: ["a", "b", "c"])
-    @notValid(field, enumValueIds: ["a"])
+  it("invalid if wrong enums expression", function() {
+    const field = { type: "field", table: "t1", column: "expr_enum" };
+    this.isValid(field, {enumValueIds: ["a", "b", "c"]});
+    return this.notValid(field, {enumValueIds: ["a"]});
+  });
 
-  it "valid if ok", ->
-    @isValid({ type: "field", table: "t1", column: "text"})
+  it("valid if ok", function() {
+    return this.isValid({ type: "field", table: "t1", column: "text"});
+  });
 
-  it "invalid if missing field", ->
-    @notValid({ type: "field", table: "t1", column: "xyz"})
+  it("invalid if missing field", function() {
+    return this.notValid({ type: "field", table: "t1", column: "xyz"});
+  });
 
-  it "invalid if field expr invalid", ->
-    table = @schema.getTable("t1")
+  it("invalid if field expr invalid", function() {
+    const table = this.schema.getTable("t1");
     table.contents.push(
       { id: "expr_invalid", name: { en: "Expr Invalid"}, type: "expr", expr: { type: "field", table: "t1", column: "xyz" }}
-    )
-    schema = @schema.addTable(table)
+    );
+    const schema = this.schema.addTable(table);
 
-    exprValidator = new ExprValidator(schema)
-    assert exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_invalid" })
+    const exprValidator = new ExprValidator(schema);
+    return assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_invalid" }));
+  });
 
-  it "handles recursive field expr", ->
-    table = @schema.getTable("t1")
+  it("handles recursive field expr", function() {
+    const table = this.schema.getTable("t1");
     table.contents.push(
       { id: "expr_recursive", name: { en: "Expr Recursive"}, type: "expr", expr: { type: "field", table: "t1", column: "expr_recursive" }}
-    )
-    schema = @schema.addTable(table)
+    );
+    const schema = this.schema.addTable(table);
 
-    exprValidator = new ExprValidator(schema)
-    assert exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" })
+    const exprValidator = new ExprValidator(schema);
+    return assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" }));
+  });
 
-  describe "scalar", ->
-    it "valid", ->
-      expr = { 
-        type: "scalar"
-        table: "t2"
-        joins: ["2-1"]
+  describe("scalar", function() {
+    it("valid", function() {
+      const expr = { 
+        type: "scalar",
+        table: "t2",
+        joins: ["2-1"],
         expr: { type: "field", table: "t1", column: "number" }
-      }
-      @isValid(expr)
+      };
+      return this.isValid(expr);
+    });
 
-    it "bad join", ->
-      expr = { 
-        type: "scalar"
-        table: "t2"
-        joins: ["xyz"]
+    it("bad join", function() {
+      const expr = { 
+        type: "scalar",
+        table: "t2",
+        joins: ["xyz"],
         expr: { type: "field", table: "t1", column: "number" }
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
 
-    it "bad expr", ->
-      expr = { 
-        type: "scalar"
-        table: "t2"
-        joins: ["2-1"]
+    it("bad expr", function() {
+      const expr = { 
+        type: "scalar",
+        table: "t2",
+        joins: ["2-1"],
         expr: { type: "field", table: "t1", column: "xyz" }
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
     
-    it "valid aggr", ->
-      expr = {
-        type: "scalar"
-        table: "t1"
-        joins: ["1-2"]
+    return it("valid aggr", function() {
+      const expr = {
+        type: "scalar",
+        table: "t1",
+        joins: ["1-2"],
         expr: { type: "op", table: "t2", op: "avg", exprs: [{ type: "field", table: "t2", column: "number" }] }
-      }
-      @isValid(expr)
+      };
+      return this.isValid(expr);
+    });
+  });
 
-  describe "op", ->
-    it "invalid if mixed aggregate and individual", ->
-      expr = {
-        type: "op"
-        table: "t1"
-        op: "+"
+  describe("op", function() {
+    it("invalid if mixed aggregate and individual", function() {
+      const expr = {
+        type: "op",
+        table: "t1",
+        op: "+",
         exprs: [
           { type: "field", table: "t1", column: "number" },
           { type: "op", op: "sum", exprs: [{ type: "field", table: "t1", column: "number" }] }
         ]
-      }
-      @notValid(expr, { aggrStatuses: ["individual", "literal", "aggregate"] })
+      };
+      return this.notValid(expr, { aggrStatuses: ["individual", "literal", "aggregate"] });
+    });
 
-    it "valid", ->
-      expr = { 
-        type: "op"
-        table: "t1"
-        op: "+"
+    it("valid", function() {
+      const expr = { 
+        type: "op",
+        table: "t1",
+        op: "+",
         exprs: [{ type: "field", table: "t1", column: "number" }]
-      }
-      @isValid(expr)
+      };
+      return this.isValid(expr);
+    });
 
-    it "invalid if expr invalid", ->
-      expr = { 
-        type: "op"
-        table: "t1"
-        op: "+"
+    it("invalid if expr invalid", function() {
+      const expr = { 
+        type: "op",
+        table: "t1",
+        op: "+",
         exprs: [{ type: "field", table: "t1", column: "xyz" }]
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
 
-    it "invalid if wrong expr types", ->
-      expr = { 
-        type: "op"
-        table: "t1"
-        op: "+"
+    return it("invalid if wrong expr types", function() {
+      const expr = { 
+        type: "op",
+        table: "t1",
+        op: "+",
         exprs: [{ type: "field", table: "t1", column: "text" }]
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
+  });
 
-  describe "case", ->
-    it "validates else", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
+  describe("case", function() {
+    it("validates else", function() {
+      let expr = { 
+        type: "case",
+        table: "t1",
+        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}],
         else: { type: "literal", valueType: "text", value: "abc" }
-      }
-      @isValid(expr)
+      };
+      this.isValid(expr);
 
-      expr = _.cloneDeep(expr)
-      expr.else = { type: "field", table: "t1", column: "xyz" }
-      @notValid(expr)
+      expr = _.cloneDeep(expr);
+      expr.else = { type: "field", table: "t1", column: "xyz" };
+      return this.notValid(expr);
+    });
 
-    it "validates cases whens boolean", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
+    it("validates cases whens boolean", function() {
+      let expr = { 
+        type: "case",
+        table: "t1",
+        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}],
         else: { type: "literal", valueType: "text", value: "abc" }
-      }
-      @isValid(expr)
+      };
+      this.isValid(expr);
 
-      expr = _.cloneDeep(expr)
-      expr.cases[0].when = { type: "field", table: "t1", column: "text" }
-      @notValid(expr)
+      expr = _.cloneDeep(expr);
+      expr.cases[0].when = { type: "field", table: "t1", column: "text" };
+      return this.notValid(expr);
+    });
 
-    it "validates cases thens", ->
-      expr = { 
-        type: "case"
-        table: "t1"
-        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}]
+    return it("validates cases thens", function() {
+      let expr = { 
+        type: "case",
+        table: "t1",
+        cases: [{ when: { type: "literal", valueType: "boolean", value: true }, then: { type: "literal", valueType: "number", value: 123 }}],
         else: { type: "literal", valueType: "text", value: "abc" }
-      }
-      @isValid(expr)
+      };
+      this.isValid(expr);
 
-      expr = _.cloneDeep(expr)
-      expr.cases[0].then = { type: "field", table: "t1", column: "xyz" }
-      @notValid(expr)
+      expr = _.cloneDeep(expr);
+      expr.cases[0].then = { type: "field", table: "t1", column: "xyz" };
+      return this.notValid(expr);
+    });
+  });
 
-  describe "score", ->
-    it "validates input", ->
-      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {} }
-      @isValid(expr)
+  describe("score", function() {
+    it("validates input", function() {
+      let expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {} };
+      this.isValid(expr);
 
-      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "text" }, scores: {} }
-      @notValid(expr)
+      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "text" }, scores: {} };
+      this.notValid(expr);
 
-      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "xyz" }, scores: {} }
-      @notValid(expr)
+      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "xyz" }, scores: {} };
+      return this.notValid(expr);
+    });
 
-    it "validates score keys", ->
-      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+    it("validates score keys", function() {
+      let expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
           a: { type: "field", table: "t1", column: "number" }
         } 
-      }
-      @isValid(expr)
+      };
+      this.isValid(expr);
 
       expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
           xyz: { type: "field", table: "t1", column: "number" }
         } 
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
 
-    it "validates score values", ->
-      expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
+    return it("validates score values", function() {
+      let expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
           a: { type: "field", table: "t1", column: "number" }
         } 
-      }
-      @isValid(expr)
+      };
+      this.isValid(expr);
 
       expr = { type: "score", table: "t1", input: { type: "field", table: "t1", column: "enum" }, scores: {
           a: { type: "field", table: "t1", column: "text" }
         } 
-      }
-      @notValid(expr)
+      };
+      return this.notValid(expr);
+    });
+  });
 
-  describe "variable", -> 
-    it "fails if non-existent", ->
-      @notValid({ type: "variable", variableId: "varxyz" })
+  describe("variable", function() { 
+    it("fails if non-existent", function() {
+      return this.notValid({ type: "variable", variableId: "varxyz" });
+    });
 
-    it "success if exists", ->
-      @isValid({ type: "variable", variableId: "varnumber" })
+    it("success if exists", function() {
+      return this.isValid({ type: "variable", variableId: "varnumber" });
+    });
 
-    it "checks idTable", ->
-      @isValid({ type: "variable", variableId: "varid" })
-      @isValid({ type: "variable", variableId: "varid" }, { table: "t2" })
-      @isValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
-      @notValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
+    return it("checks idTable", function() {
+      this.isValid({ type: "variable", variableId: "varid" });
+      this.isValid({ type: "variable", variableId: "varid" }, { table: "t2" });
+      this.isValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" });
+      return this.notValid({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" });
+    });
+  });
 
-  it "validates extension", ->
-    schema = fixtures.simpleSchema()
-    exprValidator = new ExprValidator(schema, variables)
-    assert.equal exprValidator.validateExpr({ type: "extension", extension: "test" }), "test"
+  return it("validates extension", function() {
+    const schema = fixtures.simpleSchema();
+    const exprValidator = new ExprValidator(schema, variables);
+    return assert.equal(exprValidator.validateExpr({ type: "extension", extension: "test" }), "test");
+  });
+});
