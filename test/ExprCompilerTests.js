@@ -1,5 +1,7 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
-import fixtures from './fixtures';
+import * as fixtures from './fixtures';
 import _ from 'lodash';
 import canonical from 'canonical-json';
 import moment from 'moment';
@@ -11,7 +13,13 @@ import { setupTestExtension } from './extensionSetup';
 
 setupTestExtension();
 
-const compare = (actual, expected) => assert.equal(canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n");
+function compare(actual, expected) {
+  return assert.equal(
+    canonical(actual),
+    canonical(expected),
+    "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
+  );
+}
 
 // now expression (to_json(now() at time zone 'UTC')#>>'{}') as timestamp
 const nowExpr = {

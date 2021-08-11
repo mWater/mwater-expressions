@@ -1,9 +1,13 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
 import _ from 'lodash';
 import { default as Schema } from '../src/Schema';
 import canonical from 'canonical-json';
 
-const compare = (actual, expected) => assert.equal(canonical(actual), canonical(expected));
+function compare(actual, expected) {
+  return assert.equal(canonical(actual), canonical(expected));
+}
 
 describe("Schema", function() {
   it("adds and gets tables", function() {

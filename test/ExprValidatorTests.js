@@ -1,8 +1,10 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
 import _ from 'lodash';
 import { default as Schema } from '../src/Schema';
 import { default as ExprValidator } from '../src/ExprValidator';
-import fixtures from './fixtures';
+import * as fixtures from './fixtures';
 import { setupTestExtension } from './extensionSetup';
 import canonical from 'canonical-json';
 

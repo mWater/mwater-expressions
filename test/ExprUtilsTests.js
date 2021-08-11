@@ -1,5 +1,7 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
-import fixtures from './fixtures';
+import * as fixtures from './fixtures';
 import _ from 'lodash';
 import { default as ExprUtils } from '../src/ExprUtils';
 import { default as Schema } from '../src/Schema';
@@ -12,7 +14,13 @@ const variables = [
   { id: "varidexpr", name: { _base: "en", en: "Varidexpr" }, type: "id", table: "t1", idTable: "t2" }
 ];
 
-const compare = (actual, expected) => assert.equal(canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n");
+function compare(actual, expected) {
+  return assert.equal(
+    canonical(actual),
+    canonical(expected),
+    "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
+  );
+}
 
 describe("ExprUtils", function() {
   beforeEach(function() {

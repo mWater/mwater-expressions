@@ -1,11 +1,19 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
 import _ from 'lodash';
 import { default as Schema } from '../src/Schema';
 import { default as ExprCleaner } from '../src/ExprCleaner';
-import fixtures from './fixtures';
+import * as fixtures from './fixtures';
 import canonical from 'canonical-json';
 
-const compare = (actual, expected) => assert.equal(canonical(actual), canonical(expected), "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n");
+function compare(actual, expected) {
+  return assert.equal(
+    canonical(actual),
+    canonical(expected),
+    "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
+  );
+}
 
 const variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] },

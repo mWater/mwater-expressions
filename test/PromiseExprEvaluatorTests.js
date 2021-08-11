@@ -1,21 +1,23 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
 import _ from 'lodash';
 import canonical from 'canonical-json';
 import moment from 'moment';
 import sinon from 'sinon';
-import fixtures from './fixtures';
+import * as fixtures from './fixtures';
 import { PromiseExprEvaluator } from '../src/PromiseExprEvaluator';
 import testExprs from './testExprs';
 import { setupTestExtension } from './extensionSetup';
 setupTestExtension();
 
-const compare = function(actual, expected) {
+function compare(actual, expected) {
   if (_.isObject(actual) || _.isArray(actual)) {
     return assert.equal(canonical(actual), canonical(expected), "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n");
   } else {
     return assert.equal(actual, expected);
   }
-};
+}
 
 const variables = [
   { id: "varenum", name: { _base: "en", en: "Varenum" }, type: "enum", enumValues: [{ id: "a", name: { en: "A" }}, { id: "b", name: { en: "B" }}] },

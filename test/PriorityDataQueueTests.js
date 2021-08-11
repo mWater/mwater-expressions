@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { assert } from 'chai';
 import { default as PriorityDataQueue } from '../src/PriorityDataQueue';
 import DataSource from '../src/DataSource';
@@ -28,14 +30,15 @@ describe("PriorityDataQueue", function() {
 
   return it("priorityDataQueue properly prioritize the calls", function(testCallback) {
     let counter = 0;
-    const callDone = function(priority) {
+
+    function callDone(priority) {
       counter++;
       // Make sure that the priority is called in the right order
       assert.equal(priority, counter);
       if (counter === 4) {
         return testCallback();
       }
-    };
+    }
 
     const priorityDataSource1 = this.priorityDataQueue.createPriorityDataSource(1);
     const priorityDataSource2 = this.priorityDataQueue.createPriorityDataSource(2);

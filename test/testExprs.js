@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -6,22 +8,31 @@ import moment from 'moment';
 const testExprs = [];
 export default testExprs;
 
-const add = (expr, value, context) => testExprs.push({ expr, value, context });
-const literal = (value, type) => ({
-  type: "literal",
-  valueType: type,
-  value
-});
+function add(expr, value, context) {
+  return testExprs.push({ expr, value, context });
+}
+
+function literal(value, type) {
+  return {
+    type: "literal",
+    valueType: type,
+    value
+  };
+}
 
 // Adds a test for an op. Pass result, op, exprs
-const addOp = (result, op, ...exprs) => add({ type: "op", op, exprs }, result);
+function addOp(result, op, ...exprs) {
+  return add({ type: "op", op, exprs }, result);
+}
 
 // Create sample rows for testing 
-const makeRow = data => ({
-  getPrimaryKey() { return Promise.resolve(data.id); },
-  getField(columnId) { return Promise.resolve(data[columnId]); },
-  followJoin(columnId) { return Promise.resolve(data["join:" + columnId]); }
-});
+function makeRow(data) {
+  return {
+    getPrimaryKey() { return Promise.resolve(data.id); },
+    getField(columnId) { return Promise.resolve(data[columnId]); },
+    followJoin(columnId) { return Promise.resolve(data["join:" + columnId]); }
+  };
+}
 
 // Null
 add(null, null);

@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 import { default as Schema } from '../src/Schema';
 
 export function simpleSchema() {
