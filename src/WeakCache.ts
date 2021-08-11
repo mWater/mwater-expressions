@@ -1,10 +1,10 @@
-import _ from 'lodash'
+import _ from "lodash"
 
-/** Cache which can cache by an array of weak objects and an array of strong primitives and 
+/** Cache which can cache by an array of weak objects and an array of strong primitives and
  * objects.
  */
 export class WeakCache {
-  cache: WeakMap<any, any> 
+  cache: WeakMap<any, any>
 
   constructor() {
     this.cache = new WeakMap()
@@ -16,7 +16,7 @@ export class WeakCache {
   get(weak: any[], strong: any[]): any {
     // Follow weak
     let value = this.cache
-    
+
     for (const k of weak) {
       value = value.get(k)
       if (value === undefined) {
@@ -34,7 +34,7 @@ export class WeakCache {
   set(weak: any[], strong: any[], value: any) {
     // Follow weak
     let map = this.cache
-    
+
     for (const k of _.initial(weak)) {
       if (!map.has(k)) {
         map.set(k, new WeakMap())
@@ -46,7 +46,7 @@ export class WeakCache {
       map.set(_.last(weak), new Map())
     }
     map = map.get(_.last(weak))
-    
+
     map.set(JSON.stringify(strong), value)
   }
 

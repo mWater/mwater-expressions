@@ -1,10 +1,10 @@
-import { AsyncPriorityQueue, priorityQueue } from 'async'
-import { JsonQLQuery } from 'jsonql'
-import _ from 'lodash'
-import DataSource from './DataSource'
+import { AsyncPriorityQueue, priorityQueue } from "async"
+import { JsonQLQuery } from "jsonql"
+import _ from "lodash"
+import DataSource from "./DataSource"
 
-import PriorityDataSource from './PriorityDataSource'
-import { Row } from './types'
+import PriorityDataSource from "./PriorityDataSource"
+import { Row } from "./types"
 
 // Creates PriorityDataSource from DataSource
 export default class PriorityDataQueue {
@@ -14,9 +14,9 @@ export default class PriorityDataQueue {
   constructor(dataSource: DataSource, concurrency: number) {
     var worker
     this.dataSource = dataSource
-    
+
     // Creates a priorityQueue that calls performQuery
-    worker = function(query: JsonQLQuery, callback: (err: any, results: Row[]) => void) {
+    worker = function (query: JsonQLQuery, callback: (err: any, results: Row[]) => void) {
       // Defer to prevent too-deep recursion
       return _.defer(() => {
         return dataSource.performQuery(query, callback)

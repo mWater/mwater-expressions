@@ -1,7 +1,7 @@
-import _ from 'lodash'
+import _ from "lodash"
 import { JsonQLExpr } from "jsonql"
 
-/** Recursively inject table aliases 
+/** Recursively inject table aliases
  * aliases is map of replacement to table aliases. For example, { "{a}": b } will replace "{a}" with "b"
  */
 export function injectTableAliases(jsonql: any, aliases: { [from: string]: string }): any {

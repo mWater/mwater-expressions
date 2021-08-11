@@ -10,7 +10,7 @@ export interface PromiseExprEvaluatorRow {
   /** gets primary key of row */
   getPrimaryKey(): Promise<any>
 
-  /** gets the value of a column. 
+  /** gets the value of a column.
    * For joins, getField will get either the primary key or array of primary keys
    */
   getField(columnId: string): Promise<any>
@@ -35,7 +35,7 @@ export class PromiseExprEvaluator {
   variableValues?: { [variableId: string]: Expr }
 
   /** variableValues are the expressions which the variable contains */
-  constructor(options: { 
+  constructor(options: {
     schema?: Schema
     locale?: string
     variables?: Variable[]
@@ -56,7 +56,11 @@ export class PromiseExprEvaluator {
     switch (expr.type) {
       case "field":
         // If schema is present and column is an expression column, use that
-        if (this.schema && this.schema.getColumn(expr.table, expr.column) && this.schema.getColumn(expr.table, expr.column)!.expr) {
+        if (
+          this.schema &&
+          this.schema.getColumn(expr.table, expr.column) &&
+          this.schema.getColumn(expr.table, expr.column)!.expr
+        ) {
           return await this.evaluate(this.schema.getColumn(expr.table, expr.column)!.expr!, context)
         }
         if (!context.row) {
@@ -87,7 +91,14 @@ export class PromiseExprEvaluator {
       case "variable":
         return await this.evaluateVariable(expr, context)
       case "extension":
-        return await getExprExtension(expr.extension).evaluate(expr, context, this.schema, this.locale, this.variables, this.variableValues)
+        return await getExprExtension(expr.extension).evaluate(
+          expr,
+          context,
+          this.schema,
+          this.locale,
+          this.variables,
+          this.variableValues
+        )
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }
@@ -103,7 +114,11 @@ export class PromiseExprEvaluator {
       case "literal":
         return expr.value
       case "op":
-        return this.evaluateOpValues(expr.op, expr.exprs, expr.exprs.map(e => this.evaluateSync(e)))
+        return this.evaluateOpValues(
+          expr.op,
+          expr.exprs,
+          expr.exprs.map((e) => this.evaluateSync(e))
+        )
       case "case":
         // TODO
         throw new Error("Synchronous case not supported")
@@ -117,7 +132,7 @@ export class PromiseExprEvaluator {
         if (expr.table) {
           throw new Error(`Synchronous table variables not supported`)
         }
-    
+
         // Get variable
         const variable = _.findWhere(this.variables || [], {
           id: expr.variableId
@@ -135,7 +150,13 @@ export class PromiseExprEvaluator {
         // Evaluate variable
         return this.evaluateSync(value)
       case "extension":
-        return getExprExtension(expr.extension).evaluateSync(expr, this.schema, this.locale, this.variables, this.variableValues)
+        return getExprExtension(expr.extension).evaluateSync(
+          expr,
+          this.schema,
+          this.locale,
+          this.variables,
+          this.variableValues
+        )
       default:
         throw new Error(`Unsupported expression type ${(expr as any).type}`)
     }
@@ -169,11 +190,9 @@ export class PromiseExprEvaluator {
         }
       }
       return sum
-    }
-    else if (expr.scores[input]) {
+    } else if (expr.scores[input]) {
       return await this.evaluate(expr.scores[input as any], context)
-    }
-    else {
+    } else {
       return 0
     }
   }
@@ -205,8 +224,7 @@ export class PromiseExprEvaluator {
         // State is an array of rows. Follow joins and flatten to rows
         const temp: any = await Promise.all(state.map((st: PromiseExprEvaluatorRow) => st.followJoin(join)))
         state = _.compact(_.flattenDeep(temp))
-      }
-      else {
+      } else {
         // State is a single row. Follow
         state = await state.followJoin(join)
       }
@@ -215,8 +233,7 @@ export class PromiseExprEvaluator {
     // Evaluate expression on new context
     if (_.isArray(state)) {
       return await this.evaluate(expr.expr, { rows: state })
-    }
-    else {
+    } else {
       return await this.evaluate(expr.expr, { row: state || undefined })
     }
   }
@@ -231,9 +248,9 @@ export class PromiseExprEvaluator {
     if (op == "is latest") {
       return await this.evaluateIsLatest(table!, exprs, context)
     }
-  
+
     // Evaluate exprs
-    const values = await Promise.all(exprs.map(expr => this.evaluate(expr, context)))
+    const values = await Promise.all(exprs.map((expr) => this.evaluate(expr, context)))
     return this.evaluateOpValues(op, exprs, values)
   }
 
@@ -245,7 +262,7 @@ export class PromiseExprEvaluator {
       console.warn("evaluateIsLatest does not work without schema and ordering")
       return false
     }
-  
+
     // Fail quietly if no rows
     if (!context.rows) {
       console.warn("evaluateIsLatest does not work without rows context")
@@ -256,29 +273,36 @@ export class PromiseExprEvaluator {
     if (!context.row) {
       return null
     }
-  
+
     // Evaluate lhs (value to group by) for all rows
-    const lhss = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row: row })))
+    const lhss = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row: row })))
 
     // Evaluate pk for all rows
-    const pks = await Promise.all(context.rows.map(row => row.getPrimaryKey()))
+    const pks = await Promise.all(context.rows.map((row) => row.getPrimaryKey()))
 
     // Evaluate all rows by ordering
-    const orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+    const orderValues = await Promise.all(
+      context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+    )
 
     // Evaluate filter value for all rows if present
-    const filters = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row: row })))
+    const filters = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row: row })))
 
-    let items = _.map(lhss, (lhs, index) => ({ lhs: lhs, pk: pks[index], ordering: orderValues[index], filter: filters[index] }))
-  
+    let items = _.map(lhss, (lhs, index) => ({
+      lhs: lhs,
+      pk: pks[index],
+      ordering: orderValues[index],
+      filter: filters[index]
+    }))
+
     // Filter
     if (exprs[1]) {
-      items = _.filter(items, item => item.filter)
+      items = _.filter(items, (item) => item.filter)
     }
 
     // Group by lhs
     const groups = _.groupBy(items, "lhs")
-  
+
     // Keep latest of each group
     let latests = []
     for (const lhs in groups) {
@@ -288,11 +312,11 @@ export class PromiseExprEvaluator {
 
     // Get pk of row
     const pk = await context.row.getPrimaryKey()
-    
+
     // See if match
     return _.contains(_.pluck(latests, "pk"), pk)
   }
-  
+
   async evaluteAggrOp(table: string, op: string, exprs: Expr[], context: PromiseExprEvaluatorContext) {
     if (!context.rows) {
       return null
@@ -305,11 +329,11 @@ export class PromiseExprEvaluator {
         return context.rows.length
       case "sum":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
         return _.sum(values)
       case "avg":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
         return _.sum(values) / values.length
 
       // TODO. Uses window functions, so returning 100 for now
@@ -317,32 +341,34 @@ export class PromiseExprEvaluator {
         return 100
       case "min":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
         return _.min(values)
       case "max":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
         return _.max(values)
       case "last":
         // Fail quietly if no ordering or no schema
         if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
-          console.warn("last does not work without schema and ordering");
+          console.warn("last does not work without schema and ordering")
           return null
         }
         // Evaluate all rows by ordering
-        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+        orderValues = await Promise.all(
+          context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+        )
 
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         zipped = _.zip(values, orderValues)
 
         // Sort by ordering reverse
-        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["desc"])
-        values = _.map(zipped, entry => entry[0])
-        
+        zipped = _.sortByOrder(zipped, [(entry) => entry[1]], ["desc"])
+        values = _.map(zipped, (entry) => entry[0])
+
         // Take first non-null
-        for (let i = 0 ; i < values.length ; i++) {
+        for (let i = 0; i < values.length; i++) {
           if (values[i] != null) {
             return values[i]
           }
@@ -351,25 +377,26 @@ export class PromiseExprEvaluator {
       case "last where":
         // Fail quietly if no ordering or no schema
         if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
-          console.warn("last where does not work without schema and ordering");
+          console.warn("last where does not work without schema and ordering")
           return null
         }
         // Evaluate all rows by ordering
-        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+        orderValues = await Promise.all(
+          context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+        )
 
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
 
         // Find largest
-        if (orderValues.length == 0)
-          return null
+        if (orderValues.length == 0) return null
 
         index = -1
         let largest: any = null
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if ((wheres[i] || !exprs[1]) && (index == -1 || orderValues[i] > largest) && values[i] != null) {
             index = i
             largest = orderValues[i]
@@ -378,30 +405,31 @@ export class PromiseExprEvaluator {
 
         if (index >= 0) {
           return values[index]
-        }
-        else {
+        } else {
           return null
         }
       case "previous":
         // Fail quietly if no ordering or no schema
         if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
-          console.warn("last where does not work without schema and ordering");
+          console.warn("last where does not work without schema and ordering")
           return null
         }
         // Evaluate all rows by ordering
-        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+        orderValues = await Promise.all(
+          context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+        )
 
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         zipped = _.zip(values, orderValues)
 
         // Sort by ordering reverse
-        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["desc"])
-        values = _.map(zipped, entry => entry[0])
-        
+        zipped = _.sortByOrder(zipped, [(entry) => entry[1]], ["desc"])
+        values = _.map(zipped, (entry) => entry[0])
+
         // Take second non-null
-        values = _.filter(values, v => v != null)
+        values = _.filter(values, (v) => v != null)
         if (values[1] != null) {
           return values[1]
         }
@@ -410,23 +438,25 @@ export class PromiseExprEvaluator {
       case "first":
         // Fail quietly if no ordering or no schema
         if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
-          console.warn("first does not work without schema and ordering");
+          console.warn("first does not work without schema and ordering")
           return null
         }
         // Evaluate all rows by ordering
-        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+        orderValues = await Promise.all(
+          context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+        )
 
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         zipped = _.zip(values, orderValues)
 
         // Sort by ordering asc
-        zipped = _.sortByOrder(zipped, [entry => entry[1]], ["asc"])
-        values = _.map(zipped, entry => entry[0])
-        
+        zipped = _.sortByOrder(zipped, [(entry) => entry[1]], ["asc"])
+        values = _.map(zipped, (entry) => entry[0])
+
         // Take first non-null
-        for (let i = 0 ; i < values.length ; i++) {
+        for (let i = 0; i < values.length; i++) {
           if (values[i] != null) {
             return values[i]
           }
@@ -436,25 +466,26 @@ export class PromiseExprEvaluator {
       case "first where":
         // Fail quietly if no ordering or no schema
         if (!this.schema || !this.schema.getTable(table) || !this.schema.getTable(table)!.ordering) {
-          console.warn("first where does not work without schema and ordering");
+          console.warn("first where does not work without schema and ordering")
           return null
         }
         // Evaluate all rows by ordering
-        orderValues = await Promise.all(context.rows.map(row => row.getField(this.schema!.getTable(table)!.ordering!)))
+        orderValues = await Promise.all(
+          context.rows.map((row) => row.getField(this.schema!.getTable(table)!.ordering!))
+        )
 
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
 
         // Find smallest
-        if (orderValues.length == 0)
-          return null
+        if (orderValues.length == 0) return null
 
         index = -1
         let smallest: any = null
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if ((wheres[i] || !exprs[1]) && (index == -1 || orderValues[i] < smallest) && values[i] != null) {
             index = i
             smallest = orderValues[i]
@@ -463,22 +494,21 @@ export class PromiseExprEvaluator {
 
         if (index >= 0) {
           return values[index]
-        }
-        else {
+        } else {
           return null
         }
       case "count where":
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
-        return wheres.filter(w => w === true).length
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
+        return wheres.filter((w) => w === true).length
       case "sum where":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
         sum = 0
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if (wheres[i] === true) {
             sum += values[i]
           }
@@ -486,13 +516,13 @@ export class PromiseExprEvaluator {
         return sum
       case "percent where":
         // Evaluate all rows
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        ofs = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        ofs = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
         sum = 0
         count = 0
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if (!exprs[1] || ofs[i] == true) {
             count++
             if (wheres[i] === true) {
@@ -502,45 +532,44 @@ export class PromiseExprEvaluator {
         }
         if (count === 0) {
           return null
-        } 
-        else {
-          return sum / count * 100
+        } else {
+          return (sum / count) * 100
         }
       case "min where":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
         items = []
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if (wheres[i] === true) {
-            items.push(values[i]);
+            items.push(values[i])
           }
         }
         value = _.min(items)
         return value != null ? value : null
       case "max where":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
 
         // Evaluate all rows by where
-        wheres = await Promise.all(context.rows.map(row => this.evaluate(exprs[1], { row })))
+        wheres = await Promise.all(context.rows.map((row) => this.evaluate(exprs[1], { row })))
         items = []
-        for (let i = 0 ; i < context.rows.length ; i++) {
+        for (let i = 0; i < context.rows.length; i++) {
           if (wheres[i] === true) {
-            items.push(values[i]);
+            items.push(values[i])
           }
         }
         value = _.max(items)
         return value != null ? value : null
       case "count distinct":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
-        return _.uniq(values).length;
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
+        return _.uniq(values).length
       case "array_agg":
         // Evaluate all rows
-        values = await Promise.all(context.rows.map(row => this.evaluate(exprs[0], { row })))
+        values = await Promise.all(context.rows.map((row) => this.evaluate(exprs[0], { row })))
         return values
       default:
         throw new Error(`Unknown op ${op}`)
@@ -552,18 +581,18 @@ export class PromiseExprEvaluator {
     let date, point, point1, point2, v0, v1
 
     // Check if has null argument
-    const hasNull = _.any(values, v => v == null)
+    const hasNull = _.any(values, (v) => v == null)
 
     switch (op) {
       case "+":
-        return _.reduce(values, function(acc, value) {
+        return _.reduce(values, function (acc, value) {
           return acc + (value != null ? value : 0)
         })
       case "*":
         if (hasNull) {
           return null
         }
-        return _.reduce(values, function(acc: number, value) {
+        return _.reduce(values, function (acc: number, value) {
           return acc * value
         })
       case "-":
@@ -583,14 +612,14 @@ export class PromiseExprEvaluator {
         if (values.length === 0) {
           return null
         }
-        return _.reduce(values, function(acc, value) {
+        return _.reduce(values, function (acc, value) {
           return acc && value
         })
       case "or":
         if (values.length === 0) {
           return null
         }
-        return _.reduce(values, function(acc, value) {
+        return _.reduce(values, function (acc, value) {
           return acc || value
         })
       case "not":
@@ -731,7 +760,7 @@ export class PromiseExprEvaluator {
         // Pad to datetime (to allow date/datetime comparisons)
         v0 = values[0].length == 10 ? values[0] + "T00:00:00Z" : values[0]
         v1 = values[1].length == 10 ? values[1] + "T00:00:00Z" : values[1]
-        
+
         return moment(v0, moment.ISO_8601).diff(moment(v1, moment.ISO_8601)) / 24 / 3600 / 1000 / 365
       case "days since":
         if (hasNull) {
@@ -742,7 +771,7 @@ export class PromiseExprEvaluator {
         if (hasNull) {
           return null
         }
-        return (Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1) + ""; // Make string
+        return Math.floor((moment(values[0], moment.ISO_8601).date() - 1) / 7) + 1 + "" // Make string
       case "dayofmonth":
         if (hasNull) {
           return null
@@ -762,18 +791,18 @@ export class PromiseExprEvaluator {
         if (hasNull) {
           return null
         }
-        return values[0].substr(0, 4) + "-" + moment(values[0].substr(0, 10), 'YYYY-MM-DD').quarter()
+        return values[0].substr(0, 4) + "-" + moment(values[0].substr(0, 10), "YYYY-MM-DD").quarter()
       case "yearweek":
         if (hasNull) {
           return null
         }
-        const isoWeek = moment(values[0].substr(0, 10), 'YYYY-MM-DD').isoWeek()
+        const isoWeek = moment(values[0].substr(0, 10), "YYYY-MM-DD").isoWeek()
         return values[0].substr(0, 4) + "-" + (isoWeek < 10 ? "0" + isoWeek : isoWeek)
       case "weekofyear":
         if (hasNull) {
           return null
         }
-        const isoWeek2 = moment(values[0].substr(0, 10), 'YYYY-MM-DD').isoWeek()
+        const isoWeek2 = moment(values[0].substr(0, 10), "YYYY-MM-DD").isoWeek()
         return isoWeek2 < 10 ? "0" + isoWeek2 : isoWeek2
       case "to date":
         if (hasNull) {
@@ -826,43 +855,64 @@ export class PromiseExprEvaluator {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isSameOrBefore(moment()) && moment(date, moment.ISO_8601).isAfter(moment().subtract(24, "hours"))
+        return (
+          moment(date, moment.ISO_8601).isSameOrBefore(moment()) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(24, "hours"))
+        )
       case "last7days":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(7, "days"))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(7, "days"))
+        )
       case "last30days":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(30, "days"))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(30, "days"))
+        )
       case "last365days":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(365, "days"))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(365, "days"))
+        )
       case "last12months":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(11, "months").startOf('month'))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(11, "months").startOf("month"))
+        )
       case "last6months":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(5, "months").startOf('month'))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(5, "months").startOf("month"))
+        )
       case "last3months":
         if (hasNull) {
           return null
         }
         date = values[0]
-        return moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) && moment(date, moment.ISO_8601).isAfter(moment().subtract(2, "months").startOf('month'))
+        return (
+          moment(date, moment.ISO_8601).isBefore(moment().add(1, "days")) &&
+          moment(date, moment.ISO_8601).isAfter(moment().subtract(2, "months").startOf("month"))
+        )
       case "future":
         if (hasNull) {
           return null
@@ -903,8 +953,16 @@ export class PromiseExprEvaluator {
         }
         point1 = values[0]
         point2 = values[1]
-        if ((point1 != null ? point1.type : void 0) === "Point" && (point2 != null ? point2.type : void 0) === "Point") {
-          return getDistanceFromLatLngInM(point1.coordinates[1], point1.coordinates[0], point2.coordinates[1], point2.coordinates[0])
+        if (
+          (point1 != null ? point1.type : void 0) === "Point" &&
+          (point2 != null ? point2.type : void 0) === "Point"
+        ) {
+          return getDistanceFromLatLngInM(
+            point1.coordinates[1],
+            point1.coordinates[0],
+            point2.coordinates[1],
+            point2.coordinates[0]
+          )
         }
         break
       case "line length":
@@ -966,12 +1024,14 @@ export class PromiseExprEvaluator {
 
 function getDistanceFromLatLngInM(lat1: number, lng1: number, lat2: number, lng2: number) {
   var R, a, c, d, dLat, dLng
-  R = 6370986; // Radius of the earth in m
-  dLat = deg2rad(lat2 - lat1); // deg2rad below
+  R = 6370986 // Radius of the earth in m
+  dLat = deg2rad(lat2 - lat1) // deg2rad below
   dLng = deg2rad(lng2 - lng1)
-  a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
   c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  d = R * c; // Distance in m
+  d = R * c // Distance in m
   return d
 }
 

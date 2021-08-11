@@ -1,5 +1,5 @@
-import { JsonQLQuery } from "jsonql";
-import { Row } from "./types";
+import { JsonQLQuery } from "jsonql"
+import { Row } from "./types"
 
 export default class DataSource {
   /** Performs a single query. Calls cb with (error, rows) or uses promise if no callback */

@@ -1,6 +1,5 @@
-import { assert } from 'chai'
-import { WeakCache } from '../src/WeakCache'
-
+import { assert } from "chai"
+import { WeakCache } from "../src/WeakCache"
 
 const a = { x: 1 }
 const b = { x: 2 }
@@ -13,7 +12,7 @@ describe("WeakCache", () => {
 
     wc.set([a], [], "foo")
     assert.equal(wc.get([a], []), "foo")
-    assert.equal(wc.get([b], []), undefined)    
+    assert.equal(wc.get([b], []), undefined)
   })
 
   it("gets multiple object", () => {
@@ -42,10 +41,22 @@ describe("WeakCache", () => {
       return obj.x
     }
 
-    assert.equal(wc.cacheFunction([a], [], () => func(a)), 1)
-    assert.equal(wc.cacheFunction([b], [], () => func(b)), 2)
-    assert.equal(wc.cacheFunction([b], [], () => func(b)), 2)
-    assert.equal(wc.cacheFunction([b], [], () => func(b)), 2)
+    assert.equal(
+      wc.cacheFunction([a], [], () => func(a)),
+      1
+    )
+    assert.equal(
+      wc.cacheFunction([b], [], () => func(b)),
+      2
+    )
+    assert.equal(
+      wc.cacheFunction([b], [], () => func(b)),
+      2
+    )
+    assert.equal(
+      wc.cacheFunction([b], [], () => func(b)),
+      2
+    )
 
     assert.equal(count, 2)
   })

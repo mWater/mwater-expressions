@@ -4,8 +4,8 @@ export default class ColumnNotFoundException extends Error {
     super(message)
     this.name = this.constructor.name
     this.message = message
-    this.stack = (new Error(message)).stack
+    this.stack = new Error(message).stack
   }
 }
 
-ColumnNotFoundException.prototype.constructor = ColumnNotFoundException;
+ColumnNotFoundException.prototype.constructor = ColumnNotFoundException

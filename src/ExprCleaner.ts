@@ -1,17 +1,34 @@
-import _ from 'lodash'
-import ExprUtils from './ExprUtils'
-import ExprValidator from './ExprValidator'
-import { Schema } from '.'
-import { Variable, Expr, LiteralType, AggrStatus, FieldExpr, OpExpr, ScalarExpr, LiteralExpr, CaseExpr, IdExpr, ScoreExpr, BuildEnumsetExpr, VariableExpr, LegacyComparisonExpr, LegacyLogicalExpr, LegacyCountExpr } from './types'
-import produce from 'immer'
-import { getExprExtension } from './extensions'
+import _ from "lodash"
+import ExprUtils from "./ExprUtils"
+import ExprValidator from "./ExprValidator"
+import { Schema } from "."
+import {
+  Variable,
+  Expr,
+  LiteralType,
+  AggrStatus,
+  FieldExpr,
+  OpExpr,
+  ScalarExpr,
+  LiteralExpr,
+  CaseExpr,
+  IdExpr,
+  ScoreExpr,
+  BuildEnumsetExpr,
+  VariableExpr,
+  LegacyComparisonExpr,
+  LegacyLogicalExpr,
+  LegacyCountExpr
+} from "./types"
+import produce from "immer"
+import { getExprExtension } from "./extensions"
 
 export interface CleanExprOptions {
   /** optional current table. expression must be related to this table or will be stripped */
   table?: string
 
   /** optional types to limit to */
-  types?: LiteralType[] 
+  types?: LiteralType[]
 
   /** ids of enum values that are valid if type is enum */
   enumValueIds?: string[]
@@ -45,22 +62,25 @@ export default class ExprCleaner {
   //   enumValueIds: ids of enum values that are valid if type is enum
   //   idTable: table that type of id must be from
   //   aggrStatuses: statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"]
-  cleanExpr(expr: Expr, options: {
-    /** optional current table. expression must be related to this table or will be stripped */
-    table?: string
+  cleanExpr(
+    expr: Expr,
+    options: {
+      /** optional current table. expression must be related to this table or will be stripped */
+      table?: string
 
-    /** optional types to limit to */
-    types?: LiteralType[] 
+      /** optional types to limit to */
+      types?: LiteralType[]
 
-    /** ids of enum values that are valid if type is enum */
-    enumValueIds?: string[]
+      /** ids of enum values that are valid if type is enum */
+      enumValueIds?: string[]
 
-    /** table that type of id must be from */
-    idTable?: string
+      /** table that type of id must be from */
+      idTable?: string
 
-    /** statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"] */
-    aggrStatuses?: AggrStatus[]
-   } = {}): Expr {
+      /** statuses of aggregation to allow. list of "individual", "literal", "aggregate". Default: ["individual", "literal"] */
+      aggrStatuses?: AggrStatus[]
+    } = {}
+  ): Expr {
     const aggrStatuses: AggrStatus[] = options.aggrStatuses || ["individual", "literal"]
 
     // Null handling
@@ -74,18 +94,15 @@ export default class ExprCleaner {
     }
 
     // Handle upgrades from old version
-    if (expr.type == "comparison")
-      return this.cleanComparisonExpr(expr, { ...options, aggrStatuses: aggrStatuses })
-    if (expr.type == "logical")
-      return this.cleanLogicalExpr(expr, { ...options, aggrStatuses: aggrStatuses })
-    if (expr.type == "count")
-      return this.cleanCountExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "comparison") return this.cleanComparisonExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "logical") return this.cleanLogicalExpr(expr, { ...options, aggrStatuses: aggrStatuses })
+    if (expr.type == "count") return this.cleanCountExpr(expr, { ...options, aggrStatuses: aggrStatuses })
     if (expr.type == "literal" && (expr.valueType as any) == "enum[]")
       expr = { type: "literal", valueType: "enumset", value: expr.value }
 
-    // Strip if wrong table 
+    // Strip if wrong table
     if (expr.type != "literal") {
-      if (options.table && expr.table && (expr.table !== options.table)) {
+      if (options.table && expr.table && expr.table !== options.table) {
         return null
       }
     }
@@ -99,9 +116,9 @@ export default class ExprCleaner {
     if (expr.type != "literal" && expr.table && !this.schema.getTable(expr.table)) {
       return null
     }
-    
+
     // Fix old expression type
-    if ((expr.type === "literal") && ((expr as any).valueType === "enum[]")) {
+    if (expr.type === "literal" && (expr as any).valueType === "enum[]") {
       return { type: "literal", valueType: "enumset", value: expr.value }
     }
 
@@ -110,19 +127,19 @@ export default class ExprCleaner {
     try {
       aggrStatus = this.exprUtils.getExprAggrStatus(expr)
     } catch (ex) {
-      if (ex.message === 'Infinite recursion') {
+      if (ex.message === "Infinite recursion") {
         return null
       }
       throw ex
     }
-    
+
     // Default aggregation if needed and not aggregated
     if (expr.type != "literal" && expr.table) {
       if (aggrStatus === "individual" && !aggrStatuses.includes("individual") && aggrStatuses.includes("aggregate")) {
         const aggrOpItems = this.exprUtils.findMatchingOpItems({
-          resultTypes: options.types, 
-          lhsExpr: expr, 
-          aggr: true, 
+          resultTypes: options.types,
+          lhsExpr: expr,
+          aggr: true,
           ordered: this.schema.getTable(expr.table)!.ordering != null
         })
 
@@ -134,13 +151,13 @@ export default class ExprCleaner {
       }
     }
 
-    // Default percent where + booleanization 
+    // Default percent where + booleanization
     if (expr.type != "literal" && expr.table) {
       if (aggrStatus == "individual" && !aggrStatuses.includes("individual") && aggrStatuses.includes("aggregate")) {
         // Only if result types include number
         if (!options.types || options.types.includes("number")) {
           // Find op item that matches
-          const opItem = this.exprUtils.findMatchingOpItems({resultTypes: ["boolean"], lhsExpr: expr})[0]
+          const opItem = this.exprUtils.findMatchingOpItems({ resultTypes: ["boolean"], lhsExpr: expr })[0]
 
           if (opItem) {
             // Wrap in op to make it boolean
@@ -151,7 +168,7 @@ export default class ExprCleaner {
             const args = opItem.exprTypes.length - 1
 
             // Add extra nulls for other arguments
-            for (let i = 1; i <= args ; i++) {
+            for (let i = 1; i <= args; i++) {
               expr.exprs.push(null)
             }
 
@@ -172,19 +189,18 @@ export default class ExprCleaner {
 
     // Boolean-ize for easy building of filters
     // True if a boolean expression is required
-    const booleanOnly = options.types && (options.types.length === 1) && (options.types[0] === "boolean")
+    const booleanOnly = options.types && options.types.length === 1 && options.types[0] === "boolean"
 
     // If boolean and expr is not boolean, wrap with appropriate expression
-    if (booleanOnly && type && (type !== "boolean")) {
+    if (booleanOnly && type && type !== "boolean") {
       // Find op item that matches
-      const opItem = this.exprUtils.findMatchingOpItems({resultTypes: ["boolean"], lhsExpr: expr})[0]
+      const opItem = this.exprUtils.findMatchingOpItems({ resultTypes: ["boolean"], lhsExpr: expr })[0]
 
       if (opItem) {
         // Wrap in op to make it boolean
         if (expr.type != "literal") {
           expr = { type: "op", table: expr.table, op: opItem.op, exprs: [expr] }
-        }
-        else { 
+        } else {
           expr = { type: "op", op: opItem.op, exprs: [expr] }
         }
 
@@ -192,13 +208,13 @@ export default class ExprCleaner {
         const args = opItem.exprTypes.length - 1
 
         // Add extra nulls for other arguments
-        for (let i = 1; i <= args ; i++) {
+        for (let i = 1; i <= args; i++) {
           expr.exprs.push(null)
         }
       }
     }
 
-    // Get type again in case changed  
+    // Get type again in case changed
     type = this.exprUtils.getExprType(expr)
 
     // Strip if wrong type
@@ -263,7 +279,7 @@ export default class ExprCleaner {
     }
 
     // Invalid enums
-    if (options.enumValueIds && (column.type === "enum")) {
+    if (options.enumValueIds && column.type === "enum") {
       if (_.difference(_.pluck(column.enumValues!, "id"), options.enumValueIds).length > 0) {
         return null
       }
@@ -271,7 +287,9 @@ export default class ExprCleaner {
 
     if (options.enumValueIds && column.expr) {
       if (this.exprUtils.getExprType(column.expr) === "enum") {
-        if (_.difference(_.pluck(this.exprUtils.getExprEnumValues(column.expr)!, "id"), options.enumValueIds).length > 0) {
+        if (
+          _.difference(_.pluck(this.exprUtils.getExprEnumValues(column.expr)!, "id"), options.enumValueIds).length > 0
+        ) {
           return null
         }
       }
@@ -282,7 +300,8 @@ export default class ExprCleaner {
 
   cleanOpExpr(expr: OpExpr, options: CleanExprOptions): Expr {
     switch (expr.op) {
-      case "and": case "or":
+      case "and":
+      case "or":
         // Simplify
         if (expr.exprs.length === 1) {
           return this.cleanExpr(expr.exprs[0], options)
@@ -291,13 +310,18 @@ export default class ExprCleaner {
           return null
         }
 
-        return produce(expr, draft => {
-          for (let i = 0 ; i < expr.exprs.length ; i++) {
-            draft.exprs[i] = this.cleanExpr(expr.exprs[i], { types: ["boolean"], aggrStatuses: options.aggrStatuses, table: expr.table })
+        return produce(expr, (draft) => {
+          for (let i = 0; i < expr.exprs.length; i++) {
+            draft.exprs[i] = this.cleanExpr(expr.exprs[i], {
+              types: ["boolean"],
+              aggrStatuses: options.aggrStatuses,
+              table: expr.table
+            })
           }
         })
 
-      case "+": case "*":
+      case "+":
+      case "*":
         // Simplify
         if (expr.exprs.length === 1) {
           return this.cleanExpr(expr.exprs[0], options)
@@ -306,19 +330,26 @@ export default class ExprCleaner {
           return null
         }
 
-        return produce(expr, draft => {
-          for (let i = 0 ; i < expr.exprs.length ; i++) {
-            draft.exprs[i] = this.cleanExpr(expr.exprs[i], { types: ["number"], table: expr.table, aggrStatuses: options.aggrStatuses })
+        return produce(expr, (draft) => {
+          for (let i = 0; i < expr.exprs.length; i++) {
+            draft.exprs[i] = this.cleanExpr(expr.exprs[i], {
+              types: ["number"],
+              table: expr.table,
+              aggrStatuses: options.aggrStatuses
+            })
           }
         })
-        
-      default: 
+
+      default:
         // Count always takes zero parameters and is valid if number type is valid
-        if ((expr.op === "count") && (!options.types || options.types.includes("number")) && options.aggrStatuses.includes("aggregate")) {
+        if (
+          expr.op === "count" &&
+          (!options.types || options.types.includes("number")) &&
+          options.aggrStatuses.includes("aggregate")
+        ) {
           if (expr.exprs.length == 0) {
             return expr
-          }
-          else {
+          } else {
             return { type: "op", op: "count", table: expr.table, exprs: [] }
           }
         }
@@ -350,12 +381,18 @@ export default class ExprCleaner {
 
         // Now attempt to clean it restricting to the types the op allows as lhs
         if (lhsExpr) {
-          const lhsTypes = _.uniq(_.compact(_.map(this.exprUtils.findMatchingOpItems({op: expr.op}), opItem => opItem.exprTypes[0])))
-          lhsExpr = this.cleanExpr(expr.exprs[0], {table: expr.table, aggrStatuses: innerAggrStatuses, types: lhsTypes})
+          const lhsTypes = _.uniq(
+            _.compact(_.map(this.exprUtils.findMatchingOpItems({ op: expr.op }), (opItem) => opItem.exprTypes[0]))
+          )
+          lhsExpr = this.cleanExpr(expr.exprs[0], {
+            table: expr.table,
+            aggrStatuses: innerAggrStatuses,
+            types: lhsTypes
+          })
 
           // If this nulls it, don't keep as we can switch ops to preseve it
-          if ((lhsExpr == null)) {
-            lhsExpr = this.cleanExpr(expr.exprs[0], {table: expr.table, aggrStatuses: innerAggrStatuses})
+          if (lhsExpr == null) {
+            lhsExpr = this.cleanExpr(expr.exprs[0], { table: expr.table, aggrStatuses: innerAggrStatuses })
           }
         }
 
@@ -366,20 +403,25 @@ export default class ExprCleaner {
 
         // Get opItem
         var opItems = this.exprUtils.findMatchingOpItems({
-          op: expr.op, 
-          lhsExpr: lhsExpr, 
-          resultTypes: options.types, 
-          aggr: aggr, 
-          ordered: (expr.table && this.schema.getTable(expr.table) && this.schema.getTable(expr.table)!.ordering) != null
+          op: expr.op,
+          lhsExpr: lhsExpr,
+          resultTypes: options.types,
+          aggr: aggr,
+          ordered:
+            (expr.table && this.schema.getTable(expr.table) && this.schema.getTable(expr.table)!.ordering) != null
         })
 
         // If ambiguous, just clean subexprs and return
         if (opItems.length > 1) {
-          return produce(expr, draft => {
-            for (let i = 0 ; i < expr.exprs.length ; i++) {
+          return produce(expr, (draft) => {
+            for (let i = 0; i < expr.exprs.length; i++) {
               // Determine all possible types (union of all op items types)
-              const types = _.uniq(_.compact(_.flatten(_.map(opItems, opItem => opItem.exprTypes[i]))))
-              draft.exprs[i] = this.cleanExpr(expr.exprs[i], { table: expr.table, aggrStatuses: innerAggrStatuses, types: (types.length > 0 ? types : undefined) })
+              const types = _.uniq(_.compact(_.flatten(_.map(opItems, (opItem) => opItem.exprTypes[i]))))
+              draft.exprs[i] = this.cleanExpr(expr.exprs[i], {
+                table: expr.table,
+                aggrStatuses: innerAggrStatuses,
+                types: types.length > 0 ? types : undefined
+              })
             }
           })
         }
@@ -393,9 +435,9 @@ export default class ExprCleaner {
           }
 
           expr = { type: "op", table: expr.table, op: opItem.op, exprs: [lhsExpr || null] }
-        } 
+        }
 
-        return produce(expr, draft => {
+        return produce(expr, (draft) => {
           // Pad or trim number of expressions
           while (draft.exprs.length < opItem.exprTypes.length) {
             draft.exprs.push(null)
@@ -413,15 +455,15 @@ export default class ExprCleaner {
             }
           }
 
-          for (let i = 0 ; i < draft.exprs.length ; i++) {
-            draft.exprs[i] = this.cleanExpr(expr.exprs[i] || null, { 
-              table: expr.table, 
-              types: (opItem.exprTypes[i] ? [opItem.exprTypes[i]] : undefined), 
-              enumValueIds, 
-              idTable: this.exprUtils.getExprIdTable(expr.exprs[0]) || undefined, 
-              aggrStatuses: innerAggrStatuses 
+          for (let i = 0; i < draft.exprs.length; i++) {
+            draft.exprs[i] = this.cleanExpr(expr.exprs[i] || null, {
+              table: expr.table,
+              types: opItem.exprTypes[i] ? [opItem.exprTypes[i]] : undefined,
+              enumValueIds,
+              idTable: this.exprUtils.getExprIdTable(expr.exprs[0]) || undefined,
+              aggrStatuses: innerAggrStatuses
             })
-          } 
+          }
         })
     }
   }
@@ -433,13 +475,13 @@ export default class ExprCleaner {
     }
 
     // Fix legacy entity joins (accidentally had entities.<tablename>. prepended)
-    const joins = _.map(expr.joins, j => {
+    const joins = _.map(expr.joins, (j) => {
       if (j.match(/^entities\.[a-z_0-9]+\./)) {
         return j.split(".")[2]
       }
       return j
     })
-    expr = _.extend({}, expr, {joins})
+    expr = _.extend({}, expr, { joins })
 
     if (!this.exprUtils.areJoinsValid(expr.table, expr.joins)) {
       return null
@@ -450,7 +492,9 @@ export default class ExprCleaner {
     // LEGACY
     // Move aggr to inner expression
     if ((expr as any).aggr) {
-      expr = _.extend({}, _.omit(expr, "aggr"), {expr: { type: "op", table: innerTable, op: (expr as any).aggr, exprs: [expr.expr] }})
+      expr = _.extend({}, _.omit(expr, "aggr"), {
+        expr: { type: "op", table: innerTable, op: (expr as any).aggr, exprs: [expr.expr] }
+      })
     }
 
     // // Clean where
@@ -459,7 +503,7 @@ export default class ExprCleaner {
     // }
 
     // Simplify to join column
-    if ((expr.joins.length === 1) && expr.expr && expr.expr.type === "id") {
+    if (expr.joins.length === 1 && expr.expr && expr.expr.type === "id") {
       return { type: "field", table: expr.table, column: expr.joins[0] }
     }
 
@@ -468,7 +512,7 @@ export default class ExprCleaner {
       const isMultiple = this.exprUtils.isMultipleJoins(expr.table, expr.joins)
       const aggrStatuses: AggrStatus[] = isMultiple ? ["literal", "aggregate"] : ["literal", "individual"]
 
-      return produce(expr, draft => {
+      return produce(expr, (draft) => {
         draft.expr = this.cleanExpr(expr.expr, { ...options, table: innerTable, aggrStatuses })
       })
     }
@@ -478,26 +522,26 @@ export default class ExprCleaner {
 
   cleanLiteralExpr(expr: LiteralExpr, options: CleanExprOptions) {
     // Convert old types
-    if (['decimal', 'integer'].includes(expr.valueType)) {
-      expr = _.extend({}, expr, { valueType: "number"})
+    if (["decimal", "integer"].includes(expr.valueType)) {
+      expr = _.extend({}, expr, { valueType: "number" })
     }
 
     // TODO strip if no value?
 
     // Remove if enum type is wrong
-    if ((expr.valueType === "enum") && options.enumValueIds && expr.value && !options.enumValueIds.includes(expr.value)) {
+    if (expr.valueType === "enum" && options.enumValueIds && expr.value && !options.enumValueIds.includes(expr.value)) {
       return null
     }
 
     // Remove invalid enum types
-    if ((expr.valueType === "enumset") && options.enumValueIds && expr.value) {
+    if (expr.valueType === "enumset" && options.enumValueIds && expr.value) {
       if (_.difference(expr.value, options.enumValueIds).length > 0) {
         return { ...expr, value: _.intersection(options.enumValueIds, expr.value) }
       }
     }
 
     // Null if wrong table
-    if ((expr.valueType === "id") && options.idTable && (expr.idTable !== options.idTable)) {
+    if (expr.valueType === "id" && options.idTable && expr.idTable !== options.idTable) {
       return null
     }
 
@@ -511,8 +555,8 @@ export default class ExprCleaner {
     }
 
     // Clean whens as boolean
-    return produce(expr, draft => {
-      for (let c = 0 ; c < expr.cases.length ; c++) {
+    return produce(expr, (draft) => {
+      for (let c = 0; c < expr.cases.length; c++) {
         draft.cases[c].when = this.cleanExpr(expr.cases[c].when, { types: ["boolean"], table: expr.table })
         draft.cases[c].then = this.cleanExpr(expr.cases[c].then, options)
       }
@@ -522,15 +566,15 @@ export default class ExprCleaner {
 
   cleanIdExpr(expr: IdExpr, options: CleanExprOptions) {
     // Null if wrong table
-    if (options.idTable && (expr.table !== options.idTable)) {
+    if (options.idTable && expr.table !== options.idTable) {
       return null
     }
     return expr
   }
 
   cleanScoreExpr(expr: ScoreExpr, options: CleanExprOptions) {
-    return produce(expr, draft => {
-      draft.input = this.cleanExpr(expr.input, { types: ['enum', 'enumset' ] })  
+    return produce(expr, (draft) => {
+      draft.input = this.cleanExpr(expr.input, { types: ["enum", "enumset"] })
 
       // Remove scores if no input
       if (!draft.input) {
@@ -543,16 +587,15 @@ export default class ExprCleaner {
         draft.scores = {}
         return
       }
-      const enumValueIds = enumValues.map(ev => ev.id)
+      const enumValueIds = enumValues.map((ev) => ev.id)
 
       // Clean score values
       for (const key in expr.scores) {
-        // Remove unknown enum values 
+        // Remove unknown enum values
         if (!enumValueIds.includes(key)) {
           delete draft.scores[key]
-        }
-        else {
-          draft.scores[key] = this.cleanExpr(expr.scores[key], { table: expr.table, types: ['number']})
+        } else {
+          draft.scores[key] = this.cleanExpr(expr.scores[key], { table: expr.table, types: ["number"] })
           if (!draft.scores[key]) {
             delete draft.scores[key]
           }
@@ -562,16 +605,15 @@ export default class ExprCleaner {
   }
 
   cleanBuildEnumsetExpr(expr: BuildEnumsetExpr, options: CleanExprOptions) {
-    return produce(expr, draft => {
+    return produce(expr, (draft) => {
       const enumValueIds = options.enumValueIds
 
       // Clean values
       for (const key in expr.values) {
         if (enumValueIds && !enumValueIds.includes(key)) {
           delete draft.values[key]
-        }
-        else {
-          draft.values[key] = this.cleanExpr(expr.values[key], { table: expr.table, types: ['boolean']})
+        } else {
+          draft.values[key] = this.cleanExpr(expr.values[key], { table: expr.table, types: ["boolean"] })
           if (!draft.values[key]) {
             delete draft.values[key]
           }
@@ -582,13 +624,13 @@ export default class ExprCleaner {
 
   cleanVariableExpr(expr: VariableExpr, options: CleanExprOptions) {
     // Get variable
-    const variable = this.variables.find(v => v.id == expr.variableId)
+    const variable = this.variables.find((v) => v.id == expr.variableId)
     if (!variable) {
       return null
     }
 
     // Check id table
-    if (options.idTable && (variable.type === "id") && (variable.idTable !== options.idTable)) {
+    if (options.idTable && variable.type === "id" && variable.idTable !== options.idTable) {
       return null
     }
 
@@ -603,7 +645,7 @@ export default class ExprCleaner {
     }
 
     // Clean sub-expressions to handle legacy literals
-    newExpr.exprs = _.map(newExpr.exprs, e => this.cleanExpr(e))
+    newExpr.exprs = _.map(newExpr.exprs, (e) => this.cleanExpr(e))
 
     // If = true
     if (expr.op === "= true") {
@@ -614,16 +656,38 @@ export default class ExprCleaner {
       newExpr = { type: "op", op: "not", table: expr.table, exprs: [expr.lhs] }
     }
 
-    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && ((expr as any).rhs.valueType === "daterange")) {
-      (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0] }, { type: "literal", valueType: "date", value: expr.rhs.value[1] }]
+    if (
+      expr.op === "between" &&
+      expr.rhs &&
+      expr.rhs.type === "literal" &&
+      (expr as any).rhs.valueType === "daterange"
+    ) {
+      ;(newExpr as OpExpr).exprs = [
+        expr.lhs,
+        { type: "literal", valueType: "date", value: expr.rhs.value[0] },
+        { type: "literal", valueType: "date", value: expr.rhs.value[1] }
+      ]
     }
 
-    if ((expr.op === "between") && expr.rhs && (expr.rhs.type === "literal") && ((expr as any).rhs.valueType === "datetimerange")) {
+    if (
+      expr.op === "between" &&
+      expr.rhs &&
+      expr.rhs.type === "literal" &&
+      (expr as any).rhs.valueType === "datetimerange"
+    ) {
       // If date, convert datetime to date
       if (this.exprUtils.getExprType(expr.lhs) === "date") {
-        (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) }, { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }]
-      } else {        
-        (newExpr as OpExpr).exprs = [expr.lhs, { type: "literal", valueType: "datetime", value: expr.rhs.value[0] }, { type: "literal", valueType: "datetime", value: expr.rhs.value[1] }]
+        ;(newExpr as OpExpr).exprs = [
+          expr.lhs,
+          { type: "literal", valueType: "date", value: expr.rhs.value[0].substr(0, 10) },
+          { type: "literal", valueType: "date", value: expr.rhs.value[1].substr(0, 10) }
+        ]
+      } else {
+        ;(newExpr as OpExpr).exprs = [
+          expr.lhs,
+          { type: "literal", valueType: "datetime", value: expr.rhs.value[0] },
+          { type: "literal", valueType: "datetime", value: expr.rhs.value[1] }
+        ]
       }
     }
 

@@ -17,8 +17,8 @@ export default class PriorityDataSource extends DataSource {
     this.priority = priority
   }
 
-  performQuery(query: JsonQLQuery): Promise<Row[]>;
-  performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void): void;
+  performQuery(query: JsonQLQuery): Promise<Row[]>
+  performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void): void
   performQuery(query: JsonQLQuery, cb?: (err: any, results: Row[]) => void): Promise<Row[]> | void {
     if (cb) {
       this.priorityDataQueue.performQuery(query, cb, this.priority)
@@ -26,14 +26,17 @@ export default class PriorityDataSource extends DataSource {
     }
 
     return new Promise<Row[]>((resolve, reject) => {
-      this.priorityDataQueue.performQuery(query, (err, results) => {
-        if (err) {
-          reject(err)
-        }
-        else {
-          resolve(results)
-        }
-      }, this.priority)
+      this.priorityDataQueue.performQuery(
+        query,
+        (err, results) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(results)
+          }
+        },
+        this.priority
+      )
     })
   }
 

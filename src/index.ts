@@ -1,29 +1,29 @@
-import { Column, LocalizedString, Section } from './types'
+import { Column, LocalizedString, Section } from "./types"
 
-export * from './types'
-export { default as DataSource } from './DataSource'
-export { default as ExprValidator, ValidateOptions } from './ExprValidator'
-export { default as Schema } from './Schema'
-export * from './PromiseExprEvaluator'
+export * from "./types"
+export { default as DataSource } from "./DataSource"
+export { default as ExprValidator, ValidateOptions } from "./ExprValidator"
+export { default as Schema } from "./Schema"
+export * from "./PromiseExprEvaluator"
 
-export { default as ExprUtils } from './ExprUtils'
+export { default as ExprUtils } from "./ExprUtils"
 
-export { WeakCache } from './WeakCache'
+export { WeakCache } from "./WeakCache"
 
 /** Cleans expressions. Cleaning means nulling invalid (not just incomplete) expressions if they cannot be auto-fixed. */
-export { default as ExprCleaner, CleanExprOptions } from './ExprCleaner'
+export { default as ExprCleaner, CleanExprOptions } from "./ExprCleaner"
 
-export { default as ExprCompiler } from './ExprCompiler'
+export { default as ExprCompiler } from "./ExprCompiler"
 
-export { default as PriorityDataQueue } from './PriorityDataQueue'
+export { default as PriorityDataQueue } from "./PriorityDataQueue"
 
-export { default as NullDataSource } from './NullDataSource'
+export { default as NullDataSource } from "./NullDataSource"
 
-export { default as ColumnNotFoundException } from './ColumnNotFoundException'
+export { default as ColumnNotFoundException } from "./ColumnNotFoundException"
 
-export * from './injectTableAliases'
+export * from "./injectTableAliases"
 
-export * from './extensions'
+export * from "./extensions"
 
 /** Flatten a list of contents to columns */
 export function flattenContents(contents: (Column | Section)[]): Column[] {
@@ -32,8 +32,7 @@ export function flattenContents(contents: (Column | Section)[]): Column[] {
   for (const item of contents) {
     if (item.type == "section") {
       columns = columns.concat(flattenContents(item.contents))
-    }
-    else {
+    } else {
       columns.push(item)
     }
   }
@@ -48,7 +47,7 @@ export function localizeString(name: LocalizedString | null | undefined | string
   }
 
   // Simple string
-  if (typeof(name) == "string") {
+  if (typeof name == "string") {
     return name
   }
 
