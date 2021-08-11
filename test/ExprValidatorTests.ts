@@ -33,9 +33,9 @@ describe("ExprValidator", function () {
       return assert.isNull(this.exprValidator.validateExpr(expr, options), "Expected to be valid")
     }
 
-    return this.notValid = (expr: any, options: any) => {
+    return (this.notValid = (expr: any, options: any) => {
       return assert(this.exprValidator.validateExpr(expr, options), "Expected to be invalid")
-    };
+    })
   })
 
   it("invalid if wrong table", function () {

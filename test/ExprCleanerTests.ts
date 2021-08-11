@@ -34,9 +34,9 @@ describe("ExprCleaner", function () {
   beforeEach(function () {
     this.schema = fixtures.simpleSchema()
     this.exprCleaner = new ExprCleaner(this.schema, variables)
-    return this.clean = (expr: any, expected: any, options: any) => {
+    return (this.clean = (expr: any, expected: any, options: any) => {
       return compare(this.exprCleaner.cleanExpr(expr, options), expected)
-    };
+    })
   })
 
   describe("cleanExpr", function () {
@@ -1007,5 +1007,5 @@ describe("ExprCleaner", function () {
         ]
       })
     })
-  });
+  })
 })

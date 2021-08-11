@@ -37,8 +37,8 @@ export default class MWaterDataSource extends DataSource {
           } else {
             return resolve(rows)
           }
-        });
-      });
+        })
+      })
     }
 
     if (this.options.localCaching) {
@@ -97,7 +97,7 @@ export default class MWaterDataSource extends DataSource {
       })
       .fail((xhr: any) => {
         return cb(new Error(xhr.responseText))
-      });
+      })
   }
 
   // Get the cache expiry time in ms from epoch. No cached items before this time will be used
@@ -134,7 +134,7 @@ export default class MWaterDataSource extends DataSource {
 
     return url
   }
-};
+}
 
 // Make ES6 compatible
 MWaterDataSource.default = MWaterDataSource

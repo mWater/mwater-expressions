@@ -96,10 +96,10 @@ const variableValues = {
 describe("ExprCompiler", function () {
   beforeEach(function () {
     this.ec = new ExprCompiler(fixtures.simpleSchema(), variables, variableValues)
-    return this.compile = (expr: any, expected: any) => {
+    return (this.compile = (expr: any, expected: any) => {
       const jsonql = this.ec.compileExpr({ expr, tableAlias: "T1" })
       return compare(jsonql, expected)
-    };
+    })
   })
 
   it("compiles literal", function () {

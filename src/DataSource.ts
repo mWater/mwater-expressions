@@ -24,4 +24,4 @@ export default class DataSource {
   getCacheExpiry() {
     throw new Error("Not implemented")
   }
-};
+}

@@ -37,7 +37,7 @@ function makeRow(data: any) {
     followJoin(columnId: any) {
       return Promise.resolve(data["join:" + columnId])
     }
-  };
+  }
 }
 
 // Null

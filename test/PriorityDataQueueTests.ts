@@ -25,7 +25,7 @@ describe("PriorityDataQueue", function () {
       // Make sure that TestDataSource called back with the right data
       assert.equal("test", data)
       return testCallback()
-    });
+    })
   })
 
   return it("priorityDataQueue properly prioritize the calls", function (testCallback) {
@@ -51,6 +51,6 @@ describe("PriorityDataQueue", function () {
     // Then call with 4
     priorityDataSource4.performQuery(4, (data: any) => callDone(4))
     // Then with 2
-    return priorityDataSource2.performQuery(2, (data: any) => callDone(2));
-  });
+    return priorityDataSource2.performQuery(2, (data: any) => callDone(2))
+  })
 })
