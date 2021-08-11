@@ -1,6 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-let MWaterDataSource
 import _ from "lodash"
 import DataSource from "./DataSource"
 import LRU from "lru-cache"
@@ -8,7 +5,7 @@ import querystring from "querystring"
 import $ from "jquery"
 
 // Caching data source for mWater. Requires jQuery. require explicitly: require('mwater-expressions/lib/MWaterDataSource')
-export default MWaterDataSource = class MWaterDataSource extends DataSource {
+export default class MWaterDataSource extends DataSource {
   // options:
   // serverCaching: allows server to send cached results. default true
   // localCaching allows local MRU cache. default true
@@ -137,7 +134,7 @@ export default MWaterDataSource = class MWaterDataSource extends DataSource {
 
     return url
   }
-}
+};
 
 // Make ES6 compatible
 MWaterDataSource.default = MWaterDataSource

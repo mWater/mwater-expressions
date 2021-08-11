@@ -1,10 +1,7 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-let DataSource
 import _ from "lodash"
 
 // Fetches data for queries
-export default DataSource = class DataSource {
+export default class DataSource {
   // Performs a single query. Calls cb with (error, rows) or uses promise if no callback
   performQuery(query: any, cb: any) {
     throw new Error("Not implemented")
@@ -27,4 +24,4 @@ export default DataSource = class DataSource {
   getCacheExpiry() {
     throw new Error("Not implemented")
   }
-}
+};
