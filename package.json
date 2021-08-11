@@ -34,6 +34,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.14",
     "@types/lodash": "^3.10.3",
+    "@types/lru-cache": "^5.1.1",
     "@types/moment": "^2.13.0",
     "build-library": "github:mWater/build-library",
     "canonical-json": "0.0.4",

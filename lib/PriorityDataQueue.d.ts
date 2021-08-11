@@ -1,8 +1,8 @@
-import { AsyncPriorityQueue } from 'async';
-import { JsonQLQuery } from 'jsonql';
-import DataSource from './DataSource';
-import PriorityDataSource from './PriorityDataSource';
-import { Row } from './types';
+import { AsyncPriorityQueue } from "async";
+import { JsonQLQuery } from "jsonql";
+import DataSource from "./DataSource";
+import PriorityDataSource from "./PriorityDataSource";
+import { Row } from "./types";
 export default class PriorityDataQueue {
     dataSource: DataSource;
     performQueryPriorityQueue: AsyncPriorityQueue<JsonQLQuery>;

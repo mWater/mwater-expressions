@@ -79,7 +79,7 @@ export default class ExprUtils {
         type: string;
         op: string;
         table: string;
-        exprs: (import("./types").LiteralExpr | FieldExpr | import("./types").OpExpr | import("./types").IdExpr | ScalarExpr | CaseExpr | import("./types").ScoreExpr | import("./types").BuildEnumsetExpr | import("./types").VariableExpr | import("./types").ExtensionExpr | import("./types").LegacyComparisonExpr | import("./types").LegacyLogicalExpr | import("./types").LegacyCountExpr | Expr[] | null)[];
+        exprs: (Expr | Expr[])[];
     } | null;
     /** Summarizes expression as text */
     summarizeExpr(expr: Expr, locale?: string): string;
@@ -90,7 +90,7 @@ export default class ExprUtils {
     stringifyLiteralValue(type: LiteralType, value: any, locale?: string, enumValues?: EnumValue[] | null, preferEnumCodes?: boolean): any;
     /** Get all comparison ops (id and name) for a given left hand side type DEPRECATED
      * @deprecated
-    */
+     */
     getComparisonOps(lhsType: any): {
         id: string;
         name: string;

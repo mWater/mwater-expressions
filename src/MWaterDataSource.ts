@@ -3,14 +3,28 @@ import DataSource from "./DataSource"
 import LRU from "lru-cache"
 import querystring from "querystring"
 import $ from "jquery"
+import { JsonQLQuery } from "jsonql"
+import { Row } from "./types"
 
-// Caching data source for mWater. Requires jQuery. require explicitly: require('mwater-expressions/lib/MWaterDataSource')
+/** Caching data source for mWater. Requires jQuery. require explicitly: require('mwater-expressions/lib/MWaterDataSource') */
 export default class MWaterDataSource extends DataSource {
-  // options:
-  // serverCaching: allows server to send cached results. default true
-  // localCaching allows local MRU cache. default true
-  // imageApiUrl: overrides apiUrl for images
-  constructor(apiUrl: any, client: any, options = {}) {
+  apiUrl: string
+  client: string | null | undefined
+  cacheExpiry: number
+  options: { serverCaching?: boolean; localCaching?: boolean; imageApiUrl?: string }
+  cache: LRU<string, Row[]>
+  
+  /**
+   * @param apiUrl
+   * @param options serverCaching: allows server to send cached results. default true
+   * localCaching allows local MRU cache. default true
+   * imageApiUrl: overrides apiUrl for images
+   */
+   constructor(
+    apiUrl: string,
+    client?: string | null,
+    options: { serverCaching?: boolean; localCaching?: boolean; imageApiUrl?: string } = {}
+  ) {
     super()
     this.apiUrl = apiUrl
     this.client = client
@@ -26,12 +40,14 @@ export default class MWaterDataSource extends DataSource {
     }
   }
 
-  performQuery(jsonql: any, cb: any) {
+  performQuery(query: JsonQLQuery): Promise<Row[]>
+  performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void): void
+  performQuery(query: any, cb?: any): any {
     // If no callback, use promise
     let cacheKey: any, method
     if (!cb) {
       return new Promise((resolve, reject) => {
-        return this.performQuery(jsonql, (error: any, rows: any) => {
+        return this.performQuery(query, (error: any, rows: any) => {
           if (error) {
             return reject(error)
           } else {
@@ -42,19 +58,20 @@ export default class MWaterDataSource extends DataSource {
     }
 
     if (this.options.localCaching) {
-      cacheKey = JSON.stringify(jsonql)
+      cacheKey = JSON.stringify(query)
       const cachedRows = this.cache.get(cacheKey)
       if (cachedRows) {
-        return cb(null, cachedRows)
+        cb(null, cachedRows)
+        return
       }
     }
 
-    const queryParams = {}
+    const queryParams: any = {}
     if (this.client) {
       queryParams.client = this.client
     }
 
-    const jsonqlStr = JSON.stringify(jsonql)
+    const jsonqlStr = JSON.stringify(query)
 
     // Add as GET if short, POST otherwise
     if (jsonqlStr.length < 2000) {
@@ -80,7 +97,7 @@ export default class MWaterDataSource extends DataSource {
     // Create URL
     const url = this.apiUrl + "jsonql?" + querystring.stringify(queryParams)
 
-    return $.ajax({
+    $.ajax({
       dataType: "json",
       method,
       url,
@@ -93,10 +110,10 @@ export default class MWaterDataSource extends DataSource {
           this.cache.set(cacheKey, rows)
         }
 
-        return cb(null, rows)
+        cb(null, rows)
       })
       .fail((xhr: any) => {
-        return cb(new Error(xhr.responseText))
+        cb(new Error(xhr.responseText))
       })
   }
 
@@ -120,7 +137,7 @@ export default class MWaterDataSource extends DataSource {
     const apiUrl = this.options.imageApiUrl || this.apiUrl
 
     let url = apiUrl + `images/${imageId}`
-    const query = {}
+    const query: any = {}
     if (height) {
       query.h = height
     }
@@ -135,6 +152,3 @@ export default class MWaterDataSource extends DataSource {
     return url
   }
 }
-
-// Make ES6 compatible
-MWaterDataSource.default = MWaterDataSource
