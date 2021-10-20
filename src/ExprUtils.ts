@@ -622,12 +622,12 @@ export default class ExprUtils {
     return _.uniq(_.pluck(aggrOpItems, "resultType"))
   }
 
-  localizeString(name: LocalizedString | string | null | undefined, locale?: string): string {
+  localizeString(name: LocalizedString | string | null | undefined, locale?: string | null): string {
     return ExprUtils.localizeString(name, locale)
   }
 
   // Localize a string that is { en: "english word", etc. }. Works with null and plain strings too, returning always a string ("" for null)
-  static localizeString(name: LocalizedString | string | null | undefined, locale?: string): string {
+  static localizeString(name: LocalizedString | string | null | undefined, locale?: string | null): string {
     if (!name) {
       return ""
     }
