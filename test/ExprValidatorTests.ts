@@ -1,23 +1,20 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
 import { assert } from "chai"
 import _ from "lodash"
-import { default as Schema } from "../src/Schema"
 import { default as ExprValidator } from "../src/ExprValidator"
 import * as fixtures from "./fixtures"
 import { setupTestExtension } from "./extensionSetup"
-import canonical from "canonical-json"
+import { CaseExpr, ScoreExpr, Variable } from "../src"
 
 setupTestExtension()
 
-const variables = [
+const variables: Variable[] = [
   {
     id: "varenum",
     name: { _base: "en", en: "Varenum" },
     type: "enum",
     enumValues: [
-      { id: "a", name: { en: "A" } },
-      { id: "b", name: { en: "B" } }
+      { id: "a", name: { _base: "en", en: "A" } },
+      { id: "b", name: { _base: "en", en: "B" } }
     ]
   },
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" },
@@ -30,11 +27,11 @@ describe("ExprValidator", function () {
     this.schema = fixtures.simpleSchema()
     this.exprValidator = new ExprValidator(this.schema, variables)
     this.isValid = (expr: any, options: any) => {
-      return assert.isNull(this.exprValidator.validateExpr(expr, options), "Expected to be valid")
+      assert.isNull(this.exprValidator.validateExpr(expr, options), "Expected to be valid")
     }
 
     return (this.notValid = (expr: any, options: any) => {
-      return assert(this.exprValidator.validateExpr(expr, options), "Expected to be invalid")
+      assert(this.exprValidator.validateExpr(expr, options), "Expected to be invalid")
     })
   })
 
@@ -76,28 +73,37 @@ describe("ExprValidator", function () {
     const table = this.schema.getTable("t1")
     table.contents.push({
       id: "expr_invalid",
-      name: { en: "Expr Invalid" },
+      name: { _base: "en", en: "Expr Invalid" },
       type: "expr",
       expr: { type: "field", table: "t1", column: "xyz" }
     })
     const schema = this.schema.addTable(table)
 
     const exprValidator = new ExprValidator(schema)
-    return assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_invalid" }))
+    assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_invalid" }))
   })
 
   it("handles recursive field expr", function () {
     const table = this.schema.getTable("t1")
     table.contents.push({
       id: "expr_recursive",
-      name: { en: "Expr Recursive" },
+      name: { _base: "en", en: "Expr Recursive" },
       type: "expr",
       expr: { type: "field", table: "t1", column: "expr_recursive" }
     })
     const schema = this.schema.addTable(table)
 
     const exprValidator = new ExprValidator(schema)
-    return assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" }))
+    assert(exprValidator.validateExpr({ type: "field", table: "t1", column: "expr_recursive" }))
+  })
+
+  it("valid if op with literal", function () {
+    const exprValidator = new ExprValidator(this.schema)
+    assert.isNull(exprValidator.validateExpr({ 
+      type: "op", table: "t1", op: "+", exprs: [
+       { type: "field", table: "t1", column: "number" },
+       { type: "literal", valueType: "number", value: 3 }
+    ]}, { aggrStatuses: ["individual"] }))
   })
 
   describe("scalar", function () {
@@ -189,7 +195,7 @@ describe("ExprValidator", function () {
 
   describe("case", function () {
     it("validates else", function () {
-      let expr = {
+      let expr: CaseExpr = {
         type: "case",
         table: "t1",
         cases: [
@@ -208,7 +214,7 @@ describe("ExprValidator", function () {
     })
 
     it("validates cases whens boolean", function () {
-      let expr = {
+      let expr: CaseExpr = {
         type: "case",
         table: "t1",
         cases: [
@@ -227,7 +233,7 @@ describe("ExprValidator", function () {
     })
 
     return it("validates cases thens", function () {
-      let expr = {
+      let expr: CaseExpr = {
         type: "case",
         table: "t1",
         cases: [
@@ -259,7 +265,7 @@ describe("ExprValidator", function () {
     })
 
     it("validates score keys", function () {
-      let expr = {
+      let expr: ScoreExpr = {
         type: "score",
         table: "t1",
         input: { type: "field", table: "t1", column: "enum" },
@@ -323,6 +329,6 @@ describe("ExprValidator", function () {
   return it("validates extension", function () {
     const schema = fixtures.simpleSchema()
     const exprValidator = new ExprValidator(schema, variables)
-    return assert.equal(exprValidator.validateExpr({ type: "extension", extension: "test" }), "test")
+    assert.equal(exprValidator.validateExpr({ type: "extension", extension: "test" }), "test")
   })
 })

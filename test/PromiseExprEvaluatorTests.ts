@@ -9,6 +9,7 @@ import * as fixtures from "./fixtures"
 import { PromiseExprEvaluator } from "../src/PromiseExprEvaluator"
 import testExprs from "./testExprs"
 import { setupTestExtension } from "./extensionSetup"
+import { Variable } from "../src"
 setupTestExtension()
 
 function compare(actual: any, expected: any) {
@@ -23,14 +24,14 @@ function compare(actual: any, expected: any) {
   }
 }
 
-const variables = [
+const variables: Variable[] = [
   {
     id: "varenum",
     name: { _base: "en", en: "Varenum" },
     type: "enum",
     enumValues: [
-      { id: "a", name: { en: "A" } },
-      { id: "b", name: { en: "B" } }
+      { id: "a", name: { _base: "en", en: "A" } },
+      { id: "b", name: { _base: "en", en: "B" } }
     ]
   },
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" },

@@ -12,13 +12,13 @@ function compare(actual: any, expected: any) {
 describe("Schema", function () {
   it("adds and gets tables", function () {
     let schema = new Schema()
-    schema = schema.addTable({ id: "a", name: "A", desc: "a table", contents: [{ id: "x", name: "X", type: "text" }] })
+    schema = schema.addTable({ id: "a", name: { _base: "en", en: "A" }, desc: { _base: "en", en: "a table" }, contents: [{ id: "x", name: { _base: "en", en: "X" }, type: "text" }] })
     assert.equal(schema.getTables()[0].id, "a")
-    assert.equal(schema.getTables()[0].name, "A")
-    assert.equal(schema.getTables()[0].desc, "a table")
+    assert.deepEqual(schema.getTables()[0].name, { _base: "en", en: "A" })
+    assert.deepEqual(schema.getTables()[0].desc, { _base: "en", en: "a table" })
 
-    assert.equal(schema.getTable("a").name, "A")
-    return assert.equal(schema.getColumn("a", "x").name, "X")
+    assert.deepEqual(schema.getTable("a")!.name, { _base: "en", en: "A" })
+    return assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
   })
 
   it("loads from JSON", function () {
@@ -26,11 +26,11 @@ describe("Schema", function () {
       tables: [
         {
           id: "a",
-          name: "A",
+          name: { _base: "en", en: "A" },
           contents: [
             {
               id: "x",
-              name: "X",
+              name: { _base: "en", en: "X" },
               type: "text"
             }
           ]
@@ -38,7 +38,7 @@ describe("Schema", function () {
       ]
     })
 
-    return assert.equal(schema.getColumn("a", "x").name, "X")
+    return assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
   })
 
   it("saves to JSON", function () {
@@ -46,11 +46,11 @@ describe("Schema", function () {
       tables: [
         {
           id: "a",
-          name: "A",
+          name: { _base: "en", en: "A" },
           contents: [
             {
               id: "x",
-              name: "X",
+              name: { _base: "en", en: "X" },
               type: "text"
             }
           ]
@@ -64,11 +64,11 @@ describe("Schema", function () {
         tables: [
           {
             id: "a",
-            name: "A",
+            name: { _base: "en", en: "A" },
             contents: [
               {
                 id: "x",
-                name: "X",
+                name: { _base: "en", en: "X" },
                 type: "text"
               }
             ]
@@ -105,15 +105,15 @@ describe("Schema", function () {
       tables: [
         {
           id: "a",
-          name: "A",
+          name: { _base: "en", en: "A" },
           contents: [
             {
               type: "section",
-              name: "S1",
+              name: { _base: "en", en: "S1" },
               contents: [
                 {
                   id: "x",
-                  name: "X",
+                  name: { _base: "en", en: "X" },
                   type: "text"
                 }
               ]
@@ -123,8 +123,8 @@ describe("Schema", function () {
       ]
     })
 
-    assert.equal(schema.getColumn("a", "x").name, "X")
+    assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
     assert.equal(schema.getColumns("a").length, 1)
-    return assert.equal(schema.getColumns("a")[0].name, "X")
+    assert.deepEqual(schema.getColumns("a")[0].name, { _base: "en", en: "X" })
   })
 })

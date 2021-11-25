@@ -133,7 +133,10 @@ export default class ExprValidator {
               aggrStatuses: ["literal", "individual"]
             })
           } else {
-            error = this.validateExprInternal(subexpr, _.omit(options, "types", "enumValueIds", "idTable"))
+            // Allow literal always, as literal + individual is still ok
+            error = this.validateExprInternal(subexpr, { 
+              ..._.omit(options, "types", "enumValueIds", "idTable"), aggrStatuses: _.union(aggrStatuses, ["literal"]) 
+            })
           }
 
           if (error) {

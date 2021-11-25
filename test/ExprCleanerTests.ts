@@ -6,6 +6,7 @@ import { default as Schema } from "../src/Schema"
 import { default as ExprCleaner } from "../src/ExprCleaner"
 import * as fixtures from "./fixtures"
 import canonical from "canonical-json"
+import { Expr, FieldExpr, OpExpr, ScalarExpr, Variable } from "../src"
 
 function compare(actual: any, expected: any) {
   return assert.equal(
@@ -15,14 +16,14 @@ function compare(actual: any, expected: any) {
   )
 }
 
-const variables = [
+const variables: Variable[] = [
   {
     id: "varenum",
     name: { _base: "en", en: "Varenum" },
     type: "enum",
     enumValues: [
-      { id: "a", name: { en: "A" } },
-      { id: "b", name: { en: "B" } }
+      { id: "a", name: { _base: "en", en: "A" } },
+      { id: "b", name: { _base: "en", en: "B" } }
     ]
   },
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" },
@@ -85,7 +86,7 @@ describe("ExprCleaner", function () {
       const table = this.schema.getTable("t1")
       table.contents.push({
         id: "expr_recursive",
-        name: { en: "Expr Recursive" },
+        name: { _base: "en", en: "Expr Recursive" },
         type: "expr",
         expr: { type: "field", table: "t1", column: "expr_recursive" }
       })
@@ -100,13 +101,13 @@ describe("ExprCleaner", function () {
       table.contents.push(
         {
           id: "expr_invalid",
-          name: { en: "Expr Invalid" },
+          name: { _base: "en", en: "Expr Invalid" },
           type: "expr",
           expr: { type: "field", table: "t1", column: "nonsuch" }
         },
         {
           id: "expr_valid",
-          name: { en: "Expr Invalid" },
+          name: { _base: "en", en: "Expr Invalid" },
           type: "expr",
           expr: { type: "field", table: "t1", column: "enum" }
         }
@@ -295,8 +296,8 @@ describe("ExprCleaner", function () {
       })
 
       it("allows math on aggregates", function () {
-        const field = { type: "field", table: "t1", column: "number" }
-        let expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+        const field: FieldExpr = { type: "field", table: "t1", column: "number" }
+        let expr: Expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
 
         expr = { type: "op", op: "+", table: "t1", exprs: [expr, expr] }
 
@@ -304,8 +305,8 @@ describe("ExprCleaner", function () {
       })
 
       it("allows building math on aggregates", function () {
-        const field = { type: "field", table: "t1", column: "number" }
-        let expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
+        const field: FieldExpr = { type: "field", table: "t1", column: "number" }
+        let expr: Expr = { type: "op", table: "t1", op: "sum", exprs: [field] }
 
         expr = { type: "op", op: "+", table: "t1", exprs: [expr, null] }
 
@@ -712,14 +713,14 @@ describe("ExprCleaner", function () {
       })
 
       it("strips where if wrong table", function () {
-        const fieldExpr = {
+        const fieldExpr: OpExpr = {
           type: "op",
           op: "sum",
           table: "t2",
           exprs: [{ type: "field", table: "t2", column: "number" }]
         }
         const whereExpr = { type: "logical", table: "t1" }
-        let scalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr }
+        let scalarExpr: ScalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr }
         scalarExpr = this.exprCleaner.cleanExpr(scalarExpr)
         assert(scalarExpr.expr, "Should keep expr")
         return assert(!scalarExpr.where, "Should remove where")
@@ -944,7 +945,7 @@ describe("ExprCleaner", function () {
 
       const exprCleaner = new ExprCleaner(schema)
 
-      const clean = (expr: any, expected: any, options: any) => {
+      const clean = (expr: any, expected: any, options?: any) => {
         return compare(exprCleaner.cleanExpr(expr, options), expected)
       }
 

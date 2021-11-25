@@ -36,6 +36,7 @@
     "@types/lodash": "^3.10.3",
     "@types/lru-cache": "^5.1.1",
     "@types/moment": "^2.13.0",
+    "@types/sinon": "^10.0.6",
     "build-library": "github:mWater/build-library",
     "canonical-json": "0.0.4",
     "chai": "^3.4.0",

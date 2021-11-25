@@ -6,15 +6,16 @@ import _ from "lodash"
 import { default as ExprUtils } from "../src/ExprUtils"
 import { default as Schema } from "../src/Schema"
 import canonical from "canonical-json"
+import { Variable } from "../src"
 
-const variables = [
+const variables: Variable[] = [
   {
     id: "varenum",
     name: { _base: "en", en: "Varenum" },
     type: "enum",
     enumValues: [
-      { id: "a", name: { en: "A" } },
-      { id: "b", name: { en: "B" } }
+      { id: "a", name: { _base: "en", en: "A" } },
+      { id: "b", name: { _base: "en", en: "B" } }
     ]
   },
   { id: "varnumber", name: { _base: "en", en: "Varnumber" }, type: "number" },
@@ -47,8 +48,8 @@ describe("ExprUtils", function () {
 
   it("localizes strings", function () {
     assert.equal(this.exprUtils.localizeString("apple", "en"), "apple")
-    assert.equal(this.exprUtils.localizeString({ en: "apple", fr: "pomme" }, "fr"), "pomme")
-    assert.equal(this.exprUtils.localizeString({ en: "apple", fr: "pomme" }, null), "apple")
+    assert.equal(this.exprUtils.localizeString({ _base: "en", en: "apple", fr: "pomme" }, "fr"), "pomme")
+    assert.equal(this.exprUtils.localizeString({ _base: "en", en: "apple", fr: "pomme" }, null), "apple")
     assert.equal(this.exprUtils.localizeString({ _base: "fr", fr: "pomme" }, null), "pomme")
     assert.equal(
       this.exprUtils.localizeString({ _base: "fr", en: "apple", fr: "pomme" }, null),
@@ -224,11 +225,11 @@ describe("ExprUtils", function () {
     beforeEach(function () {
       this.schema = new Schema().addTable({
         id: "a",
-        name: "A",
+        name: { _base: "en", en: "A" },
         ordering: "z",
         contents: [
-          { id: "y", name: "Y", type: "text" },
-          { id: "z", name: "Z", type: "number" }
+          { id: "y", name: { _base: "en", en: "Y" }, type: "text" },
+          { id: "z", name: { _base: "en", en: "Z" }, type: "number" }
         ]
       })
       return (this.exprUtils = new ExprUtils(this.schema))
@@ -573,8 +574,8 @@ describe("ExprUtils", function () {
   describe("getExprEnumValues", function () {
     it("finds in field", function () {
       return assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "field", table: "t1", column: "enum" }), [
-        { id: "a", name: { en: "A" } },
-        { id: "b", name: { en: "B" } }
+        { id: "a", name: { _base: "en", en: "A" } },
+        { id: "b", name: { _base: "en", en: "B" } }
       ])
     })
 
@@ -584,8 +585,8 @@ describe("ExprUtils", function () {
         cases: [{ when: null, then: { type: "field", table: "t1", column: "enum" } }]
       }
       return assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
-        { id: "a", name: { en: "A" } },
-        { id: "b", name: { en: "B" } }
+        { id: "a", name: { _base: "en", en: "A" } },
+        { id: "b", name: { _base: "en", en: "B" } }
       ])
     })
 
@@ -596,8 +597,8 @@ describe("ExprUtils", function () {
         else: { type: "field", table: "t1", column: "enum" }
       }
       return assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
-        { id: "a", name: { en: "A" } },
-        { id: "b", name: { en: "B" } }
+        { id: "a", name: { _base: "en", en: "A" } },
+        { id: "b", name: { _base: "en", en: "B" } }
       ])
     })
 
@@ -625,8 +626,8 @@ describe("ExprUtils", function () {
 
     return it("finds in field", function () {
       return assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "variable", variableId: "varenum" }), [
-        { id: "a", name: { en: "A" } },
-        { id: "b", name: { en: "B" } }
+        { id: "a", name: { _base: "en", en: "A" } },
+        { id: "b", name: { _base: "en", en: "B" } }
       ])
     })
   })

@@ -6,7 +6,7 @@ import DataSource from "../src/DataSource"
 
 // Very simple DataSource implementation used for testing
 class TestDataSource extends DataSource {
-  performQuery(query: any, cb: any) {
+  performQuery(query: any, cb?: any): any {
     // Simply does an async callback passing back the query
     const call = () => cb(query)
     return setTimeout(call, 1)
