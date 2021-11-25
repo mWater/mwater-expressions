@@ -6,7 +6,7 @@ import { default as Schema } from "../src/Schema"
 import canonical from "canonical-json"
 
 function compare(actual: any, expected: any) {
-  return assert.equal(canonical(actual), canonical(expected))
+  assert.equal(canonical(actual), canonical(expected))
 }
 
 describe("Schema", function () {
@@ -18,7 +18,7 @@ describe("Schema", function () {
     assert.deepEqual(schema.getTables()[0].desc, { _base: "en", en: "a table" })
 
     assert.deepEqual(schema.getTable("a")!.name, { _base: "en", en: "A" })
-    return assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
+    assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
   })
 
   it("loads from JSON", function () {
@@ -38,7 +38,7 @@ describe("Schema", function () {
       ]
     })
 
-    return assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
+    assert.deepEqual(schema.getColumn("a", "x")!.name, { _base: "en", en: "X" })
   })
 
   it("saves to JSON", function () {
@@ -58,7 +58,7 @@ describe("Schema", function () {
       ]
     })
 
-    return assert.equal(
+    assert.equal(
       JSON.stringify(schema.toJSON()),
       JSON.stringify({
         tables: [

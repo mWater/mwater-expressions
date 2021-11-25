@@ -14,13 +14,13 @@ setupTestExtension()
 
 function compare(actual: any, expected: any) {
   if (_.isObject(actual) || _.isArray(actual)) {
-    return assert.equal(
+    assert.equal(
       canonical(actual),
       canonical(expected),
       "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
     )
   } else {
-    return assert.equal(actual, expected)
+    assert.equal(actual, expected)
   }
 }
 
@@ -64,7 +64,7 @@ describe("PromiseExprEvaluator", function () {
         })
         const value = await ev.evaluate(testExpr.expr, testExpr.context)
         if (_.isFunction(testExpr.value)) {
-          return assert.isTrue(testExpr.value(value))
+          assert.isTrue(testExpr.value(value))
         } else {
           return compare(value, testExpr.value)
         }
@@ -89,7 +89,7 @@ describe("PromiseExprEvaluator", function () {
       1235
     )
 
-    return assert.equal(
+    assert.equal(
       ev.evaluateSync({
         type: "op",
         op: "+",

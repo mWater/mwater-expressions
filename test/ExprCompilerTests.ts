@@ -14,7 +14,7 @@ import { JsonQLExpr, JsonQLQuery } from "jsonql"
 setupTestExtension()
 
 function compare(actual: any, expected: any) {
-  return assert.equal(
+  assert.equal(
     canonical(actual),
     canonical(expected),
     "\ngot:" + canonical(actual) + "\nexp:" + canonical(expected) + "\n"
@@ -188,7 +188,7 @@ describe("ExprCompiler", function () {
   // })
 
   it("throws ColumnNotFoundException", function () {
-    return assert.throws(() => {
+    assert.throws(() => {
       return this.ec.compileExpr({ expr: { type: "field", table: "t1", column: "XYZ" }, tableAlias: "T1" })
     }, ColumnNotFoundException)
   })
@@ -2142,7 +2142,7 @@ describe("ExprCompiler", function () {
 
     it("compiles current datetime", function () {
       const jsonql = this.ec.compileExpr({ expr: { type: "op", op: "current datetime", exprs: [] }, tableAlias: "T1" })
-      return assert.equal(jsonql.type, "literal")
+      assert.equal(jsonql.type, "literal")
     })
 
     // # DEPRECATED. Use ancestryTable
@@ -3353,7 +3353,7 @@ describe("ExprCompiler", function () {
           alias: "1_2"
         }
 
-        return assert(_.isEqual((jql as any).from, from), JSON.stringify(jql, null, 2))
+        assert(_.isEqual((jql as any).from, from), JSON.stringify(jql, null, 2))
       }))
 
     // describe "join"
@@ -3382,7 +3382,7 @@ describe("ExprCompiler", function () {
 
         const jql = ec.compileExpr({ expr: { type: "field", table: "t1", column: "custom" }, tableAlias: "T1" })
 
-        return assert(
+        assert(
           _.isEqual(jql, {
             type: "op",
             op: "sum",

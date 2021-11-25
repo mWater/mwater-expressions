@@ -24,7 +24,7 @@ const variables: Variable[] = [
 ]
 
 function compare(actual: any, expected: any) {
-  return assert.equal(
+  assert.equal(
     canonical(actual),
     canonical(expected),
     "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
@@ -38,12 +38,12 @@ describe("ExprUtils", function () {
 
   it("determines if multiple joins", function () {
     assert.isTrue(this.exprUtils.isMultipleJoins("t1", ["1-2"]))
-    return assert.isFalse(this.exprUtils.isMultipleJoins("t2", ["2-1"]))
+    assert.isFalse(this.exprUtils.isMultipleJoins("t2", ["2-1"]))
   })
 
   it("follows joins", function () {
     assert.equal(this.exprUtils.followJoins("t1", []), "t1")
-    return assert.equal(this.exprUtils.followJoins("t1", ["1-2"]), "t2")
+    assert.equal(this.exprUtils.followJoins("t1", ["1-2"]), "t2")
   })
 
   it("localizes strings", function () {
@@ -56,7 +56,7 @@ describe("ExprUtils", function () {
       "pomme",
       "_base wins if no locale"
     )
-    return assert.equal(
+    assert.equal(
       this.exprUtils.localizeString({ _base: "fr", en: "apple", fr: "pomme" }, "en"),
       "apple",
       "_base wins if no locale"
@@ -64,27 +64,27 @@ describe("ExprUtils", function () {
   })
 
   it("getExprTable", function () {
-    return assert.equal(this.exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz")
+    assert.equal(this.exprUtils.getExprTable({ table: "xyz", type: "id" }), "xyz")
   })
 
   describe("getExprIdTable", function () {
     it("gets for literal", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprIdTable({ type: "literal", valueType: "id", idTable: "xyz", value: "123" }),
         "xyz"
       )
     })
 
     it("gets for id field", function () {
-      return assert.equal(this.exprUtils.getExprIdTable({ table: "xyz", type: "id" }), "xyz")
+      assert.equal(this.exprUtils.getExprIdTable({ table: "xyz", type: "id" }), "xyz")
     })
 
     it("gets for id expr field", function () {
-      return assert.equal(this.exprUtils.getExprIdTable({ type: "field", table: "t1", column: "expr_id" }), "t1")
+      assert.equal(this.exprUtils.getExprIdTable({ type: "field", table: "t1", column: "expr_id" }), "t1")
     })
 
     it("gets for scalar", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprIdTable({
           type: "scalar",
           table: "t2",
@@ -96,7 +96,7 @@ describe("ExprUtils", function () {
     })
 
     return it("gets for variable", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprIdTable({ type: "variable", table: "t1", variableId: "varidexpr" }),
         "t2"
       )
@@ -105,32 +105,32 @@ describe("ExprUtils", function () {
 
   describe("getExprAggrStatus", function () {
     it("gets for literal", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({ type: "literal", valueType: "id", idTable: "xyz", value: "123" }),
         "literal"
       )
     })
 
     it("gets for id", function () {
-      return assert.equal(this.exprUtils.getExprAggrStatus({ table: "xyz", type: "id" }), "individual")
+      assert.equal(this.exprUtils.getExprAggrStatus({ table: "xyz", type: "id" }), "individual")
     })
 
     it("gets for field", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({ type: "field", table: "t1", column: "number" }),
         "individual"
       )
     })
 
     it("gets for expr field", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({ type: "field", table: "t1", column: "expr_sum" }),
         "aggregate"
       )
     })
 
     it("gets for aggregate", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({
           type: "op",
           op: "sum",
@@ -141,7 +141,7 @@ describe("ExprUtils", function () {
     })
 
     it("gets for aggregate + literal", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({
           type: "op",
           op: "+",
@@ -155,7 +155,7 @@ describe("ExprUtils", function () {
     })
 
     it("gets for scalar", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({
           type: "scalar",
           table: "t2",
@@ -167,7 +167,7 @@ describe("ExprUtils", function () {
     })
 
     it("gets for scalar aggregation", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({
           type: "scalar",
           table: "t1",
@@ -183,11 +183,11 @@ describe("ExprUtils", function () {
     })
 
     it("gets for literal variable", function () {
-      return assert.equal(this.exprUtils.getExprAggrStatus({ type: "variable", variableId: "varnumber" }), "literal")
+      assert.equal(this.exprUtils.getExprAggrStatus({ type: "variable", variableId: "varnumber" }), "literal")
     })
 
     return it("gets for individual variable", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprAggrStatus({ type: "variable", table: "t1", variableId: "varidexpr" }),
         "individual"
       )
@@ -196,25 +196,25 @@ describe("ExprUtils", function () {
 
   describe("findMatchingOpItems", function () {
     it("finds = for number", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "field", table: "t1", column: "number" } })[0].op,
         "="
       )
     })
 
     it("finds = for expr number", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "field", table: "t1", column: "expr_number" } })[0].op,
         "="
       )
     })
 
     it("first = for id type non-hierarchical", function () {
-      return assert.equal(this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "id", table: "t1" } })[0].op, "=")
+      assert.equal(this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "id", table: "t1" } })[0].op, "=")
     })
 
     return it("first within for id type hierarchical", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "id", table: "thier" } })[0].op,
         "within"
       )
@@ -238,7 +238,7 @@ describe("ExprUtils", function () {
     it("includes text (last)", function () {
       const field = { type: "field", table: "a", column: "y" }
       const types = this.exprUtils.getAggrTypes(field)
-      return assert.isTrue(types.includes("text"), JSON.stringify(types))
+      assert.isTrue(types.includes("text"), JSON.stringify(types))
     })
 
     return it("doesn't include last normally", function () {
@@ -247,21 +247,21 @@ describe("ExprUtils", function () {
 
       const field = { type: "field", table: "b", column: "x" }
       const types = this.exprUtils.getAggrTypes(field)
-      return assert.deepEqual(types, ["text[]", "number"])
+      assert.deepEqual(types, ["text[]", "number"])
     })
   })
 
   describe("getExprType", function () {
     it("gets field type", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text")
+      assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "text" }), "text")
     })
 
     it("gets expr field type", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "expr_number" }), "number")
+      assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "expr_number" }), "number")
     })
 
     it("gets join field type", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "1-2" }), "id[]")
+      assert.equal(this.exprUtils.getExprType({ type: "field", table: "t1", column: "1-2" }), "id[]")
     })
 
     it("gets scalar type", function () {
@@ -271,7 +271,7 @@ describe("ExprUtils", function () {
         expr: { type: "field", table: "t1", column: "text" },
         joins: []
       }
-      return assert.equal(this.exprUtils.getExprType(expr), "text")
+      assert.equal(this.exprUtils.getExprType(expr), "text")
     })
 
     it("gets scalar type with aggr", function () {
@@ -282,7 +282,7 @@ describe("ExprUtils", function () {
         aggr: "avg",
         joins: ["1-2"]
       }
-      return assert.equal(this.exprUtils.getExprType(expr), "number")
+      assert.equal(this.exprUtils.getExprType(expr), "number")
     })
 
     it("gets scalar type with count", function () {
@@ -293,28 +293,28 @@ describe("ExprUtils", function () {
         aggr: "count",
         joins: ["1-2"]
       }
-      return assert.equal(this.exprUtils.getExprType(expr), "number")
+      assert.equal(this.exprUtils.getExprType(expr), "number")
     })
 
     it("gets literal types", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean")
+      assert.equal(this.exprUtils.getExprType({ type: "literal", valueType: "boolean", value: true }), "boolean")
     })
 
     it("gets boolean type for and/or", function () {
       assert.equal(this.exprUtils.getExprType({ type: "op", op: "and", exprs: [] }), "boolean")
-      return assert.equal(this.exprUtils.getExprType({ type: "op", op: "or", exprs: [] }), "boolean")
+      assert.equal(this.exprUtils.getExprType({ type: "op", op: "or", exprs: [] }), "boolean")
     })
 
     it("gets boolean type for =", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "op", op: "=", exprs: [] }), "boolean")
+      assert.equal(this.exprUtils.getExprType({ type: "op", op: "=", exprs: [] }), "boolean")
     })
 
     it("no type for {}", function () {
-      return assert.isNull(this.exprUtils.getExprType({}))
+      assert.isNull(this.exprUtils.getExprType({}))
     })
 
     it("number type if number + number", function () {
-      return assert.equal(
+      assert.equal(
         this.exprUtils.getExprType({
           type: "op",
           op: "+",
@@ -328,36 +328,36 @@ describe("ExprUtils", function () {
     })
 
     return it("variable type", function () {
-      return assert.equal(this.exprUtils.getExprType({ type: "variable", variableId: "varnumber" }), "number")
+      assert.equal(this.exprUtils.getExprType({ type: "variable", variableId: "varnumber" }), "number")
     })
   })
 
   describe("summarizeExpr", function () {
     it("summarizes null", function () {
-      return assert.equal(this.exprUtils.summarizeExpr(null), "None")
+      assert.equal(this.exprUtils.summarizeExpr(null), "None")
     })
 
     it("summarizes field expr", function () {
       const expr = { type: "field", table: "t1", column: "number" }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Number")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Number")
     })
 
     it("summarizes simple scalar expr", function () {
       const fieldExpr = { type: "field", table: "t1", column: "number" }
       const scalarExpr = { type: "scalar", table: "t1", joins: [], expr: fieldExpr }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "Number")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "Number")
     })
 
     it("summarizes joined scalar expr", function () {
       const fieldExpr = { type: "field", table: "t2", column: "number" }
       const scalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number")
     })
 
     it("summarizes joined aggr scalar expr", function () {
       const fieldExpr = { type: "field", table: "t2", column: "number" }
       const scalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr, aggr: "sum" }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Total Number")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Total Number")
     })
 
     it("simplifies when count id", function () {
@@ -368,12 +368,12 @@ describe("ExprUtils", function () {
         expr: { type: "id", table: "t2" },
         aggr: "count"
       }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number of T2")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T1->T2 > Number of T2")
     })
 
     it("simplifies when id", function () {
       const scalarExpr = { type: "scalar", table: "t2", joins: ["2-1"], expr: { type: "id", table: "t1" } }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T2->T1")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T2->T1")
     })
 
     it("shows join types", function () {
@@ -383,14 +383,14 @@ describe("ExprUtils", function () {
         joins: ["3-2"],
         expr: { type: "field", table: "t2", column: "2-1" }
       }
-      return assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T3->T2 > T2->T1")
+      assert.equal(this.exprUtils.summarizeExpr(scalarExpr), "T3->T2 > T2->T1")
     })
 
     it("summarizes +/-/*//", function () {
       const fieldExpr = { type: "field", table: "t2", column: "number" }
       const literalExpr = { type: "literal", valueType: "number", value: 5 }
       const opExpr = { type: "op", op: "+", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "Number + 5")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "Number + 5")
     })
 
     it("summarizes case with else", function () {
@@ -404,59 +404,59 @@ describe("ExprUtils", function () {
         ],
         else: { type: "field", table: "t1", column: "text" }
       }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "If Boolean Then Text Else Text")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "If Boolean Then Text Else Text")
     })
 
     it("summarizes = with enum literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "enum" }
       const literalExpr = { type: "literal", valueType: "enum", value: "a" }
       const opExpr = { type: "op", op: "=", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "Enum is A")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "Enum is A")
     })
 
     it("summarizes = any with enumset literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "enum" }
       const literalExpr = { type: "literal", valueType: "enumset", value: ["a", "b"] }
       const opExpr = { type: "op", op: "= any", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "Enum is any of A, B")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "Enum is any of A, B")
     })
 
     it("summarizes contains with enumset literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "enumset" }
       const literalExpr = { type: "literal", valueType: "enumset", value: ["a"] }
       const opExpr = { type: "op", op: "contains", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "EnumSet includes all of A")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "EnumSet includes all of A")
     })
 
     it("summarizes intersects with enumset literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "enumset" }
       const literalExpr = { type: "literal", valueType: "enumset", value: ["a"] }
       const opExpr = { type: "op", op: "intersects", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "EnumSet includes any of A")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "EnumSet includes any of A")
     })
 
     it("summarizes contains with text[] literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "text[]" }
       const literalExpr = { type: "literal", valueType: "text[]", value: ["a"] }
       const opExpr = { type: "op", op: "contains", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "Text[] includes all of a")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "Text[] includes all of a")
     })
 
     it("summarizes intersects with enumset literal", function () {
       const fieldExpr = { type: "field", table: "t1", column: "text[]" }
       const literalExpr = { type: "literal", valueType: "text[]", value: ["a"] }
       const opExpr = { type: "op", op: "intersects", exprs: [fieldExpr, literalExpr] }
-      return assert.equal(this.exprUtils.summarizeExpr(opExpr), "Text[] includes any of a")
+      assert.equal(this.exprUtils.summarizeExpr(opExpr), "Text[] includes any of a")
     })
 
     it("summarizes sum(field) expr", function () {
       const expr = { type: "op", op: "sum", table: "t2", exprs: [{ type: "field", table: "t2", column: "number" }] }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Total Number")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Total Number")
     })
 
     it("summarizes count", function () {
       const expr = { type: "op", op: "count", table: "t1", exprs: [] }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Number of T1")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Number of T1")
     })
 
     it("summarizes max where expr", function () {
@@ -469,7 +469,7 @@ describe("ExprUtils", function () {
           { type: "field", table: "t1", column: "boolean" }
         ]
       }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum Number of Boolean")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum Number of Boolean")
     })
 
     it("summarizes max where expr without rhs", function () {
@@ -479,22 +479,22 @@ describe("ExprUtils", function () {
         table: "t1",
         exprs: [{ type: "field", table: "t1", column: "number" }, null]
       }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum Number of All")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum Number of All")
     })
 
     it("summarizes max where without expr or rhs", function () {
       const expr = { type: "op", op: "max where", table: "t1", exprs: [] }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum ")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Maximum ")
     })
 
     it("summarizes date ops", function () {
       const expr = { type: "op", op: "thisyear", table: "t1", exprs: [{ type: "field", table: "t1", column: "date" }] }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Date is this year")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Date is this year")
     })
 
     return it("summarizes variable", function () {
       const expr = { type: "variable", variableId: "varnumber" }
-      return assert.equal(this.exprUtils.summarizeExpr(expr), "Varnumber")
+      assert.equal(this.exprUtils.summarizeExpr(expr), "Varnumber")
     })
   })
 
@@ -515,52 +515,52 @@ describe("ExprUtils", function () {
   describe("stringifyExprLiteral", function () {
     it("stringifies number", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, 2.34)
-      return assert.equal(str, "2.34")
+      assert.equal(str, "2.34")
     })
 
     it("stringifies expr number", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "expr_number" }, 2.34)
-      return assert.equal(str, "2.34")
+      assert.equal(str, "2.34")
     })
 
     it("stringifies null", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "number" }, null)
-      return assert.equal(str, "None")
+      assert.equal(str, "None")
     })
 
     it("looks up enum", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "a")
-      return assert.equal(str, "A")
+      assert.equal(str, "A")
     })
 
     it("handles null enum", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, null)
-      return assert.equal(str, "None")
+      assert.equal(str, "None")
     })
 
     it("handles invalid enum", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enum" }, "xyz")
-      return assert.equal(str, "???")
+      assert.equal(str, "???")
     })
 
     it("looks up enumset", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, ["a", "b"])
-      return assert.equal(str, "A, B")
+      assert.equal(str, "A, B")
     })
 
     it("handles null enumset", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, null)
-      return assert.equal(str, "None")
+      assert.equal(str, "None")
     })
 
     it("handles invalid enumset", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "enumset" }, ["xyz", "b"])
-      return assert.equal(str, "???, B")
+      assert.equal(str, "???, B")
     })
 
     return it("handles text[]", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "text[]" }, ["xyz", "b"])
-      return assert.equal(str, "xyz, b")
+      assert.equal(str, "xyz, b")
     })
   })
 
@@ -568,12 +568,12 @@ describe("ExprUtils", function () {
     it("finds = any for text lhs with boolean result", function () {
       const opItem = this.exprUtils.findMatchingOpItems({ resultType: "boolean", exprTypes: ["text"] })[0]
       assert.equal(opItem.op, "= any")
-      return assert.equal(opItem.exprTypes[0], "text")
+      assert.equal(opItem.exprTypes[0], "text")
     }))
 
   describe("getExprEnumValues", function () {
     it("finds in field", function () {
-      return assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "field", table: "t1", column: "enum" }), [
+      assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "field", table: "t1", column: "enum" }), [
         { id: "a", name: { _base: "en", en: "A" } },
         { id: "b", name: { _base: "en", en: "B" } }
       ])
@@ -584,7 +584,7 @@ describe("ExprUtils", function () {
         type: "case",
         cases: [{ when: null, then: { type: "field", table: "t1", column: "enum" } }]
       }
-      return assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
+      assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
         { id: "a", name: { _base: "en", en: "A" } },
         { id: "b", name: { _base: "en", en: "B" } }
       ])
@@ -596,7 +596,7 @@ describe("ExprUtils", function () {
         cases: [{ when: null, then: null }],
         else: { type: "field", table: "t1", column: "enum" }
       }
-      return assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
+      assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
         { id: "a", name: { _base: "en", en: "A" } },
         { id: "b", name: { _base: "en", en: "B" } }
       ])
@@ -608,7 +608,7 @@ describe("ExprUtils", function () {
         op: "month",
         exprs: [{ type: "field", table: "t1", column: "date" }]
       }
-      return assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
+      assert.deepEqual(this.exprUtils.getExprEnumValues(expr), [
         { id: "01", name: { _base: "en", en: "January" } },
         { id: "02", name: { _base: "en", en: "February" } },
         { id: "03", name: { _base: "en", en: "March" } },
@@ -625,7 +625,7 @@ describe("ExprUtils", function () {
     })
 
     return it("finds in field", function () {
-      return assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "variable", variableId: "varenum" }), [
+      assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "variable", variableId: "varenum" }), [
         { id: "a", name: { _base: "en", en: "A" } },
         { id: "b", name: { _base: "en", en: "B" } }
       ])
@@ -779,7 +779,7 @@ describe("ExprUtils", function () {
     it("handles trivial case", function () {
       assert.isNull(ExprUtils.andExprs("xyz"))
       assert.isNull(ExprUtils.andExprs("xyz", null))
-      return assert.isNull(ExprUtils.andExprs("xyz", null, null))
+      assert.isNull(ExprUtils.andExprs("xyz", null, null))
     })
 
     return it("denests", () =>

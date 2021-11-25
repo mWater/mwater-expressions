@@ -9,7 +9,7 @@ import canonical from "canonical-json"
 import { Expr, FieldExpr, OpExpr, ScalarExpr, Variable } from "../src"
 
 function compare(actual: any, expected: any) {
-  return assert.equal(
+  assert.equal(
     canonical(actual),
     canonical(expected),
     "\ngot: " + canonical(actual) + "\nexp: " + canonical(expected) + "\n"
@@ -42,42 +42,42 @@ describe("ExprCleaner", function () {
 
   describe("cleanExpr", function () {
     it("nulls if wrong table", function () {
-      return assert.isNull(this.exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, { table: "t2" }))
+      assert.isNull(this.exprCleaner.cleanExpr({ type: "field", table: "t1", column: "text" }, { table: "t2" }))
     })
 
     it("nulls if wrong type", function () {
       const field = { type: "field", table: "t1", column: "enum" }
-      return assert.isNull(this.exprCleaner.cleanExpr(field, { types: ["text"] }))
+      assert.isNull(this.exprCleaner.cleanExpr(field, { types: ["text"] }))
     })
 
     it("nulls if wrong idTable", function () {
       const field = { type: "id", table: "t1" }
       assert(this.exprCleaner.cleanExpr(field, { types: ["id"], idTable: "t1" }))
-      return assert.isNull(this.exprCleaner.cleanExpr(field, { types: ["id"], idTable: "t2" }))
+      assert.isNull(this.exprCleaner.cleanExpr(field, { types: ["id"], idTable: "t2" }))
     })
 
     it("nulls if wrong enums", function () {
       const field = { type: "field", table: "t1", column: "enum" }
       assert.isNotNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a", "b", "c"] }))
-      return assert.isNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a"] }))
+      assert.isNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a"] }))
     })
 
     it("nulls if wrong enums expression", function () {
       const field = { type: "field", table: "t1", column: "expr_enum" }
       assert.isNotNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a", "b", "c"] }))
-      return assert.isNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a"] }))
+      assert.isNull(this.exprCleaner.cleanExpr(field, { enumValueIds: ["a"] }))
     })
 
     it("nulls if missing variable", function () {
       assert.isNotNull(this.exprCleaner.cleanExpr({ type: "variable", variableId: "varnumber" }, { table: "t2" }))
-      return assert.isNull(this.exprCleaner.cleanExpr({ type: "variable", variableId: "varxyz" }, { table: "t2" }))
+      assert.isNull(this.exprCleaner.cleanExpr({ type: "variable", variableId: "varxyz" }, { table: "t2" }))
     })
 
     it("allows variable if right id table", function () {
       assert.isNotNull(
         this.exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t1" })
       )
-      return assert.isNull(
+      assert.isNull(
         this.exprCleaner.cleanExpr({ type: "variable", variableId: "varid" }, { table: "t2", idTable: "t2" })
       )
     })
@@ -93,7 +93,7 @@ describe("ExprCleaner", function () {
       const schema = this.schema.addTable(table)
       const exprCleaner = new ExprCleaner(schema)
 
-      return assert.isNull(exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_recursive" }))
+      assert.isNull(exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_recursive" }))
     })
 
     it("nulls if expr is invalid", function () {
@@ -116,7 +116,7 @@ describe("ExprCleaner", function () {
       const exprCleaner = new ExprCleaner(schema)
 
       assert.isNull(exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_invalid" }))
-      return assert(exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_valid" }))
+      assert(exprCleaner.cleanExpr({ type: "field", table: "t1", column: "expr_valid" }))
     })
 
     it("cleans aggregate op", function () {
@@ -154,7 +154,7 @@ describe("ExprCleaner", function () {
         const aggr = { type: "op", table: "t1", op: "sum", exprs: [field] }
         assert.isNull(this.exprCleaner.cleanExpr(aggr), "is aggregate")
         assert.isNull(this.exprCleaner.cleanExpr(aggr, { aggrStatuses: ["literal"] }))
-        return assert(this.exprCleaner.cleanExpr(aggr, { aggrStatuses: ["aggregate"] }), "should allow aggregate")
+        assert(this.exprCleaner.cleanExpr(aggr, { aggrStatuses: ["aggregate"] }), "should allow aggregate")
       })
 
       it("nulls inner expr if wrong aggregation status", function () {
@@ -723,14 +723,14 @@ describe("ExprCleaner", function () {
         let scalarExpr: ScalarExpr = { type: "scalar", table: "t1", joins: ["1-2"], expr: fieldExpr }
         scalarExpr = this.exprCleaner.cleanExpr(scalarExpr)
         assert(scalarExpr.expr, "Should keep expr")
-        return assert(!scalarExpr.where, "Should remove where")
+        assert(!scalarExpr.where, "Should remove where")
       })
 
       it("strips if invalid join", function () {
         const fieldExpr = { type: "op", op: "sum", exprs: [{ type: "field", table: "t2", column: "number" }] }
         let scalarExpr = { type: "scalar", table: "t1", joins: ["xyz"], expr: fieldExpr }
         scalarExpr = this.exprCleaner.cleanExpr(scalarExpr)
-        return assert(!scalarExpr)
+        assert(!scalarExpr)
       })
 
       it("simplifies if no joins", function () {
