@@ -733,7 +733,7 @@ export default class ExprUtils {
 
         // Special case for count
         if (expr.op === "count") {
-          return "Number of " + this.localizeString(this.schema.getTable(expr.table!)!.name, locale)
+          return "Number of " + this.localizeString(this.schema.getTable(expr.table!)?.name || "NOT FOUND", locale)
         }
 
         var opItem = this.findMatchingOpItems({ op: expr.op })[0]
@@ -1790,8 +1790,8 @@ addOpItem({
     const lhsIdTable = exprUtils.getExprIdTable(lhsExpr)
     if (lhsIdTable) {
       return (
-        exprUtils.schema.getTable(lhsIdTable)!.ancestry != null ||
-        exprUtils.schema.getTable(lhsIdTable)!.ancestryTable != null
+        exprUtils.schema.getTable(lhsIdTable)?.ancestry != null ||
+        exprUtils.schema.getTable(lhsIdTable)?.ancestryTable != null
       )
     }
     return false
