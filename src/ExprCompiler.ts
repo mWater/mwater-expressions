@@ -24,6 +24,7 @@ import {
   LegacyComparisonExpr,
   LegacyLogicalExpr,
   LiteralExpr,
+  LiteralType,
   OpExpr,
   ScalarExpr,
   ScoreExpr,
@@ -89,8 +90,8 @@ export default class ExprCompiler {
   }
 
   /** Compile an expression. Pass expr and tableAlias. */
-  compileExpr(options: { expr: Expr; tableAlias: string }): JsonQLExpr {
-    const { expr, tableAlias } = options
+  compileExpr(options: { expr: Expr; tableAlias: string, literalType?: LiteralType|null }): JsonQLExpr {
+    const { expr, tableAlias, literalType } = options
 
     // Handle null
     if (!expr) {
@@ -106,6 +107,9 @@ export default class ExprCompiler {
         return this.compileScalarExpr({ expr, tableAlias })
       case "literal":
         if (expr.value != null) {
+          if(!!literalType && literalType === "enumset" && expr.valueType === "enumset") {
+            return convertToJsonB({ type: "literal", value: expr.value })
+          }
           return { type: "literal", value: expr.value }
         } else {
           return null
@@ -2393,13 +2397,14 @@ export default class ExprCompiler {
 
   compileCaseExpr(options: { expr: CaseExpr; tableAlias: string }): JsonQLExpr {
     const { expr } = options
+    const exprUtils = new ExprUtils(this.schema)
 
     const compiled: JsonQLCase = {
       type: "case",
       cases: _.map(expr.cases, (c) => {
         return {
           when: this.compileExpr({ expr: c.when, tableAlias: options.tableAlias }),
-          then: this.compileExpr({ expr: c.then, tableAlias: options.tableAlias })
+          then: this.compileExpr({ expr: c.then, tableAlias: options.tableAlias, literalType: exprUtils.getExprType(expr.else) })
         }
       }),
       else: this.compileExpr({ expr: expr.else, tableAlias: options.tableAlias })
