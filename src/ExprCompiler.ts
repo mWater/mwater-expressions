@@ -106,6 +106,14 @@ export default class ExprCompiler {
         return this.compileScalarExpr({ expr, tableAlias })
       case "literal":
         if (expr.value != null) {
+          // Special case for https://github.com/mWater/mwater-portal/issues/1341 to avoid mixing text[] and jsonb
+          if (expr.valueType == "enumset") {
+            return {
+              type: "op",
+              op: "::jsonb",
+              exprs: [{ type: "literal", value: JSON.stringify(expr.value) }]
+            }
+          }
           return { type: "literal", value: expr.value }
         } else {
           return null
@@ -801,14 +809,26 @@ export default class ExprCompiler {
         }
 
         // False if empty list on rhs
-        if (expr.exprs[1]!.type === "literal") {
-          const rhsLiteral = expr.exprs[1] as LiteralExpr
-          if (rhsLiteral.value == null || (_.isArray(rhsLiteral.value) && rhsLiteral.value.length === 0)) {
-            return false
+        if (expr.exprs[1]?.type === "literal" && expr.exprs[1]?.value.length === 0) {
+          return false
+        }
+
+        const lhs = expr.exprs[0]!
+        const rhs = expr.exprs[1]!
+
+        if (rhs.type === "literal") {
+          // Special case of single entry literal on right side (optimize to =)
+          if (_.isArray(rhs.value) && rhs.value.length == 1) {
+            return { type: "op", op: "=", exprs: [compiledExprs[0], { type: "literal", value: rhs.value[0] }] }
           }
         }
 
-        return { type: "op", op: "=", modifier: "any", exprs: compiledExprs }
+        // Compile as jsonb(lhs) <@ jsonb(rhs)
+        return {
+          type: "op",
+          op: "<@",
+          exprs: [convertToJsonB(compiledExprs[0]), convertToJsonB(compiledExprs[1])]
+        }
 
       case "between":
         // Null if first not present
@@ -876,8 +896,8 @@ export default class ExprCompiler {
         }
 
         // Null if no expressions in literal list
-        if ((compiledExprs[1] as any).type === "literal" && (compiledExprs[1] as any).value.length === 0) {
-          return null
+        if (expr.exprs[1]?.type === "literal" && expr.exprs[1]?.value.length === 0) {
+          return false
         }
 
         // Cast both to jsonb and use @>. Also convert both to json first to handle literal arrays
@@ -2667,6 +2687,11 @@ function convertToJsonB(compiledExpr: JsonQLExpr): JsonQLExpr {
       op: "::jsonb",
       exprs: [{ type: "literal", value: JSON.stringify((compiledExpr as JsonQLLiteral).value) }]
     }
+  }
+
+  // If already cast to jsonb, leave alone
+  if ((compiledExpr as any).type === "op" && (compiledExpr as any).op == "::jsonb") {
+    return compiledExpr
   }
 
   // First convert using to_jsonb in case is array

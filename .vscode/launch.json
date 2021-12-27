@@ -11,9 +11,7 @@
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
           "-r",
-          "coffeescript/register",
-          "-r",
-          "ts-node/register",
+          "ts-node/register/transpile-only",
           "--timeout",
           "999999",
           "--colors",

@@ -1744,11 +1744,31 @@ describe("ExprCompiler", function () {
         },
         {
           type: "op",
+          op: "<@",
+          exprs: [
+            { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enum" }] },
+            { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a","b"]' }] }
+          ]
+        }
+      )
+    })
+
+    it("compiles simple = any", function () {
+      return this.compile(
+        {
+          type: "op",
+          op: "= any",
+          exprs: [
+            { type: "field", table: "t1", column: "enum" },
+            { type: "literal", valueType: "enumset", value: ["a"] }
+          ]
+        },
+        {
+          type: "op",
           op: "=",
-          modifier: "any",
           exprs: [
             { type: "field", tableAlias: "T1", column: "enum" },
-            { type: "literal", value: ["a", "b"] }
+            { type: "literal", value: "a" }
           ]
         }
       )
@@ -1858,7 +1878,7 @@ describe("ExprCompiler", function () {
             { type: "literal", valueType: "enumset", value: [] }
           ]
         },
-        null
+        false
       )
     })
 
@@ -3398,77 +3418,95 @@ describe("ExprCompiler", function () {
       }))
   })
 
-  describe("comparisons (deprecated)", function () {
-    it("compiles =", function () {
-      return this.compile(
-        {
-          type: "comparison",
-          op: "=",
-          lhs: { type: "field", table: "t1", column: "number" },
-          rhs: { type: "literal", valueType: "number", value: 3 }
-        },
-        {
-          type: "op",
-          op: "=",
-          exprs: [
-            { type: "field", tableAlias: "T1", column: "number" },
-            { type: "literal", value: 3 }
-          ]
-        }
-      )
-    })
+  // describe("comparisons (deprecated)", function () {
+  //   it("compiles =", function () {
+  //     return this.compile(
+  //       {
+  //         type: "comparison",
+  //         op: "=",
+  //         lhs: { type: "field", table: "t1", column: "number" },
+  //         rhs: { type: "literal", valueType: "number", value: 3 }
+  //       },
+  //       {
+  //         type: "op",
+  //         op: "=",
+  //         exprs: [
+  //           { type: "field", tableAlias: "T1", column: "number" },
+  //           { type: "literal", value: 3 }
+  //         ]
+  //       }
+  //     )
+  //   })
 
-    it("compiles = any", function () {
-      return this.compile(
-        {
-          type: "comparison",
-          op: "= any",
-          lhs: { type: "field", table: "t1", column: "enum" },
-          rhs: { type: "literal", valueType: "enum[]", value: ["a", "b"] }
-        },
-        {
-          type: "op",
-          op: "=",
-          modifier: "any",
-          exprs: [
-            { type: "field", tableAlias: "T1", column: "enum" },
-            { type: "literal", value: ["a", "b"] }
-          ]
-        }
-      )
-    })
+  //   it("compiles = any", function () {
+  //     return this.compile(
+  //       {
+  //         type: "comparison",
+  //         op: "= any",
+  //         lhs: { type: "field", table: "t1", column: "enum" },
+  //         rhs: { type: "literal", valueType: "enum[]", value: ["a", "b"] }
+  //       },
+  //       {
+  //         type: "op",
+  //         op: "<@",
+  //         exprs: [
+  //           { type: "op", op: "to_jsonb", exprs: [{ type: "field", tableAlias: "T1", column: "enum" }] },
+  //           { type: "op", op: "::jsonb", exprs: [{ type: "literal", value: '["a", "b"]' }] }
+  //         ]
+  //       }
+  //     )
+  //   })
 
-    it("compiles no rhs as null", function () {
-      return this.compile(
-        {
-          type: "comparison",
-          op: "=",
-          lhs: { type: "field", table: "t1", column: "number" }
-        },
-        null
-      )
-    })
+  //   it("compiles simple = any", function () {
+  //     return this.compile(
+  //       {
+  //         type: "comparison",
+  //         op: "= any",
+  //         lhs: { type: "field", table: "t1", column: "enum" },
+  //         rhs: { type: "literal", valueType: "enum[]", value: ["a"] }
+  //       },
+  //       {
+  //         type: "op",
+  //         op: "=",
+  //         exprs: [
+  //           { type: "field", tableAlias: "T1", column: "enum" },
+  //           { type: "literal", value: ["a"] }
+  //         ]
+  //       }
+  //     )
+  //   })
 
-    return it("compiles daterange", function () {
-      return this.compile(
-        {
-          type: "comparison",
-          op: "between",
-          lhs: { type: "field", table: "t1", column: "date" },
-          rhs: { type: "literal", valueType: "daterange", value: ["2014-01-01", "2014-12-31"] }
-        },
-        {
-          type: "op",
-          op: "between",
-          exprs: [
-            { type: "field", tableAlias: "T1", column: "date" },
-            { type: "literal", value: "2014-01-01" },
-            { type: "literal", value: "2014-12-31" }
-          ]
-        }
-      )
-    })
-  })
+  //   it("compiles no rhs as null", function () {
+  //     return this.compile(
+  //       {
+  //         type: "comparison",
+  //         op: "=",
+  //         lhs: { type: "field", table: "t1", column: "number" }
+  //       },
+  //       null
+  //     )
+  //   })
+
+  //   return it("compiles daterange", function () {
+  //     return this.compile(
+  //       {
+  //         type: "comparison",
+  //         op: "between",
+  //         lhs: { type: "field", table: "t1", column: "date" },
+  //         rhs: { type: "literal", valueType: "daterange", value: ["2014-01-01", "2014-12-31"] }
+  //       },
+  //       {
+  //         type: "op",
+  //         op: "between",
+  //         exprs: [
+  //           { type: "field", tableAlias: "T1", column: "date" },
+  //           { type: "literal", value: "2014-01-01" },
+  //           { type: "literal", value: "2014-12-31" }
+  //         ]
+  //       }
+  //     )
+  //   })
+  // })
 
   describe("logicals (deprecated)", function () {
     it("simplifies logical", function () {
