@@ -1815,6 +1815,7 @@ addOpItem({
   resultType: "text",
   exprTypes: ["text"],
   moreExprType: "text",
+  prefix: true
 })
 
 addOpItem({ op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"] })
