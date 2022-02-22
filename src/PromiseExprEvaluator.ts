@@ -732,6 +732,8 @@ export class PromiseExprEvaluator {
           }
         }
         return greatest
+      case "concat":
+        return "".concat(...values.map(v => v || ""))
       case "days difference":
         if (hasNull) {
           return null

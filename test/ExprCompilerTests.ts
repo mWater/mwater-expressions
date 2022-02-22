@@ -1153,6 +1153,24 @@ describe("ExprCompiler", function () {
       )
     })
 
+    it("compiles concat", function () {
+      this.compile(
+        {
+          type: "op",
+          op: "concat",
+          exprs: [this.text1, this.text2]
+        },
+        {
+          type: "op",
+          op: "concat",
+          exprs: [
+            this.text1JsonQL,
+            this.text2JsonQL
+          ]
+        }
+      )
+    })
+
     it("compiles last", function () {
       const text = { type: "field", table: "t2", column: "text" }
       const textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
