@@ -238,7 +238,12 @@ export interface Table {
 export interface EnumValue {
   id: string
   name: LocalizedString
+
+  /** Optional code of enum value e.g. A1 */
   code?: string
+
+  /** Optional description of enum value */
+  desc?: LocalizedString
 }
 
 /**
