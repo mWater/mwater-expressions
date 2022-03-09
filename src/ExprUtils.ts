@@ -1813,9 +1813,10 @@ addOpItem({
   name: "Concatenate",
   desc: "Combine several text strings together",
   resultType: "text",
-  exprTypes: ["text"],
+  exprTypes: ["text", "text"],
   moreExprType: "text",
-  prefix: true
+  prefix: true,
+  joiner: " with "
 })
 
 addOpItem({ op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"] })
