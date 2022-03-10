@@ -218,7 +218,7 @@ export default class ExprCompiler {
       const fromColumn = this.schema.getColumn(expr.table, expr.joins[0])!
 
       if (fromColumn.type === "id") {
-        return this.compileColumnRef(fromColumn.id, options.tableAlias)
+        return this.compileColumnRef(fromColumn.jsonql || fromColumn.id, options.tableAlias)
       }
       if (fromColumn.join && fromColumn.join.toColumn === this.schema.getTable(expr.expr.table)!.primaryKey) {
         return this.compileColumnRef(fromColumn.join.fromColumn, options.tableAlias)
