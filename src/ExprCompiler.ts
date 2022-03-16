@@ -542,6 +542,7 @@ export default class ExprCompiler {
         }
       case "least":
       case "greatest":
+      case "concat":
         return {
           type: "op",
           op: expr.op,

@@ -1808,6 +1808,17 @@ addOpItem({
   aggr: true
 })
 
+addOpItem({
+  op: "concat",
+  name: "Concatenate",
+  desc: "Combine several text strings together",
+  resultType: "text",
+  exprTypes: ["text"],
+  moreExprType: "text",
+  prefix: true,
+  joiner: " with "
+})
+
 addOpItem({ op: "contains", name: "includes all of", resultType: "boolean", exprTypes: ["id[]", "id[]"] })
 addOpItem({ op: "intersects", name: "includes any of", resultType: "boolean", exprTypes: ["id[]", "id[]"] })
 addOpItem({ op: "includes", name: "includes", resultType: "boolean", exprTypes: ["id[]", "id"] })

@@ -8,7 +8,7 @@ import moment from "moment"
 const testExprs: any = []
 export default testExprs
 
-function add(expr: any, value: any, context: any) {
+function add(expr: any, value: any, context?: any) {
   return testExprs.push({ expr, value, context })
 }
 
@@ -145,6 +145,9 @@ addOp(4, "round", literal(3.6, "number"))
 addOp(3, "floor", literal(3.6, "number"))
 
 addOp(4, "ceiling", literal(3.6, "number"))
+
+addOp("ab", "concat", literal("ab", "text"), literal(null, "text"))
+addOp("abcd", "concat", literal("ab", "text"), literal("cd", "text"))
 
 addOp(2, "latitude", literal({ type: "Point", coordinates: [1, 2] }, "geometry"))
 addOp(1, "longitude", literal({ type: "Point", coordinates: [1, 2] }, "geometry"))
