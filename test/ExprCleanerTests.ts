@@ -82,6 +82,15 @@ describe("ExprCleaner", function () {
       )
     })
 
+    it("leaves in extra op exprs if moreExprType is set", function() {
+      const after = this.exprCleaner.cleanExpr({ type: "op", table: "t1", op: "concat", exprs: [
+        { type: "field", table: "t1", column: "text" },
+        { type: "field", table: "t1", column: "text" },
+        { type: "field", table: "t1", column: "text" }
+      ]})
+      assert.equal(after.exprs.length, 3)
+    })
+
     it("nulls recursive field expr", function () {
       const table = this.schema.getTable("t1")
       table.contents.push({

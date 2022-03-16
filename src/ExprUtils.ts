@@ -1813,7 +1813,7 @@ addOpItem({
   name: "Concatenate",
   desc: "Combine several text strings together",
   resultType: "text",
-  exprTypes: ["text", "text"],
+  exprTypes: ["text"],
   moreExprType: "text",
   prefix: true,
   joiner: " with "
