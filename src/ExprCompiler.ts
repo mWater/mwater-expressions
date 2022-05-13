@@ -2345,13 +2345,14 @@ export default class ExprCompiler {
         }
 
         // order descending
-        var orderBy: { expr: JsonQLExpr; direction: "desc" }[] = [
+        var orderBy: { expr: JsonQLExpr; direction: "desc", nulls: "last" | "first" }[] = [
           {
             expr: this.compileFieldExpr({
               expr: { type: "field", table: expr.table!, column: ordering },
               tableAlias: "innerrn"
             }),
-            direction: "desc"
+            direction: "desc",
+            nulls: "last"
           }
         ]
 

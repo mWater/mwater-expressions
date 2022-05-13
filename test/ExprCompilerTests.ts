@@ -3317,7 +3317,7 @@ describe("ExprCompiler", function () {
                         over: {
                           partitionBy: [this.enum1JsonQL],
                           orderBy: [
-                            { expr: { type: "field", tableAlias: "innerrn", column: "number" }, direction: "desc" }
+                            { expr: { type: "field", tableAlias: "innerrn", column: "number" }, direction: "desc", nulls: "last" }
                           ]
                         }
                       },
