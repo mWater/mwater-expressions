@@ -2071,6 +2071,30 @@ describe("ExprCompiler", function () {
       )
     })
 
+    it("compiles altitude", function () {
+      return this.compile(
+        {
+          type: "op",
+          op: "altitude",
+          exprs: [{ type: "field", table: "t1", column: "geometry" }]
+        },
+        {
+          type: "op",
+          op: "ST_ZMax",
+          exprs: [
+            {
+              type: "op",
+              op: "ST_Transform",
+              exprs: [
+                { type: "field", tableAlias: "T1", column: "geometry" },
+                { type: "op", op: "::integer", exprs: [4326] }
+              ]
+            }
+          ]
+        }
+      )
+    })
+
     it("compiles within", function () {
       return this.compile(
         {

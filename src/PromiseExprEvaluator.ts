@@ -949,6 +949,15 @@ export class PromiseExprEvaluator {
           return point.coordinates[0]
         }
         break
+      case "altitude":
+        if (hasNull) {
+          return null
+        }
+        point = values[0]
+        if ((point != null ? point.type : void 0) === "Point") {
+          return point.coordinates[2]
+        }
+        break
       case "distance":
         if (hasNull) {
           return null

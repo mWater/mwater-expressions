@@ -1271,6 +1271,14 @@ addOpItem({
   prefix: true
 })
 addOpItem({
+  op: "altitude",
+  name: "Altitude of",
+  desc: "Get altitude of a location in meters",
+  resultType: "number",
+  exprTypes: ["geometry"],
+  prefix: true
+})
+addOpItem({
   op: "distance",
   name: "Distance between",
   desc: "Get distance in meters between two locations",

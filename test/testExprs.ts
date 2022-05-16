@@ -152,6 +152,11 @@ addOp("abcd", "concat", literal("ab", "text"), literal("cd", "text"))
 addOp(2, "latitude", literal({ type: "Point", coordinates: [1, 2] }, "geometry"))
 addOp(1, "longitude", literal({ type: "Point", coordinates: [1, 2] }, "geometry"))
 
+addOp(null, "altitude", literal({ type: "Point", coordinates: [1, 2] }, "geometry"))
+addOp(5, "altitude", literal({ type: "Point", coordinates: [1, 2, 5] }, "geometry"))
+// TODO: add support for non-points to all three ops
+// addOp(7, "altitude", literal({ type: "LineString", coordinates: [[1, 2, 5], [2, 3, 7]] }, "geometry"))
+
 addOp(
   (v: any) => v > 310000 && v < 320000,
   "line length",

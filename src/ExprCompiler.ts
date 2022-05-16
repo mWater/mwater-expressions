@@ -1531,7 +1531,24 @@ export default class ExprCompiler {
           ]
         }
 
-      case "days difference":
+        case "altitude":
+          if (compiledExprs[0] == null) {
+            return null
+          }
+  
+          return {
+            type: "op",
+            op: "ST_ZMax",
+            exprs: [
+              {
+                type: "op",
+                op: "ST_Transform",
+                exprs: [compiledExprs[0], { type: "op", op: "::integer", exprs: [4326] }]
+              }
+            ]
+          }
+  
+        case "days difference":
         if (compiledExprs[0] == null || compiledExprs[1] == null) {
           return null
         }
