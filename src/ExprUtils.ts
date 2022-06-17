@@ -1625,7 +1625,11 @@ for (const type of [
   "date",
   "datetime",
   "geometry",
-  "id"
+  "id",
+  "image",
+  "imagelist",
+  "id[]",
+  "text[]"
 ] as LiteralType[]) {
   addOpItem({
     op: "last",
