@@ -127,7 +127,7 @@ export default class MWaterDataSource extends DataSource {
     this.cache?.reset()
 
     // Set new cache expiry
-    return (this.cacheExpiry = new Date().getTime())
+    this.cacheExpiry = new Date().getTime()
   }
 
   // Get the url to download an image (by id from an image or imagelist column)

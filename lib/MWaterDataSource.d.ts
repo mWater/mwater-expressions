@@ -27,6 +27,6 @@ export default class MWaterDataSource extends DataSource {
     performQuery(query: JsonQLQuery): Promise<Row[]>;
     performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void): void;
     getCacheExpiry(): number;
-    clearCache(): number;
+    clearCache(): void;
     getImageUrl(imageId: any, height: any): string;
 }
