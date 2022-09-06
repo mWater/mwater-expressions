@@ -36,7 +36,7 @@ export default class MWaterDataSource extends DataSource {
     this.options = options
 
     if (this.options.localCaching) {
-      this.cache = new LRU({ max: 500, maxAge: 1000 * 15 * 60 })
+      this.cache = new LRU({ max: 500, ttl: 1000 * 15 * 60 })
     }
   }
 
