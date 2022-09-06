@@ -1,10 +1,6 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
 import { assert } from "chai"
 import _ from "lodash"
 import canonical from "canonical-json"
-import moment from "moment"
-import sinon from "sinon"
 import * as fixtures from "./fixtures"
 import { PromiseExprEvaluator } from "../src/PromiseExprEvaluator"
 import testExprs from "./testExprs"

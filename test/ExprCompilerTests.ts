@@ -103,7 +103,7 @@ describe("ExprCompiler", function () {
   })
 
   it("compiles literal", function () {
-    return this.compile(
+    this.compile(
       { type: "literal", valueType: "number", value: 2 },
       {
         type: "literal",
@@ -113,11 +113,11 @@ describe("ExprCompiler", function () {
   })
 
   it("compiles null literal", function () {
-    return this.compile({ type: "literal", value: null }, null)
+    this.compile({ type: "literal", value: null }, null)
   })
 
   it("compiles field", function () {
-    return this.compile(
+    this.compile(
       { type: "field", table: "t1", column: "number" },
       {
         type: "field",
@@ -128,7 +128,7 @@ describe("ExprCompiler", function () {
   })
 
   it("compiles expression field", function () {
-    return this.compile(
+    this.compile(
       { type: "field", table: "t1", column: "expr_enum" },
       {
         type: "field",
@@ -139,7 +139,7 @@ describe("ExprCompiler", function () {
   })
 
   it("compiles join (id[]) field", function () {
-    return this.compile(
+    this.compile(
       { type: "field", table: "t1", column: "1-2" },
       {
         type: "scalar",
@@ -164,7 +164,7 @@ describe("ExprCompiler", function () {
   })
 
   it("compiles join (id) field", function () {
-    return this.compile(
+    this.compile(
       {
         type: "field",
         table: "t2",
@@ -209,7 +209,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles case", function () {
-      return this.compile(
+      this.compile(
         {
           type: "case",
           table: "t1",
@@ -231,7 +231,7 @@ describe("ExprCompiler", function () {
     })
 
     it("skips null whens", function () {
-      return this.compile(
+      this.compile(
         {
           type: "case",
           table: "t1",
@@ -250,7 +250,7 @@ describe("ExprCompiler", function () {
     })
 
     return it("skips if empty", function () {
-      return this.compile(
+      this.compile(
         {
           type: "case",
           table: "t1",
@@ -264,14 +264,14 @@ describe("ExprCompiler", function () {
 
   describe("scalar", function () {
     it("compiles scalar with no joins, simplifying", function () {
-      return this.compile(
+      this.compile(
         { type: "scalar", table: "t1", expr: { type: "field", table: "t1", column: "number" }, joins: [] },
         { type: "field", tableAlias: "T1", column: "number" }
       )
     })
 
     it("compiles scalar with one join", function () {
-      return this.compile(
+      this.compile(
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["1-2"] },
         {
           type: "scalar",
@@ -291,7 +291,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with one join that is through id", function () {
-      return this.compile(
+      this.compile(
         { type: "scalar", table: "t1", expr: { type: "field", table: "t2", column: "number" }, joins: ["id"] },
         {
           type: "scalar",
@@ -311,7 +311,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with one join that is through id[]", function () {
-      return this.compile(
+      this.compile(
         { type: "scalar", table: "t1", expr: { type: "op", table: "t2", op: "count", exprs: [] }, joins: ["id[]"] },
         {
           type: "scalar",
@@ -331,7 +331,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with one join and sql aggr", function () {
-      return this.compile(
+      this.compile(
         {
           type: "scalar",
           table: "t1",
@@ -357,7 +357,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with one join and count(<primary key>) aggr", function () {
-      return this.compile(
+      this.compile(
         { type: "scalar", table: "t1", expr: { type: "id", table: "t2" }, joins: ["1-2"], aggr: "count" },
         {
           type: "scalar",
@@ -377,7 +377,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with one join and last aggr", function () {
-      return this.compile(
+      this.compile(
         {
           type: "scalar",
           table: "t1",
@@ -404,7 +404,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles scalar with two joins", function () {
-      return this.compile(
+      this.compile(
         {
           type: "scalar",
           table: "t1",
@@ -469,7 +469,7 @@ describe("ExprCompiler", function () {
         ]
       }
 
-      return this.compile(
+      this.compile(
         {
           type: "scalar",
           table: "t1",
@@ -511,7 +511,7 @@ describe("ExprCompiler", function () {
 
   describe("score", function () {
     it("scores enum", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enum" },
@@ -530,7 +530,7 @@ describe("ExprCompiler", function () {
     })
 
     it("scores empty enum", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enum" },
@@ -541,7 +541,7 @@ describe("ExprCompiler", function () {
     })
 
     it("scores enumset", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enumset" },
@@ -595,7 +595,7 @@ describe("ExprCompiler", function () {
     })
 
     return it("scores empty enumset", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enumset" },
@@ -608,7 +608,7 @@ describe("ExprCompiler", function () {
 
   describe("build enumset", function () {
     it("builds", function () {
-      return this.compile(
+      this.compile(
         {
           type: "build enumset",
           values: {
@@ -666,7 +666,7 @@ describe("ExprCompiler", function () {
     })
 
     it("scores empty enum", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enum" },
@@ -677,7 +677,7 @@ describe("ExprCompiler", function () {
     })
 
     return it("scores enumset", function () {
-      return this.compile(
+      this.compile(
         {
           type: "score",
           input: { type: "field", table: "t1", column: "enumset" },
@@ -732,7 +732,7 @@ describe("ExprCompiler", function () {
   })
 
   it("simplifies scalar join to id where toColumn is primary key", function () {
-    return this.compile(
+    this.compile(
       {
         type: "scalar",
         table: "t2",
@@ -744,7 +744,7 @@ describe("ExprCompiler", function () {
   })
 
   it("simplifies scalar join to id", function () {
-    return this.compile(
+    this.compile(
       {
         type: "scalar",
         table: "t2",
@@ -760,7 +760,7 @@ describe("ExprCompiler", function () {
     this.compile({ type: "literal", valueType: "number", value: 123 }, { type: "literal", value: 123 })
     this.compile({ type: "literal", valueType: "enum", value: "id1" }, { type: "literal", value: "id1" })
     this.compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
-    return this.compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
+    this.compile({ type: "literal", valueType: "boolean", value: true }, { type: "literal", value: true })
   })
 
   describe("ops", function () {
@@ -801,7 +801,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles and", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "and",
@@ -816,7 +816,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles or", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "or",
@@ -831,7 +831,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles or with nulls", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "or",
@@ -846,7 +846,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles or with all nulls", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "or",
@@ -857,7 +857,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles +", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "+",
@@ -876,7 +876,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles *", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "*",
@@ -911,7 +911,7 @@ describe("ExprCompiler", function () {
         }
       )
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "-",
@@ -938,7 +938,7 @@ describe("ExprCompiler", function () {
         }
       )
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "/",
@@ -949,7 +949,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles between", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "between",
@@ -964,7 +964,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles between with first null (null)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "between",
@@ -975,7 +975,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles between with second null (<=)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "between",
@@ -990,7 +990,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles between with third null (>=)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "between",
@@ -1024,7 +1024,7 @@ describe("ExprCompiler", function () {
         }
       )
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "not",
@@ -1083,7 +1083,7 @@ describe("ExprCompiler", function () {
       )
 
       // Missing value
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "~*",
@@ -1094,7 +1094,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles least", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "least",
@@ -1109,7 +1109,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles greatest", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "greatest",
@@ -1124,7 +1124,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles sum()", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "sum",
@@ -1139,7 +1139,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles array_agg", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "array_agg",
@@ -1175,7 +1175,7 @@ describe("ExprCompiler", function () {
       const text = { type: "field", table: "t2", column: "text" }
       const textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "last",
@@ -1224,7 +1224,7 @@ describe("ExprCompiler", function () {
       // (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> desc nulls last))[1]
       // Which prevents non-matching from appearing
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "last where",
@@ -1254,7 +1254,7 @@ describe("ExprCompiler", function () {
       const text = { type: "field", table: "t2", column: "text" }
       const textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "previous",
@@ -1283,7 +1283,7 @@ describe("ExprCompiler", function () {
       const text = { type: "field", table: "t2", column: "text" }
       const textJsonQL = { type: "field", tableAlias: "T1", column: "text" }
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "first",
@@ -1332,7 +1332,7 @@ describe("ExprCompiler", function () {
       // (array_agg((case when <condition> then <value> else null end) order by (case when <condition> then 0 else 1 end), <ordering> asc nulls last))[1]
       // Which prevents non-matching from appearing
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "first where",
@@ -1360,7 +1360,7 @@ describe("ExprCompiler", function () {
 
     it("compiles percent", function () {
       // Compiles as count(*) * 100::decimal / sum(count(*)) over()
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "percent",
@@ -1409,7 +1409,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as coalesce(sum(case when cond then 1 else 0 end), 0)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "count where",
@@ -1461,7 +1461,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as sum(case when cond then 100::decimal else 0 end) * 100/sum(1) (prevent div by zero)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "percent where",
@@ -1530,7 +1530,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as sum(case when cond then 100 else 0 end)/nullif(sum(case when cond and cond2 then 1 else 0), 0) (prevent div by zero)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "percent where",
@@ -1607,7 +1607,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as sum(case when cond then 1 else 0 end)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "sum where",
@@ -1655,7 +1655,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as min(case when cond then 1 else null end)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "min where",
@@ -1703,7 +1703,7 @@ describe("ExprCompiler", function () {
       }
 
       // Compiles as max(case when cond then 1 else null end)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "max where",
@@ -1734,7 +1734,7 @@ describe("ExprCompiler", function () {
       const value = { type: "field", table: "t1", column: "text" }
       const valueJsonQL = { type: "field", tableAlias: "T1", column: "text" }
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "count distinct",
@@ -1751,7 +1751,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles = any", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "= any",
@@ -1772,7 +1772,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles simple = any", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "= any",
@@ -1793,7 +1793,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles empty = any", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "= any",
@@ -1807,7 +1807,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles invalid = any", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "= any",
@@ -1831,7 +1831,7 @@ describe("ExprCompiler", function () {
         }
       )
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "is null",
@@ -1855,7 +1855,7 @@ describe("ExprCompiler", function () {
         }
       )
 
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "is not null",
@@ -1866,7 +1866,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles contains", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "contains",
@@ -1887,7 +1887,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles empty contains", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "contains",
@@ -1901,7 +1901,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles includes", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "includes",
@@ -1922,7 +1922,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles intersects", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "intersects",
@@ -1964,7 +1964,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles length", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "length",
@@ -1987,7 +1987,7 @@ describe("ExprCompiler", function () {
 
     it("compiles line length", function () {
       // ST_Length_Spheroid(ST_Transform(location,4326), 'SPHEROID["GRS_1980",6378137,298.257222101]'::text)
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "line length",
@@ -2012,7 +2012,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles latitude", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "latitude",
@@ -2042,7 +2042,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles longitude", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "longitude",
@@ -2072,7 +2072,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles altitude", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "altitude",
@@ -2096,7 +2096,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles within", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "within",
@@ -2142,7 +2142,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles within any", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "within any",
@@ -2189,7 +2189,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles current date", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "current date",
@@ -2268,7 +2268,7 @@ describe("ExprCompiler", function () {
     //   )
 
     it("compiles days difference (date)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "days difference",
@@ -2286,7 +2286,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles days difference (datetime)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "days difference",
@@ -2319,7 +2319,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles months difference (date)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "months difference",
@@ -2344,7 +2344,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles months difference (datetime)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "months difference",
@@ -2377,7 +2377,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles months difference (date)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "years difference",
@@ -2402,7 +2402,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles months difference (datetime)", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "years difference",
@@ -2435,7 +2435,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles enum to text", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "to text",
@@ -2453,7 +2453,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles number to text", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2469,7 +2469,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles text[] to text", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2507,7 +2507,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles to number", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2539,7 +2539,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles weekofmonth", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2555,7 +2555,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles dayofmonth", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2571,7 +2571,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles month", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2587,7 +2587,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles yearmonth", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2607,7 +2607,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles yearquarter", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2623,7 +2623,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles yearweek", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2639,7 +2639,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles weekofyear", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2655,7 +2655,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles year", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2675,7 +2675,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles to date", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2691,7 +2691,7 @@ describe("ExprCompiler", function () {
     })
 
     it("compiles weekofmonth", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           table: "t1",
@@ -2708,7 +2708,7 @@ describe("ExprCompiler", function () {
 
     describe("relative dates", function () {
       it("thisyear", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "thisyear",
@@ -2730,7 +2730,7 @@ describe("ExprCompiler", function () {
       })
 
       it("lastyear", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "lastyear",
@@ -2752,7 +2752,7 @@ describe("ExprCompiler", function () {
       })
 
       it("thismonth", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "thismonth",
@@ -2774,7 +2774,7 @@ describe("ExprCompiler", function () {
       })
 
       it("lastmonth", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "lastmonth",
@@ -2796,7 +2796,7 @@ describe("ExprCompiler", function () {
       })
 
       it("today", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "today",
@@ -2814,7 +2814,7 @@ describe("ExprCompiler", function () {
       })
 
       it("yesterday", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "yesterday",
@@ -2832,7 +2832,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last7days", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last7days",
@@ -2850,7 +2850,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last30days", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last30days",
@@ -2868,7 +2868,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last365days", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last365days",
@@ -2886,7 +2886,7 @@ describe("ExprCompiler", function () {
       })
 
       return it("compiles days since (date)", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "days since",
@@ -2906,15 +2906,15 @@ describe("ExprCompiler", function () {
 
     describe("relative datetimes", function () {
       before(function () {
-        return (this.clock = sinon.useFakeTimers(new Date().getTime()))
+        this.clock = sinon.useFakeTimers(new Date().getTime())
       })
 
       after(function () {
-        return this.clock.restore()
+        this.clock.restore()
       })
 
       it("thisyear", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "thisyear",
@@ -2936,7 +2936,7 @@ describe("ExprCompiler", function () {
       })
 
       it("lastyear", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "lastyear",
@@ -2958,7 +2958,7 @@ describe("ExprCompiler", function () {
       })
 
       it("thismonth", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "thismonth",
@@ -2980,7 +2980,7 @@ describe("ExprCompiler", function () {
       })
 
       it("lastmonth", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "lastmonth",
@@ -3002,7 +3002,7 @@ describe("ExprCompiler", function () {
       })
 
       it("today", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "today",
@@ -3024,7 +3024,7 @@ describe("ExprCompiler", function () {
       })
 
       it("yesterday", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "yesterday",
@@ -3046,7 +3046,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last24hours", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last24hours",
@@ -3064,7 +3064,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last7days", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last7days",
@@ -3090,7 +3090,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last30days", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last30days",
@@ -3141,7 +3141,7 @@ describe("ExprCompiler", function () {
         )
 
         it("last3months", function () {})
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last3months",
@@ -3167,7 +3167,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last6months", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last6months",
@@ -3193,7 +3193,7 @@ describe("ExprCompiler", function () {
       })
 
       it("last12months", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "last12months",
@@ -3219,7 +3219,7 @@ describe("ExprCompiler", function () {
       })
 
       it("compiles days since (datetime)", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "days since",
@@ -3252,7 +3252,7 @@ describe("ExprCompiler", function () {
       })
 
       it("future", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "future",
@@ -3267,7 +3267,7 @@ describe("ExprCompiler", function () {
       })
 
       return it("notfuture", function () {
-        return this.compile(
+        this.compile(
           {
             type: "op",
             op: "notfuture",
@@ -3283,7 +3283,7 @@ describe("ExprCompiler", function () {
     })
 
     it("distance", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "distance",
@@ -3310,7 +3310,7 @@ describe("ExprCompiler", function () {
     })
 
     return it("is latest", function () {
-      return this.compile(
+      this.compile(
         {
           type: "op",
           op: "is latest",
@@ -3462,7 +3462,7 @@ describe("ExprCompiler", function () {
 
   // describe("comparisons (deprecated)", function () {
   //   it("compiles =", function () {
-  //     return this.compile(
+  //     this.compile(
   //       {
   //         type: "comparison",
   //         op: "=",
@@ -3481,7 +3481,7 @@ describe("ExprCompiler", function () {
   //   })
 
   //   it("compiles = any", function () {
-  //     return this.compile(
+  //     this.compile(
   //       {
   //         type: "comparison",
   //         op: "= any",
@@ -3500,7 +3500,7 @@ describe("ExprCompiler", function () {
   //   })
 
   //   it("compiles simple = any", function () {
-  //     return this.compile(
+  //     this.compile(
   //       {
   //         type: "comparison",
   //         op: "= any",
@@ -3519,7 +3519,7 @@ describe("ExprCompiler", function () {
   //   })
 
   //   it("compiles no rhs as null", function () {
-  //     return this.compile(
+  //     this.compile(
   //       {
   //         type: "comparison",
   //         op: "=",
@@ -3530,7 +3530,7 @@ describe("ExprCompiler", function () {
   //   })
 
   //   return it("compiles daterange", function () {
-  //     return this.compile(
+  //     this.compile(
   //       {
   //         type: "comparison",
   //         op: "between",
@@ -3554,7 +3554,7 @@ describe("ExprCompiler", function () {
     it("simplifies logical", function () {
       const expr1 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "boolean" } }
 
-      return this.compile(
+      this.compile(
         { type: "logical", op: "and", exprs: [expr1] },
         {
           type: "op",
@@ -3577,7 +3577,7 @@ describe("ExprCompiler", function () {
 
       const expr2 = { type: "comparison", op: "= false", lhs: { type: "field", table: "t1", column: "boolean" } }
 
-      return this.compile(
+      this.compile(
         { type: "logical", op: "and", exprs: [expr1, expr2] },
         {
           type: "op",
@@ -3609,7 +3609,7 @@ describe("ExprCompiler", function () {
 
       const expr2 = { type: "comparison", op: "=", lhs: { type: "field", table: "t1", column: "number" } } // No RHS
 
-      return this.compile(
+      this.compile(
         { type: "logical", op: "and", exprs: [expr1, expr2] },
         {
           type: "op",
@@ -3626,12 +3626,12 @@ describe("ExprCompiler", function () {
   describe("variable", function () {
     it("compiles literal", function () {
       const expr = { type: "variable", variableId: "varnumber" }
-      return this.compile(expr, { type: "literal", value: 123 })
+      this.compile(expr, { type: "literal", value: 123 })
     })
 
     return it("compiles expression", function () {
       const expr = { type: "variable", variableId: "varnumberexpr", table: "t1" }
-      return this.compile(expr, {
+      this.compile(expr, {
         type: "op",
         op: "+",
         exprs: [
@@ -3715,6 +3715,6 @@ describe("ExprCompiler", function () {
 
   return describe("extension", () =>
     it("compiles", function () {
-      return this.compile({ type: "extension", extension: "test" }, { type: "literal", value: 4 })
+      this.compile({ type: "extension", extension: "test" }, { type: "literal", value: 4 })
     }))
 })
