@@ -120,8 +120,7 @@ export class PromiseExprEvaluator {
           expr.exprs.map((e) => this.evaluateSync(e))
         )
       case "case":
-        // TODO
-        throw new Error("Synchronous case not supported")
+        return this.evaluateCaseSync(expr)
       case "score":
         // TODO
         throw new Error("Synchronous score not supported")
@@ -1030,6 +1029,17 @@ export class PromiseExprEvaluator {
 
     // Evaluate
     return await this.evaluate(value, context)
+  }
+
+  /** Synchronously evaluate case expression */
+  evaluateCaseSync(expr: CaseExpr) {
+    for (const exprCase of expr.cases) {
+      const when = this.evaluateSync(exprCase.when)
+      if (when) {
+        return this.evaluateSync(exprCase.then)
+      }
+    }
+    return this.evaluateSync(expr.else)
   }
 }
 

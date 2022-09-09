@@ -50,4 +50,6 @@ export declare class PromiseExprEvaluator {
     /** Synchronously evaluate an op when the values are already known */
     evaluateOpValues(op: string, exprs: Expr[], values: any[]): any;
     evaluateVariable(expr: VariableExpr, context: PromiseExprEvaluatorContext): Promise<any>;
+    /** Synchronously evaluate case expression */
+    evaluateCaseSync(expr: CaseExpr): any;
 }
