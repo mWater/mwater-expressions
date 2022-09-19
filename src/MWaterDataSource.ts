@@ -130,10 +130,10 @@ export default class MWaterDataSource extends DataSource {
     this.cacheExpiry = new Date().getTime()
   }
 
-  // Get the url to download an image (by id from an image or imagelist column)
-  // Height, if specified, is minimum height needed. May return larger image
-  // Can be used to upload by posting to this url
-  getImageUrl(imageId: any, height: any) {
+  /** Get the url to download an image (by id from an image or imagelist column)
+   * Height, if specified, is minimum height needed. May return larger image
+   */
+  getImageUrl(imageId: string, height?: number) {
     const apiUrl = this.options.imageApiUrl || this.apiUrl
 
     let url = apiUrl + `images/${imageId}`
@@ -141,6 +141,22 @@ export default class MWaterDataSource extends DataSource {
     if (height) {
       query.h = height
     }
+
+    if (!_.isEmpty(query)) {
+      url += "?" + querystring.stringify(query)
+    }
+
+    return url
+  }
+
+  /** Get the url to upload an image (by id from an image or imagelist column)
+    POST to upload
+  */
+  getImageUploadUrl(imageId: string) {
+    const apiUrl = this.options.imageApiUrl || this.apiUrl
+
+    let url = apiUrl + `images/${imageId}`
+    const query: any = {}
     if (this.client) {
       query.client = this.client
     }

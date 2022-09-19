@@ -28,5 +28,12 @@ export default class MWaterDataSource extends DataSource {
     performQuery(query: JsonQLQuery, cb: (error: any, rows: Row[]) => void): void;
     getCacheExpiry(): number;
     clearCache(): void;
-    getImageUrl(imageId: any, height: any): string;
+    /** Get the url to download an image (by id from an image or imagelist column)
+     * Height, if specified, is minimum height needed. May return larger image
+     */
+    getImageUrl(imageId: string, height?: number): string;
+    /** Get the url to upload an image (by id from an image or imagelist column)
+      POST to upload
+    */
+    getImageUploadUrl(imageId: string): string;
 }

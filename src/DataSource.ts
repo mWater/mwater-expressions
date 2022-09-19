@@ -13,12 +13,18 @@ export default class DataSource {
 
   /** Get the url to download an image (by id from an image or imagelist column)
     Height, if specified, is minimum height needed. May return larger image
-    Can be used to upload by posting to this url
   */
   getImageUrl(imageId: string, height?: number): string {
     throw new Error("Not implemented")
   }
 
+  /** Get the url to upload an image (by id from an image or imagelist column)
+    POST to upload
+  */
+  getImageUploadUrl(imageId: string): string {
+    throw new Error("Not implemented")
+  }
+  
   // Clears the cache if possible with this data source
   clearCache(): void {
     throw new Error("Not implemented")
