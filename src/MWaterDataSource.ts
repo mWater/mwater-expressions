@@ -124,7 +124,7 @@ export default class MWaterDataSource extends DataSource {
 
   // Clears the local cache
   clearCache() {
-    this.cache?.reset()
+    this.cache?.clear()
 
     // Set new cache expiry
     this.cacheExpiry = new Date().getTime()
