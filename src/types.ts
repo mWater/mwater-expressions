@@ -146,8 +146,10 @@ export interface ScalarExpr {
   expr: Expr
 }
 
+/** @deprecated */
 export type LegacyExpr = LegacyComparisonExpr | LegacyLogicalExpr | LegacyCountExpr
 
+/** @deprecated */
 export interface LegacyComparisonExpr {
   type: "comparison"
   op: string
@@ -156,6 +158,7 @@ export interface LegacyComparisonExpr {
   rhs: Expr
 }
 
+/** @deprecated */
 export interface LegacyLogicalExpr {
   type: "logical"
   op: string
@@ -163,6 +166,7 @@ export interface LegacyLogicalExpr {
   exprs: Expr[]
 }
 
+/** @deprecated */
 export interface LegacyCountExpr {
   type: "count"
   table: string
@@ -170,7 +174,7 @@ export interface LegacyCountExpr {
 
 export type AggrStatus = "individual" | "literal" | "aggregate"
 
-/** a row is a plain object that has the following functions as properties */
+/** Row is a plain object that has the following functions as properties */
 export interface ExprEvaluatorRow {
   /** gets primary key of row. callback is called with (error, value) */
   getPrimaryKey(callback: (error: any, value?: any) => void): void
@@ -181,6 +185,7 @@ export interface ExprEvaluatorRow {
   getField(columnId: string, callback: (error: any, value?: any) => void): void
 }
 
+/** Context to evaluate an expression using the PromiseExprEvalutator */
 export interface ExprEvaluatorContext {
   /** current row. Optional for aggr expressions */
   row?: ExprEvaluatorRow
@@ -188,6 +193,7 @@ export interface ExprEvaluatorContext {
   rows?: ExprEvaluatorRow[]
 }
 
+/** Single table in a schema */
 export interface Table {
   id: string
 

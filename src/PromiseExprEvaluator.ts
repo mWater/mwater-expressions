@@ -1007,6 +1007,9 @@ export class PromiseExprEvaluator {
           return parseFloat(values[0])
         }
         return null
+      case "within":
+        console.warn("Within operation not supported")
+        throw new Error(`Within operator not supported`)
       default:
         throw new Error(`Unknown op ${op}`)
     }

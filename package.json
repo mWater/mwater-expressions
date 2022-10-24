@@ -29,7 +29,8 @@
     "jsonql": "github:mWater/jsonql",
     "lodash": "^3.10.1",
     "lru-cache": "^7.14.0",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "querystring": "^0.2.1"
   },
   "devDependencies": {
     "@types/chai": "^4.3.3",
@@ -40,6 +41,7 @@
     "canonical-json": "0.0.4",
     "chai": "^4.3.6",
     "husky": "^8.0.1",
-    "sinon": "^14.0.0"
+    "sinon": "^14.0.0",
+    "typescript": "^4.8.4"
   }
 }
