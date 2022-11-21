@@ -227,7 +227,7 @@ export default class ExprCompiler {
 
     // Generate a consistent, semi-unique alias. Make alias-friendly (replace all symbols with _)
     const generateAlias = (expr: ScalarExpr, joinIndex: number) =>
-      expr.joins[joinIndex].replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()
+      expr.joins[joinIndex].replace(/[^a-zA-Z0-9]/g, "_").toLowerCase() + (joinIndex > 0 ? "_" + joinIndex : "")
 
     // Perform joins
     let { table } = expr

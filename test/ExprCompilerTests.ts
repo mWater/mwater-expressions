@@ -414,17 +414,17 @@ describe("ExprCompiler", function () {
         },
         {
           type: "scalar",
-          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "2_1", column: "number" }] },
+          expr: { type: "op", op: "count", exprs: [{ type: "field", tableAlias: "2_1_1", column: "number" }] },
           from: {
             type: "join",
             left: { type: "table", table: "t2", alias: "1_2" },
-            right: { type: "table", table: "t1", alias: "2_1" },
+            right: { type: "table", table: "t1", alias: "2_1_1" },
             kind: "inner",
             on: {
               type: "op",
               op: "=",
               exprs: [
-                { type: "field", tableAlias: "2_1", column: "primary" },
+                { type: "field", tableAlias: "2_1_1", column: "primary" },
                 { type: "field", tableAlias: "1_2", column: "t1" }
               ]
             }
