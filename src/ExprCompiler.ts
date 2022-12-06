@@ -980,7 +980,7 @@ export default class ExprCompiler {
           return null
         }
 
-        // ST_Length_Spheroid(ST_Transform(location,4326::integer), 'SPHEROID["GRS_1980",6378137,298.257222101]'::spheroid)
+        // ST_LengthSpheroid(ST_Transform(location,4326::integer), 'SPHEROID["GRS_1980",6378137,298.257222101]'::spheroid)
         return {
           type: "op",
           op: "ST_LengthSpheroid",
