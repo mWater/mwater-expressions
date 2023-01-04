@@ -182,7 +182,6 @@ export default class ExprUtils {
 
   /** Return array of { id: <enum value>, name: <localized label of enum value> } */
   getExprEnumValues(expr: Expr): EnumValue[] | null {
-    let enumValues
     if (!expr) {
       return null
     }
@@ -343,13 +342,13 @@ export default class ExprUtils {
 
     // Case statements search for possible values
     if (expr.type === "case") {
+      let enumValues: EnumValue[] = []
+
       for (let cse of expr.cases) {
-        enumValues = this.getExprEnumValues(cse.then)
-        if (enumValues) {
-          return enumValues
-        }
+        enumValues = enumValues.concat(this.getExprEnumValues(cse.then) || [])
       }
-      return this.getExprEnumValues(expr.else)
+      enumValues = enumValues.concat(this.getExprEnumValues(expr.else) || [])
+      return _.uniq(enumValues, (ev) => ev.id)
     }
 
     if (expr.type === "variable") {

@@ -95,7 +95,7 @@ describe("ExprUtils", function () {
       )
     })
 
-    return it("gets for variable", function () {
+    it("gets for variable", function () {
       assert.equal(
         this.exprUtils.getExprIdTable({ type: "variable", table: "t1", variableId: "varidexpr" }),
         "t2"
@@ -186,7 +186,7 @@ describe("ExprUtils", function () {
       assert.equal(this.exprUtils.getExprAggrStatus({ type: "variable", variableId: "varnumber" }), "literal")
     })
 
-    return it("gets for individual variable", function () {
+    it("gets for individual variable", function () {
       assert.equal(
         this.exprUtils.getExprAggrStatus({ type: "variable", table: "t1", variableId: "varidexpr" }),
         "individual"
@@ -213,7 +213,7 @@ describe("ExprUtils", function () {
       assert.equal(this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "id", table: "t1" } })[0].op, "=")
     })
 
-    return it("first within for id type hierarchical", function () {
+    it("first within for id type hierarchical", function () {
       assert.equal(
         this.exprUtils.findMatchingOpItems({ lhsExpr: { type: "id", table: "thier" } })[0].op,
         "within"
@@ -241,7 +241,7 @@ describe("ExprUtils", function () {
       assert.isTrue(types.includes("text"), JSON.stringify(types))
     })
 
-    return it("doesn't include last normally", function () {
+    it("doesn't include last normally", function () {
       this.schema = this.schema.addTable({ id: "b", name: "B", contents: [{ id: "x", name: "X", type: "text" }] })
       this.exprUtils = new ExprUtils(this.schema)
 
@@ -327,7 +327,7 @@ describe("ExprUtils", function () {
       )
     })
 
-    return it("variable type", function () {
+    it("variable type", function () {
       assert.equal(this.exprUtils.getExprType({ type: "variable", variableId: "varnumber" }), "number")
     })
   })
@@ -492,7 +492,7 @@ describe("ExprUtils", function () {
       assert.equal(this.exprUtils.summarizeExpr(expr), "Date is this year")
     })
 
-    return it("summarizes variable", function () {
+    it("summarizes variable", function () {
       const expr = { type: "variable", variableId: "varnumber" }
       assert.equal(this.exprUtils.summarizeExpr(expr), "Varnumber")
     })
@@ -558,7 +558,7 @@ describe("ExprUtils", function () {
       assert.equal(str, "???, B")
     })
 
-    return it("handles text[]", function () {
+    it("handles text[]", function () {
       const str = this.exprUtils.stringifyExprLiteral({ type: "field", table: "t1", column: "text[]" }, ["xyz", "b"])
       assert.equal(str, "xyz, b")
     })
@@ -624,7 +624,7 @@ describe("ExprUtils", function () {
       ])
     })
 
-    return it("finds in field", function () {
+    it("finds in field", function () {
       assert.deepEqual(this.exprUtils.getExprEnumValues({ type: "variable", variableId: "varenum" }), [
         { id: "a", name: { _base: "en", en: "A" } },
         { id: "b", name: { _base: "en", en: "B" } }
@@ -699,7 +699,7 @@ describe("ExprUtils", function () {
       return compare(cols, [{ type: "field", table: "t1", column: "boolean" }])
     })
 
-    return it("de-duplicates", function () {
+    it("de-duplicates", function () {
       const cols = this.exprUtils.getReferencedFields({
         type: "op",
         op: "+",
@@ -761,7 +761,7 @@ describe("ExprUtils", function () {
       )
     })
 
-    return it("nulls entire value if literal null", function () {
+    it("nulls entire value if literal null", function () {
       const expr = {
         type: "op",
         op: ">",
@@ -782,7 +782,7 @@ describe("ExprUtils", function () {
       assert.isNull(ExprUtils.andExprs("xyz", null, null))
     })
 
-    return it("denests", () =>
+    it("denests", () =>
       compare(
         ExprUtils.andExprs(
           "t1",
