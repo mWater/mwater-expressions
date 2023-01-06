@@ -258,7 +258,7 @@ export interface EnumValue {
  * json: arbitrary json
  * dataurl: file stored as a data URL in text. Starts with data:
  * file: { id: id of file, filename: name of file, size: size in bytes, mimetype: mime type }. Stored as json.
- * files: an array of file. Stored as json.
+ * filelist: an array of file. Stored as json.
  */
 export type LiteralType =
   | "text"
@@ -277,7 +277,7 @@ export type LiteralType =
   | "json"
   | "dataurl"
   | "file"
-  | "files"
+  | "filelist"
 
 export interface Column {
   /** table-unique id of item */
