@@ -197,8 +197,10 @@ export interface EnumValue {
  * imagelist: an array of images
  * json: arbitrary json
  * dataurl: file stored as a data URL in text. Starts with data:
+ * file: { id: id of file, filename: name of file, size: size in bytes, mimetype: mime type }. Stored as json.
+ * files: an array of file. Stored as json.
  */
-export declare type LiteralType = "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "id" | "id[]" | "geometry" | "text[]" | "image" | "imagelist" | "json" | "dataurl";
+export declare type LiteralType = "text" | "number" | "enum" | "enumset" | "boolean" | "date" | "datetime" | "id" | "id[]" | "geometry" | "text[]" | "image" | "imagelist" | "json" | "dataurl" | "file" | "files";
 export interface Column {
     /** table-unique id of item */
     id: string;
