@@ -18,8 +18,8 @@ export default class PriorityDataQueue {
     // Creates a priorityQueue that calls performQuery
     worker = function (query: JsonQLQuery, callback: (err: any, results: Row[]) => void) {
       // Defer to prevent too-deep recursion
-      return _.defer(() => {
-        return dataSource.performQuery(query, callback)
+      _.defer(() => {
+        dataSource.performQuery(query, callback)
       })
     }
     this.performQueryPriorityQueue = priorityQueue(worker, concurrency)

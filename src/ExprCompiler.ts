@@ -914,31 +914,33 @@ export default class ExprCompiler {
           return null
         }
 
-        // Use (select bool_or(x.value) from (select LEFT::jsonb @> jsonb_array_elements(RIGHT::jsonb) as value) as x)
+        // Use (LEFT::jsonb @> ANY((select array_agg(elements) from jsonb_array_elements(RIGHT::jsonb) as elements)::jsonb[])
         return {
-          type: "scalar",
-          expr: { type: "op", op: "bool_or", exprs: [{ type: "field", tableAlias: "elements", column: "value" }] },
-          from: {
-            type: "subquery",
-            alias: "elements",
-            query: {
-              type: "query",
-              selects: [
+          type: "op",
+          op: "@>",
+          modifier: "any",
+          exprs: [
+            convertToJsonB(compiledExprs[0]),
+            {
+              type: "op",
+              op: "::jsonb[]",
+              exprs: [
                 {
-                  type: "select",
+                  type: "scalar",
                   expr: {
                     type: "op",
-                    op: "@>",
-                    exprs: [
-                      convertToJsonB(compiledExprs[0]),
-                      { type: "op", op: "jsonb_array_elements", exprs: [convertToJsonB(compiledExprs[1])] }
-                    ]
+                    op: "array_agg",
+                    exprs: [{ type: "field", tableAlias: "elements" }]
                   },
-                  alias: "value"
+                  from: {
+                    type: "subexpr",
+                    expr: { type: "op", op: "jsonb_array_elements", exprs: [convertToJsonB(compiledExprs[1])] },
+                    alias: "elements"
+                  }
                 }
-              ]
+              ] 
             }
-          }
+          ]
         }
 
       case "includes":
